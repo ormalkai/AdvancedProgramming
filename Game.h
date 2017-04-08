@@ -11,7 +11,7 @@
 using namespace std;
 
 // enum for players
-static class Game {
+class Game {
 
 private:
 	enum class GetShipLengthDirection {
@@ -51,7 +51,7 @@ private:
 
 public:
 	
-	Game(Game& const) = delete;
+	Game(const Game&) = delete;
 	void operator=(Game const&) = delete;
 
 	/*

@@ -18,12 +18,12 @@ bool Game::checkWrongSizeOrShape()
 	bool result = true;
 	for (int i = 0; i<PlayerIndex::MAX_PLAYER; i++)
 	{
-		char player = getPlayerCharByIndex(i);
+		char player = Utils::instance().getPlayerCharByIndex(i);
 		for (int j = 0; j < ShipType::MAX_SHIP; j++)
 		{
 			if (true == m_wrongSizeOrShapePerPlayer[i][j])
 			{
-				char ship = getShipByIndexAndPlayer(j, i);
+				char ship = Utils::instance().getShipByIndexAndPlayer(j, i);
 				cout << "Wrong size or shape for ship " << ship << " for player " << player << endl;
 				result = false;
 			}
@@ -37,7 +37,7 @@ bool Game::checkNumberOfShips()
 	bool result = true;
 	for (int i = 0; i < PlayerIndex::MAX_PLAYER; i++)
 	{
-		char player = getPlayerCharByIndex(i);
+		char player = Utils::instance().getPlayerCharByIndex(i);
 		if (SHIPS_PER_PLAYER < m_numOfShipsPerPlayer[i])
 		{
 			cout << "Too many ships for player " << player << endl;
@@ -92,8 +92,8 @@ void Game::validateBoard(char** initBoard)
 			int verticalShipLen   = getShipLength((char**)initBoard, currentShip, i, j, GetShipLengthDirection::VERTICAL);
 			int expectedLen = m_shipToExpectedLen[currentShip];
 
-			PlayerIndex playerIndex = getPlayerIdByShip(currentShip);
-			int shipIndex = getIndexByShip(currentShip);
+			PlayerIndex playerIndex = Utils::instance().getPlayerIdByShip(currentShip);
+			int shipIndex = Utils::instance().getIndexByShip(currentShip);
 			if ((expectedLen != horizontalShipLen && 1 != verticalShipLen) ||
 				(expectedLen != verticalShipLen   && 1 != horizontalShipLen))
 			{
@@ -129,7 +129,7 @@ void Game::readSBoardFile(std::string filePath, char** initBoard)
 		{
 			char c = line[i];
 			// If not allowed chars skip, otherwise insert it to board
-			if (PlayerIndex::MAX_PLAYER != getPlayerIdByShip(c))
+			if (PlayerIndex::MAX_PLAYER != Utils::instance().getPlayerIdByShip(c))
 			{
 				initBoard[colIndex][rowIndex] = c;
 			}

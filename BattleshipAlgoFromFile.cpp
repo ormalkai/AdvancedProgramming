@@ -1,5 +1,6 @@
 #include "BattleshipAlgoFromFile.h"
 
-BattleshipAlgoFromFile::BattleshipAlgoFromFile(int id) : m_id(id)
+BattleshipAlgoFromFile::BattleshipAlgoFromFile(int id)
 {
+	this->setId(id);
 }

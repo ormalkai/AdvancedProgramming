@@ -8,9 +8,10 @@ enum class AlgoType {
 
 class PlayerAlgoFactory {
 public:
-	IBattleshipGameAlgo createInstance(AlgoType type);
+	IBattleshipGameAlgo* create(AlgoType type);
+	static PlayerAlgoFactory& instance();
 private:
-	static int id;
+	int m_id;
 	
 
 };

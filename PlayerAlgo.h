@@ -13,6 +13,7 @@ public:
 
 	ReturnCode init();
 	int getId() { return m_id; }
+	void setId(int id) { m_id = id; }
 	
 
 	

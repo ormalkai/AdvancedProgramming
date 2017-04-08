@@ -40,98 +40,47 @@ enum ShipType
     MAX_SHIP
 };
 
-vector<char> g_playerIndexToChar
+
+class Utils
 {
-	PLAYER_A_CHAR,
-	PLAYER_B_CHAR
+private:
+	vector<char> m_playerIndexToChar
+	{
+		PLAYER_A_CHAR,
+		PLAYER_B_CHAR
+	};
+
+	vector<char> m_playerALegalSign = 
+	{ 
+		PLAYER_A_RUBBER_SHIP, 
+		PLAYER_A_ROCKET_SHIP,
+		PLAYER_A_SUBMARINE, 
+		PLAYER_A_DESTROYER 
+	};
+
+	vector<char> m_playerBLegalSign = 
+	{ 
+		PLAYER_B_RUBBER_SHIP, 
+		PLAYER_B_ROCKET_SHIP, 
+		PLAYER_B_SUBMARINE, 
+		PLAYER_B_DESTROYER 
+	};
+
+public:
+	static Utils& instance();
+
+	/**
+	 * @Details		receives char and returns for which player the ship belongs to
+	 * @Param		c - query ship
+	 * @Return		PlayerIndex::PLAYER_A if c belongs to m_playerALegalSign,
+	 *				PlayerIndex::PLAYER_B if c belongs to m_playerBLegalSign,
+	 *				PlayerIndex::MAX_PLAYER otherwise
+	 */
+	inline PlayerIndex getPlayerIdByShip(char c);
+
+	inline int getIndexByShip(char c);
+
+	inline int getShipByIndexAndPlayer(int ship, int player);
+	inline int getPlayerCharByIndex(int player);
+
 };
-
-vector<char> g_playerALegalSign = 
-{ 
-	PLAYER_A_RUBBER_SHIP, 
-	PLAYER_A_ROCKET_SHIP,
-	PLAYER_A_SUBMARINE, 
-	PLAYER_A_DESTROYER 
-};
-
-vector<char> g_playerBLegalSign = 
-{ 
-	PLAYER_B_RUBBER_SHIP, 
-	PLAYER_B_ROCKET_SHIP, 
-	PLAYER_B_SUBMARINE, 
-	PLAYER_B_DESTROYER 
-};
-
-/**
- * @Details		receives char and returns for which player the ship belongs to
- * @Param		c - query ship
- * @Return		PlayerIndex::PLAYER_A if c belongs to g_playerALegalSign,
- *				PlayerIndex::PLAYER_B if c belongs to g_playerBLegalSign,
- *				PlayerIndex::MAX_PLAYER otherwise
- */
-inline PlayerIndex getPlayerIdByShip(char c)
-{
-
-	if (std::find(g_playerALegalSign.begin(), g_playerALegalSign.end(), c) != g_playerALegalSign.end())
-	{
-		return PlayerIndex::PLAYER_A;
-	}
-	else if (std::find(g_playerBLegalSign.begin(), g_playerBLegalSign.end(), c) != g_playerBLegalSign.end())
-	{
-		return PlayerIndex::PLAYER_B;
-	}
-	return PlayerIndex::MAX_PLAYER;
-}
-
-inline int getIndexByShip(char c)
-{
-    switch (c) {
-        case 'b':
-        case 'B':
-            return RUBBER_SHIP;
-        case 'p':
-        case 'P':
-            return ROCKET_SHIP;
-        case 'm':
-        case 'M':
-            return SUBMRINE;
-        case 'd':
-        case 'D':
-            return DESTROYER;
-        default:
-            return (int)ReturnCode::RC_ERROR;
-    }
-}
-
-inline int getShipByIndexAndPlayer(int ship, int player)
-{
-	if (MAX_SHIP < ship || 0 > ship)
-	{
-		return (int)ReturnCode::RC_ERROR;
-	}
-
-	if (MAX_PLAYER < player || 0 > player)
-	{
-		return (int)ReturnCode::RC_ERROR;
-	}
-
-	switch (player) {
-	case PLAYER_A:
-		return g_playerALegalSign[ship];
-	case PLAYER_B:
-		return g_playerBLegalSign[ship];
-	default:
-		return (int)ReturnCode::RC_ERROR;
-	}
-}
-
-inline int getPlayerCharByIndex(int player)
-{
-	if (MAX_PLAYER < player || 0 > player)
-	{
-		return (int)ReturnCode::RC_ERROR;
-	}
-
-	return g_playerIndexToChar[player];
-}
-
