@@ -14,28 +14,40 @@ using namespace std;
 static class Game {
 
 private:
-	static PlayerAlgoFactory m_playerFactory;
+	enum class GetShipLengthDirection {
+		VERTICAL, HORIZONTAL
+	};
+	static PlayerAlgoFactory				m_playerFactory;
 
-	Board m_board;
+	Board									m_board;
 
-	std::vector<IBattleshipGameAlgo*> m_players;
-	std::map<IBattleshipGameAlgo, Board> m_boards;
-	std::map<char, int> m_shipToExpectedLen;
-	vector<int> m_numOfShipsPerPlayer;
+	std::vector<IBattleshipGameAlgo*>		m_players;
+	std::map<IBattleshipGameAlgo, Board>	m_boards;
+	std::map<char, int>						m_shipToExpectedLen; // conversion map between ship type to expected length
+	vector<int>								m_numOfShipsPerPlayer;
 
 	// ERRORS data structures
-	vector<vector<bool>> m_wrongSizeOrShapePerPlayer; // 2 players X 4 ships TODO init in game init
-	vector<bool> m_adjacency; // need to print Adjacency error per player TODO init in game init
-	int m_rows;
-	int m_cols;
+	vector<vector<bool>>					m_wrongSizeOrShapePerPlayer; // 2 players X 4 ships TODO init in game init
+	bool									m_foundAdjacentShips; // need to print Adjacency error per player TODO init in game init
+	int										m_rows;
+	int										m_cols;
 
 	Game();
 	~Game();
-	
-	ReturnCode parseBoardFile(std::string filePath, int rows, int cols);
+
+	bool checkWrongSizeOrShape();
+	bool checkNumberOfShips();
+	bool checkAdjacentShips();
+	bool checkErrors();
+	void validateBoard(char ** initBoard);
+	void readSBoardFile(std::string filePath, char ** initBoard);
+	ReturnCode parseBoardFile(std::string filePath);
 	ReturnCode initListPlayers();
-	
+	void initErrorDataStructures();
+	void initExpectedShipLenMap();
+
 	int getShipLength(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, GetShipLengthDirection direction);
+	bool isAdjacencyValid(char** initBoard, int i/*row*/, int j/*col*/);
 
 public:
 	
@@ -46,7 +58,7 @@ public:
 		Parse board file and build board matrix
 	*/
 	
-	ReturnCode init(std::string boardPathFile, int row, int col);
+	ReturnCode init(std::string boardPathFile);
 	ReturnCode startGame();
 
 	static Game& getInstance()

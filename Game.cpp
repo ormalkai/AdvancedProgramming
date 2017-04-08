@@ -1,79 +1,187 @@
 
 
-#include <limits.h>
+#include <iostream>
+#include <fstream>
+#include <string>
 #include "Game.h"
 #include "Utils.h"
-
+#include "Debug.h"
 
 #define INIT_BOARD_ROW_SIZE (BOARD_ROW_SIZE + 2)
 #define INIT_BOARD_COL_SIZE (BOARD_COL_SIZE + 2)
 #define SHIPS_PER_PLAYER (5)
 
-enum class GetShipLengthDirection {
-    VERTICAL, HORIZONTAL
-};
+using namespace std;
 
-
-ReturnCode Game::parseBoardFile(std::string filePath, int rows, int cols)
+bool Game::checkWrongSizeOrShape()
 {
-	char initBoard[INIT_BOARD_ROW_SIZE][INIT_BOARD_COL_SIZE] = {' '};
-	bool wrongSizeShip[UCHAR_MAX] = {false};
+	bool result = true;
+	for (int i = 0; i<PlayerIndex::MAX_PLAYER; i++)
+	{
+		char player = getPlayerCharByIndex(i);
+		for (int j = 0; j < ShipType::MAX_SHIP; j++)
+		{
+			if (true == m_wrongSizeOrShapePerPlayer[i][j])
+			{
+				char ship = getShipByIndexAndPlayer(j, i);
+				cout << "Wrong size or shape for ship " << ship << " for player " << player << endl;
+				result = false;
+			}
+		}
+	}
+	return result;
+}
+
+bool Game::checkNumberOfShips()
+{
+	bool result = true;
+	for (int i = 0; i < PlayerIndex::MAX_PLAYER; i++)
+	{
+		char player = getPlayerCharByIndex(i);
+		if (SHIPS_PER_PLAYER < m_numOfShipsPerPlayer[i])
+		{
+			cout << "Too many ships for player " << player << endl;
+			result = false;
+		}
+		else if (SHIPS_PER_PLAYER > m_numOfShipsPerPlayer[i])
+		{
+			cout << "Too few ships for player " << player << endl;
+			result = false;
+		}
+	}
+	return result;
+}
+
+bool Game::checkAdjacentShips()
+{
+	bool result = true;
+	if (true == m_foundAdjacentShips)
+	{
+		cout << "Adjacent Ships on Board" << endl;
+		result = false;
+	}
+	return result;
+}
+
+bool Game::checkErrors()
+{
+	bool result = true;
+	// Wrong size or shape for ship errors
+	result = result && checkWrongSizeOrShape();
+	// Too many/few ships for player errors
+	result = result && checkNumberOfShips();
+	// Adjacent Ships on board error
+	result = result && checkAdjacentShips();
+	return result;
+}
+
+void Game::validateBoard(char** initBoard)
+{
+	// for each char
+	for (int i = 1; i <= BOARD_ROW_SIZE; ++i)
+	{
+		for (int j = 1; j <= BOARD_COL_SIZE; ++j)
+		{
+			if (SPACE == initBoard[i][j])
+			{
+				// ignore spaces
+				continue;
+			}
+			char currentShip = initBoard[i][j];
+			int horizontalShipLen = getShipLength((char**)initBoard, currentShip, i, j, GetShipLengthDirection::HORIZONTAL);
+			int verticalShipLen   = getShipLength((char**)initBoard, currentShip, i, j, GetShipLengthDirection::VERTICAL);
+			int expectedLen = m_shipToExpectedLen[currentShip];
+
+			PlayerIndex playerIndex = getPlayerIdByShip(currentShip);
+			int shipIndex = getIndexByShip(currentShip);
+			if ((expectedLen != horizontalShipLen && 1 != verticalShipLen) ||
+				(expectedLen != verticalShipLen   && 1 != horizontalShipLen))
+			{
+				// ERROR - wrong size or shape for currentShip(player too)
+				m_wrongSizeOrShapePerPlayer[playerIndex][shipIndex] = true;
+			}
+			else
+			{
+				// count legal ship
+				m_numOfShipsPerPlayer[playerIndex]++;
+			}
+
+			//check Adjacency
+			if (false == Game::isAdjacencyValid((char**)initBoard, i, j))
+			{
+				// ERROR Adjacency
+				m_foundAdjacentShips = true;
+			}
+		}
+	}
+}
+
+void Game::readSBoardFile(std::string filePath, char** initBoard)
+{
+	ifstream sboard(filePath);
+	string line;
+	int rowIndex = 1;
+	// Line by line up to 10 line and up to 10 chars per line
+	while (getline(sboard, line) && rowIndex <= BOARD_ROW_SIZE)
+	{
+		int colIndex = 1;
+		for(std::string::size_type i = 0; i < line.size() && colIndex <=10; i++)
+		{
+			char c = line[i];
+			// If not allowed chars skip, otherwise insert it to board
+			if (PlayerIndex::MAX_PLAYER != getPlayerIdByShip(c))
+			{
+				initBoard[colIndex][rowIndex] = c;
+			}
+			// parse nex char
+			colIndex++;
+		}
+		// parse next line
+		rowIndex++;
+	}
+	// close sboard file
+	sboard.close();
+}
+
+/**
+ * @Details		parses sboard file and initializes the game board
+ * @Param		filepath		- path to sboard file
+ * @Param		rows			- number of rows 
+ * @param		cols			- number of columns
+ * @Return		ReturnCode	
+ */
+ReturnCode Game::parseBoardFile(std::string filePath)
+{
+	// init board is larger by 1 from actual board in every dimension for 
+	// traversing within the board nore easily
+	char initBoard[INIT_BOARD_ROW_SIZE][INIT_BOARD_COL_SIZE];
+	// init board file with spaces
 	for (int i = 0; i < INIT_BOARD_ROW_SIZE; ++i)
 	{
 		for (int j = 0; j < INIT_BOARD_COL_SIZE; ++j)
 		{
-			initBoard[i][j] = ' ';
+			initBoard[i][j] = SPACE;
 		}
 	}
-
-
 	// Read from file 
-	// Line by line up to 10 line and up to 10 chars per line
-	// If not allowed chars ignore
-	//
-	// for each char
-	for (int i = 1; i <= BOARD_ROW_SIZE; ++i)
+	readSBoardFile(filePath, (char**)initBoard);
+	// input validation
+	validateBoard((char**)initBoard);
+	// Print errors and return ERROR if needed
+	ReturnCode result = RC_SUCCESS;
+	if (false == checkErrors())
 	{
-	    for (int j = 1; j <= BOARD_COL_SIZE; ++j)
-	    {
-	        if (SPACE == initBoard[i][j])
-	        {
-	            // ignore spaces
-	            continue;
-	        }
-	        char currentShip = initBoard[i][j];
-	        int horizontalShipLen = getShipLength(initBoard, currentShip, i, j, GetShipLengthDirection::HORIZONTAL);
-	        int verticalShipLen   = getShipLength(initBoard, currentShip, i, j, GetShipLengthDirection::VERTICAL);
-	        int expectedLen = m_shipToExpectedLen[currentShip];
-	        if ((expectedLen != horizontalShipLen && 1 != verticalShipLen) ||
-	            (expectedLen != verticalShipLen   && 1 != horizontalShipLen))
-	        {
-	            // ERROR - wrong size or shape for currentShip(player too)
-
-
-	        }
-	        else
-	        {
-	            // count legal ship
-	        }
-
-	        //check Adjacency
-	        if (false == isAdjacencyValid(initBoard, i, j))
-	        {
-	            // ERROR Adjacency
-	        }
-
-	    }
-
-	    // check count of ships per player - should be SHIPS_PER_PLAYER
+		result = RC_ERROR;
 	}
-
-
-	return ReturnCode::RC_SUCCESS;
+	return result;
 }
 
 /**
- * @Details
+ * @Details		Receives init board and specific cell, 
+ *				verifies that there no overlapped ships
+ * @Param		initBoard		- board contains only legal ships characters and spaces
+ * @Param		i				- row of the cell to test
+ * @Param		j				- column of the cell to test
  */
 bool Game::isAdjacencyValid(char** initBoard, int i/*row*/, int j/*col*/)
 {
@@ -82,7 +190,7 @@ bool Game::isAdjacencyValid(char** initBoard, int i/*row*/, int j/*col*/)
     {
         return true;
     }
-
+	// neighbors can be like me or spaces only!
     if ((SPACE != initBoard[i+1][j] && expectedShip != initBoard[i+1][j]) ||
         (SPACE != initBoard[i-1][j] && expectedShip != initBoard[i-1][j]) ||
         (SPACE != initBoard[i][j+1] && expectedShip != initBoard[i][j+1]) ||
@@ -95,7 +203,13 @@ bool Game::isAdjacencyValid(char** initBoard, int i/*row*/, int j/*col*/)
 }
 
 /**
- * @Details
+ * @Details		This is a recursive function which calculates the largest sequence of chars
+ *				in specific dimmension, basically this is the length of the ship in the dimension.
+ * @Param		initBoard		- board contains only legal ships characters and spaces
+ * @Param		expectedShip	- the char of the ship to calculate (for stop condition)
+ * @Param		i				- row of the cell to test
+ * @Param		j				- column of the cell to test
+ * @Param		direction		- direction to calculate in current flow
  */
 int Game::getShipLength(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, GetShipLengthDirection direction)
 {
@@ -122,15 +236,43 @@ ReturnCode Game::initListPlayers()
 	return ReturnCode::RC_SUCCESS;
 }
 
-ReturnCode Game::init(std::string boardPathFile, int row, int col)
+void Game::initErrorDataStructures()
 {
-	ReturnCode rc = this->parseBoardFile(boardPathFile, row, col);
+	vector<bool> wrongSizeOrShapePerPlayer;
+	for (int j = 0; j < ShipType::MAX_SHIP; j++)
+	{
+		wrongSizeOrShapePerPlayer.push_back(false);
+	}
+	for (int i=0; i<PlayerIndex::MAX_PLAYER; i++)
+	{
+		m_numOfShipsPerPlayer.push_back(0);
+		m_wrongSizeOrShapePerPlayer.push_back(wrongSizeOrShapePerPlayer);
+	}
+	m_foundAdjacentShips = false;
+}
+
+void Game::initExpectedShipLenMap()
+{
+	m_shipToExpectedLen[PLAYER_A_RUBBER_SHIP] = m_shipToExpectedLen[PLAYER_B_RUBBER_SHIP] = 1;
+	m_shipToExpectedLen[PLAYER_A_ROCKET_SHIP] = m_shipToExpectedLen[PLAYER_B_ROCKET_SHIP] = 2;
+	m_shipToExpectedLen[PLAYER_A_SUBMARINE] = m_shipToExpectedLen[PLAYER_B_SUBMARINE] = 3;
+	m_shipToExpectedLen[PLAYER_A_DESTROYER] = m_shipToExpectedLen[PLAYER_B_DESTROYER] = 4;
+}
+
+ReturnCode Game::init(std::string boardPathFile)
+{
+	// init ERRORs data structures
+	initErrorDataStructures();
 	// init expected len map
-	//TODO macros
-	m_shipToExpectedLen['B'] = m_shipToExpectedLen['b'] = 1;
-	m_shipToExpectedLen['P'] = m_shipToExpectedLen['p'] = 2;
-	m_shipToExpectedLen['M'] = m_shipToExpectedLen['m'] = 3;
-	m_shipToExpectedLen['D'] = m_shipToExpectedLen['d'] = 4;
+	initExpectedShipLenMap();
+
+	ReturnCode rc = parseBoardFile(boardPathFile);
+	if (RC_SUCCESS != rc)
+	{
+		DBG(Debug::Error, "Failed parsing board file rc[%d]", rc);
+		return rc;
+	}
+
 	// initListPlayers + init foreach player
 	// Set board for Players
 	//

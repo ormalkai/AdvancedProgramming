@@ -7,10 +7,10 @@ enum class AlgoType {
 };
 
 class PlayerAlgoFactory {
-
-	static int id = 0;
-
+public:
 	IBattleshipGameAlgo createInstance(AlgoType type);
+private:
+	static int id;
 	
 
 };
