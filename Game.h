@@ -25,7 +25,7 @@ private:
 	Board m_board;
 
 	vector<IBattleshipGameAlgo*> m_players;
-	map<IBattleshipGameAlgo, Board> m_boards;
+	map<IBattleshipGameAlgo*, Board> m_boards;
 
 	map<char, int> m_shipToExpectedLen; // conversion map between ship type to expected length
 	vector<int> m_numOfShipsPerPlayer;

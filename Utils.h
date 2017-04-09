@@ -25,12 +25,12 @@ enum ReturnCode
     RC_INVALID_ARG
 };
 
-enum PlayerIndex
+typedef enum PlayerIndex
 {
     PLAYER_A,
     PLAYER_B,
     MAX_PLAYER
-};
+} PlayerIndex;
 
 enum ShipType
 {
@@ -77,12 +77,12 @@ public:
 	 *				PlayerIndex::PLAYER_B if c belongs to m_playerBLegalSign,
 	 *				PlayerIndex::MAX_PLAYER otherwise
 	 */
-	inline PlayerIndex getPlayerIdByShip(char c);
+	PlayerIndex getPlayerIdByShip(char c);
 
-	inline int getIndexByShip(char c);
+	int getIndexByShip(char c);
 
-	inline int getShipByIndexAndPlayer(int ship, int player);
-	inline int getPlayerCharByIndex(int player);
+	int getShipByIndexAndPlayer(int ship, int player);
+	int getPlayerCharByIndex(int player);
 
 	template<class T>
 	bool isExistInVec(vector<T> vec, T val);

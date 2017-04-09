@@ -15,7 +15,7 @@ private:
 	char m_sign; // Player 
 	// Color
 			  
-	list<Cell> cellList;
+	list<Cell*> cellList;
 
 public:
 

@@ -278,7 +278,7 @@ ReturnCode Game::init(std::string boardPathFile)
 	for (size_t i = 0; i < NUM_OF_PLAYERS; i++)
 	{
 		m_players[i] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
-		m_boards[m_players[i]] = 
+		//m_boards[m_players[i]] = 
 	
 	}
 	
@@ -289,21 +289,21 @@ ReturnCode Game::init(std::string boardPathFile)
 	return ReturnCode::RC_SUCCESS;
 }
 
-ReturnCode Game::fillBoardOfPlayer(vector<char> playerChars, Board& board)
-{
-	for (size_t i = 0; i < m_rows; i++)
-	{
-		for (size_t i = 0; i < m_cols; i++)
-		{
-			char c = m_board.getSign(i, j);
-			if (SPACE != c && Utils::instance().isExistInVec(playerChars, c))
-			{
-				m_board.getSign(i, j) 
-			}
-		}
-	}
-	
-}
+//ReturnCode Game::fillBoardOfPlayer(vector<char> playerChars, Board& board)
+//{
+//	for (size_t i = 0; i < m_rows; i++)
+//	{
+//		for (size_t i = 0; i < m_cols; i++)
+//		{
+//			char c = m_board.getSign(i, j);
+//			if (SPACE != c && Utils::instance().isExistInVec(playerChars, c))
+//			{
+//				m_board.getSign(i, j) 
+//			}
+//		}
+//	}
+//	
+//}
 
 ReturnCode Game::startGame()
 {

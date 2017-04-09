@@ -15,7 +15,7 @@ private:
 
 public:
 	BattleshipAlgoFromFile(int id);
-	~BattleshipAlgoFromFile();
+	~BattleshipAlgoFromFile() = default;
 
 	/*
 		Initialize attack queue

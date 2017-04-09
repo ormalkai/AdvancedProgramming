@@ -9,7 +9,7 @@ private:
 	int m_id;
 
 public:
-	~PlayerAlgo() = 0;
+	~PlayerAlgo() = default;
 
 	ReturnCode init();
 	int getId() { return m_id; }
