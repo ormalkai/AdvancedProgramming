@@ -270,7 +270,7 @@ ReturnCode Game::init(std::string boardPathFile)
 	ReturnCode rc = parseBoardFile(boardPathFile);
 	if (RC_SUCCESS != rc)
 	{
-		DBG(Debug::Error, "Failed parsing board file rc[%d]", rc);
+		DBG(Debug::DBG_ERROR, "Failed parsing board file rc[%d]", rc);
 		return rc;
 	}
 
