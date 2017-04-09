@@ -80,3 +80,13 @@ int Utils::getPlayerCharByIndex(int player)
 
 	return m_playerIndexToChar[player];
 }
+
+
+template<class T>
+bool Utils::isExistInVec(vector<T> vec, T val)
+{
+	if (find(vec.begin(), vec.end(), val) != vec.end()) {
+		return true;
+	}
+	return false;
+}

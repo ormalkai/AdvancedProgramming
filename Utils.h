@@ -1,5 +1,6 @@
 #pragma once
 
+#define NUM_OF_PLAYERS (2)
 #define BOARD_ROW_SIZE (10)
 #define BOARD_COL_SIZE (10)
 #define SPACE ' '
@@ -83,4 +84,8 @@ public:
 	inline int getShipByIndexAndPlayer(int ship, int player);
 	inline int getPlayerCharByIndex(int player);
 
+	template<class T>
+	bool isExistInVec(vector<T> vec, T val);
+
 };
+

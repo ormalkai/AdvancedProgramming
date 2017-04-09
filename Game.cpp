@@ -13,10 +13,10 @@
 
 using namespace std;
 
-bool Game::checkWrongSizeOrShape()
+bool Game::checkWrongSizeOrShape() const
 {
 	bool result = true;
-	for (int i = 0; i<PlayerIndex::MAX_PLAYER; i++)
+	for (int i = 0; i < PlayerIndex::MAX_PLAYER; i++)
 	{
 		char player = Utils::instance().getPlayerCharByIndex(i);
 		for (int j = 0; j < ShipType::MAX_SHIP; j++)
@@ -32,7 +32,7 @@ bool Game::checkWrongSizeOrShape()
 	return result;
 }
 
-bool Game::checkNumberOfShips()
+bool Game::checkNumberOfShips() const
 {
 	bool result = true;
 	for (int i = 0; i < PlayerIndex::MAX_PLAYER; i++)
@@ -52,7 +52,7 @@ bool Game::checkNumberOfShips()
 	return result;
 }
 
-bool Game::checkAdjacentShips()
+bool Game::checkAdjacentShips() const
 {
 	bool result = true;
 	if (true == m_foundAdjacentShips)
@@ -63,7 +63,7 @@ bool Game::checkAdjacentShips()
 	return result;
 }
 
-bool Game::checkErrors()
+bool Game::checkErrors() const
 {
 	bool result = true;
 	// Wrong size or shape for ship errors
@@ -88,14 +88,14 @@ void Game::validateBoard(char** initBoard)
 				continue;
 			}
 			char currentShip = initBoard[i][j];
-			int horizontalShipLen = getShipLength((char**)initBoard, currentShip, i, j, GetShipLengthDirection::HORIZONTAL);
-			int verticalShipLen   = getShipLength((char**)initBoard, currentShip, i, j, GetShipLengthDirection::VERTICAL);
+			int horizontalShipLen = getShipLength((char**)initBoard, currentShip, i, j, ShipLengthDirection::HORIZONTAL);
+			int verticalShipLen = getShipLength((char**)initBoard, currentShip, i, j, ShipLengthDirection::VERTICAL);
 			int expectedLen = m_shipToExpectedLen[currentShip];
 
 			PlayerIndex playerIndex = Utils::instance().getPlayerIdByShip(currentShip);
 			int shipIndex = Utils::instance().getIndexByShip(currentShip);
 			if ((expectedLen != horizontalShipLen && 1 != verticalShipLen) ||
-				(expectedLen != verticalShipLen   && 1 != horizontalShipLen))
+				(expectedLen != verticalShipLen && 1 != horizontalShipLen))
 			{
 				// ERROR - wrong size or shape for currentShip(player too)
 				m_wrongSizeOrShapePerPlayer[playerIndex][shipIndex] = true;
@@ -125,7 +125,7 @@ void Game::readSBoardFile(std::string filePath, char** initBoard)
 	while (getline(sboard, line) && rowIndex <= BOARD_ROW_SIZE)
 	{
 		int colIndex = 1;
-		for(std::string::size_type i = 0; i < line.size() && colIndex <=10; i++)
+		for (std::string::size_type i = 0; i < line.size() && colIndex <= 10; i++)
 		{
 			char c = line[i];
 			// If not allowed chars skip, otherwise insert it to board
@@ -146,16 +146,17 @@ void Game::readSBoardFile(std::string filePath, char** initBoard)
 /**
  * @Details		parses sboard file and initializes the game board
  * @Param		filepath		- path to sboard file
- * @Param		rows			- number of rows 
+ * @Param		rows			- number of rows
  * @param		cols			- number of columns
- * @Return		ReturnCode	
+ * @Return		ReturnCode
  */
 ReturnCode Game::parseBoardFile(std::string filePath)
 {
-	// init board is larger by 1 from actual board in every dimension for 
-	// traversing within the board nore easily
+	// Init board is larger by 1 from actual board in every dimension for 
+	// traversing within the board more easily
 	char initBoard[INIT_BOARD_ROW_SIZE][INIT_BOARD_COL_SIZE];
-	// init board file with spaces
+	
+	// Init board file with spaces
 	for (int i = 0; i < INIT_BOARD_ROW_SIZE; ++i)
 	{
 		for (int j = 0; j < INIT_BOARD_COL_SIZE; ++j)
@@ -177,7 +178,7 @@ ReturnCode Game::parseBoardFile(std::string filePath)
 }
 
 /**
- * @Details		Receives init board and specific cell, 
+ * @Details		Receives init board and specific cell,
  *				verifies that there no overlapped ships
  * @Param		initBoard		- board contains only legal ships characters and spaces
  * @Param		i				- row of the cell to test
@@ -185,21 +186,21 @@ ReturnCode Game::parseBoardFile(std::string filePath)
  */
 bool Game::isAdjacencyValid(char** initBoard, int i/*row*/, int j/*col*/)
 {
-    char expectedShip = initBoard[i][j];
-    if (SPACE == expectedShip)
-    {
-        return true;
-    }
+	char expectedShip = initBoard[i][j];
+	if (SPACE == expectedShip)
+	{
+		return true;
+	}
 	// neighbors can be like me or spaces only!
-    if ((SPACE != initBoard[i+1][j] && expectedShip != initBoard[i+1][j]) ||
-        (SPACE != initBoard[i-1][j] && expectedShip != initBoard[i-1][j]) ||
-        (SPACE != initBoard[i][j+1] && expectedShip != initBoard[i][j+1]) ||
-        (SPACE != initBoard[i][j-1] && expectedShip != initBoard[i][j-1]))
-    {
-        return false;
-    }
+	if ((SPACE != initBoard[i + 1][j] && expectedShip != initBoard[i + 1][j]) ||
+		(SPACE != initBoard[i - 1][j] && expectedShip != initBoard[i - 1][j]) ||
+		(SPACE != initBoard[i][j + 1] && expectedShip != initBoard[i][j + 1]) ||
+		(SPACE != initBoard[i][j - 1] && expectedShip != initBoard[i][j - 1]))
+	{
+		return false;
+	}
 
-    return true;
+	return true;
 }
 
 /**
@@ -211,23 +212,23 @@ bool Game::isAdjacencyValid(char** initBoard, int i/*row*/, int j/*col*/)
  * @Param		j				- column of the cell to test
  * @Param		direction		- direction to calculate in current flow
  */
-int Game::getShipLength(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, GetShipLengthDirection direction)
+int Game::getShipLength(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthDirection direction)
 {
 	// stop condition
 	if (expectedShip != initBoard[i][j])
 	{
-	    return 0;
+		return 0;
 	}
 
-	if (GetShipLengthDirection::HORIZONTAL == direction)
+	if (ShipLengthDirection::HORIZONTAL == direction)
 	{
-	    return (1 + Game::getShipLength(initBoard, expectedShip, i, j-1, direction) +
-	                Game::getShipLength(initBoard, expectedShip, i, j+1, direction));
+		return (1 + Game::getShipLength(initBoard, expectedShip, i, j - 1, direction) +
+			Game::getShipLength(initBoard, expectedShip, i, j + 1, direction));
 	}
 	else /*GetShipLengthDirection::VERTICAL == direction*/
 	{
-	    return (1 + Game::getShipLength(initBoard, expectedShip, i-1, j, direction) +
-	                Game::getShipLength(initBoard, expectedShip, i+1, j, direction));
+		return (1 + Game::getShipLength(initBoard, expectedShip, i - 1, j, direction) +
+			Game::getShipLength(initBoard, expectedShip, i + 1, j, direction));
 	}
 }
 
@@ -243,7 +244,7 @@ void Game::initErrorDataStructures()
 	{
 		wrongSizeOrShapePerPlayer.push_back(false);
 	}
-	for (int i=0; i<PlayerIndex::MAX_PLAYER; i++)
+	for (int i = 0; i < PlayerIndex::MAX_PLAYER; i++)
 	{
 		m_numOfShipsPerPlayer.push_back(0);
 		m_wrongSizeOrShapePerPlayer.push_back(wrongSizeOrShapePerPlayer);
@@ -273,11 +274,35 @@ ReturnCode Game::init(std::string boardPathFile)
 		return rc;
 	}
 
+	// Create players and boards
+	for (size_t i = 0; i < NUM_OF_PLAYERS; i++)
+	{
+		m_players[i] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
+		m_boards[m_players[i]] = 
+	
+	}
+	
 	// initListPlayers + init foreach player
 	// Set board for Players
 	//
 
 	return ReturnCode::RC_SUCCESS;
+}
+
+ReturnCode Game::fillBoardOfPlayer(vector<char> playerChars, Board& board)
+{
+	for (size_t i = 0; i < m_rows; i++)
+	{
+		for (size_t i = 0; i < m_cols; i++)
+		{
+			char c = m_board.getSign(i, j);
+			if (SPACE != c && Utils::instance().isExistInVec(playerChars, c))
+			{
+				m_board.getSign(i, j) 
+			}
+		}
+	}
+	
 }
 
 ReturnCode Game::startGame()
@@ -297,7 +322,7 @@ ReturnCode Game::startGame()
 		// If attack failed - iter.next
 		// If iter == last do iter = begin
 	}
-	
+
 	// Notify winner
 
 	return ReturnCode::RC_SUCCESS;

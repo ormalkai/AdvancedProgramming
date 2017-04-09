@@ -1,10 +1,9 @@
-
 #include "PlayerAlgoFactory.h"
 #include "BattleshipAlgoFromFile.h"
 
-IBattleshipGameAlgo * PlayerAlgoFactory::create(AlgoType type)
+IBattleshipGameAlgo* PlayerAlgoFactory::create(AlgoType type)
 {
-	switch(type)
+	switch (type)
 	{
 	case(AlgoType::FILE):
 		return new BattleshipAlgoFromFile(m_id++);

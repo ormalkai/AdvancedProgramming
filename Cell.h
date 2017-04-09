@@ -4,14 +4,19 @@
 
 class Cell {
 public:
-	enum cellStatus {
+	enum CellStatus {
 		ALIVE,
 		DEAD
 	};
+
 	Cell();
 	~Cell();
+
+	CellStatus getStatus() { return  m_status; }
+	void clear() { m_status = DEAD; m_pShip = nullptr; }
+
 private:
-	cellStatus m_status;
+	CellStatus m_status;
 	Ship* m_pShip;
 
 };
