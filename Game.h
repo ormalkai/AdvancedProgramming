@@ -20,6 +20,12 @@ private:
 		HORIZONTAL
 	};
 
+	enum class ShipLengthSecondDirection
+	{
+		FORWARD,
+		BACKWORD
+	};
+
 	static PlayerAlgoFactory m_playerFactory;
 
 	Board m_board;
@@ -56,6 +62,8 @@ private:
 	void initExpectedShipLenMap();
 
 	int getShipLength(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthDirection direction);
+	int getShipLengthHorizontal(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction);
+	int getShipLengthVertical(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction);
 	bool isAdjacencyValid(char** initBoard, int i/*row*/, int j/*col*/);
 
 public:

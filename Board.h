@@ -14,7 +14,7 @@ private:
 
 public:
 	Board(int rows = BOARD_ROW_SIZE, int cols = BOARD_COL_SIZE) : m_rows(rows), m_cols(cols) {};
-	~Board();
+	~Board() = default;
 	Board(const Board &);
 
 	Cell get(int r, int c);

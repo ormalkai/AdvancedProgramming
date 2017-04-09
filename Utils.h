@@ -6,14 +6,14 @@
 #define SPACE ' '
 #define PLAYER_A_CHAR 'A'
 #define PLAYER_B_CHAR 'B'
-#define PLAYER_A_RUBBER_SHIP 'b'
-#define PLAYER_B_RUBBER_SHIP 'B'
-#define PLAYER_A_ROCKET_SHIP 'p'
-#define PLAYER_B_ROCKET_SHIP 'P'
-#define PLAYER_A_SUBMARINE	 'm'
-#define PLAYER_B_SUBMARINE	 'M'
-#define PLAYER_A_DESTROYER	 'd'
-#define PLAYER_B_DESTROYER	 'D'
+#define PLAYER_A_RUBBER_SHIP 'B'
+#define PLAYER_B_RUBBER_SHIP 'b'
+#define PLAYER_A_ROCKET_SHIP 'P'
+#define PLAYER_B_ROCKET_SHIP 'p'
+#define PLAYER_A_SUBMARINE	 'M'
+#define PLAYER_B_SUBMARINE	 'm'
+#define PLAYER_A_DESTROYER	 'D'
+#define PLAYER_B_DESTROYER	 'd'
 
 #include <vector>
 using namespace std;
