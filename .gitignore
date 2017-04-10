@@ -19,3 +19,6 @@ AdvancedProgramming.vcxproj.user
 *.obj
 Debug/vc140.idb
 *.pdb
+*.sboard
+clean_movesA.attack-a
+*.attack-b

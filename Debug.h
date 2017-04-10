@@ -7,19 +7,19 @@
 		switch(LEVEL)\
 		{\
 		case(Debug::DBG_ERROR):\
-			Debug::instance()->print(LEVEL, "Error" ": " FMT, __func__, ## __VA_ARGS__);\
+			Debug::instance()->print(LEVEL, "Error  " ": " FMT, ## __VA_ARGS__);\
 			break;\
 		case(Debug::DBG_WARNING):\
-			Debug::instance()->print(LEVEL, "Warning" ": " FMT, __func__, ## __VA_ARGS__);\
+			Debug::instance()->print(LEVEL, "Warning" ": " FMT, ## __VA_ARGS__);\
 			break;\
 		case(Debug::DBG_INFO):\
-			Debug::instance()->print(LEVEL, "Info" ": " FMT, __func__, ## __VA_ARGS__);\
+			Debug::instance()->print(LEVEL, "Info   " ": " FMT, ## __VA_ARGS__);\
 			break;\
 		case(Debug::DBG_DEBUG):\
-			Debug::instance()->print(LEVEL, "Debug" ": " FMT, __func__, ## __VA_ARGS__);\
+			Debug::instance()->print(LEVEL, "Debug  " ": " FMT, ## __VA_ARGS__);\
 			break;\
 		default:\
-			Debug::instance()->print(LEVEL, "Error" ": " FMT, __func__, ## __VA_ARGS__);\
+			Debug::instance()->print(LEVEL, "Error  " ": " FMT, ## __VA_ARGS__);\
 		}\
 	} while (0);
 

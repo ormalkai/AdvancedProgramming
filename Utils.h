@@ -14,6 +14,9 @@
 #define PLAYER_B_SUBMARINE	 'm'
 #define PLAYER_A_DESTROYER	 'D'
 #define PLAYER_B_DESTROYER	 'd'
+#define PLAYER_A_ATTACK_FILE "*.attack-a"
+#define PLAYER_B_ATTACK_FILE "*.attack-b"
+#define NO_ATTACK_FILE ""
 
 #include <vector>
 using namespace std;
@@ -67,6 +70,13 @@ private:
 		PLAYER_B_DESTROYER 
 	};
 
+	vector<string> m_expectedAttackFilePerPlayer = 
+	{
+		// if no attack file - empty string
+		PLAYER_A_ATTACK_FILE,
+		PLAYER_B_ATTACK_FILE
+	};
+
 public:
 	static Utils& instance();
 
@@ -82,7 +92,8 @@ public:
 	int getIndexByShip(char c);
 
 	int getShipByIndexAndPlayer(int ship, int player);
-	int getPlayerCharByIndex(int player);
+	char getPlayerCharByIndex(int player);
+	string getAttackFileByPlayer(int player);
 
 	template<class T>
 	bool isExistInVec(vector<T> vec, T val);

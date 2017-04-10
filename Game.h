@@ -56,7 +56,10 @@ private:
 	bool checkErrors() const;
 	void validateBoard(char** initBoard);
 	void readSBoardFile(std::string filePath, char** initBoard);
-	ReturnCode parseBoardFile(std::string filePath);
+	ReturnCode getSboardFileNameFromDirectory(string filesPath, string& sboardFileName);
+	ReturnCode getattackFilesNameFromDirectory(string filesPath, vector<string>& attackFilePerPlayer);
+	ReturnCode initFilesPath(string& filesPath, string& sboardFile, vector<string>& attackFilePerPlayer);
+	ReturnCode parseBoardFile(std::string filesPath);
 	ReturnCode initListPlayers();
 	void initErrorDataStructures();
 	void initExpectedShipLenMap();
@@ -75,7 +78,7 @@ public:
 		Parse board file and build board matrix
 	*/
 
-	ReturnCode init(string boardPathFile);
+	ReturnCode init(string filesPath = "");
 	ReturnCode startGame();
 
 	static Game& getInstance()

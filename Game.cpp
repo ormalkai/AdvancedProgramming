@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <windows.h>
 #include "Game.h"
 #include "Utils.h"
 #include "Debug.h"
@@ -149,6 +150,58 @@ void Game::readSBoardFile(std::string filePath, char** initBoard)
 	sboard.close();
 }
 
+ReturnCode Game::getSboardFileNameFromDirectory(string filesPath, string& sboardFileName)
+{
+	WIN32_FIND_DATA FindFileData;
+	HANDLE hFind;
+	
+	string sboardFile = filesPath + "*.sboard";
+	DBG(Debug::DBG_DEBUG, "sboardFile [%s]", sboardFile.c_str());
+	hFind = FindFirstFile(sboardFile.c_str(), &FindFileData);
+	if (INVALID_HANDLE_VALUE == hFind)
+	{
+		cout << "Missing board file (*.sboard) looking in path: " << filesPath << endl;
+		return RC_ERROR;
+	}
+	else
+	{
+		DBG(Debug::DBG_INFO, "The first file found is %s\n", FindFileData.cFileName);
+		sboardFileName = filesPath + FindFileData.cFileName;
+		FindClose(hFind);
+		return RC_SUCCESS;
+	}
+}
+
+ReturnCode Game::getattackFilesNameFromDirectory(string filesPath, vector<string>& attackFilePerPlayer)
+{
+	WIN32_FIND_DATA FindFileData;
+	HANDLE hFind;
+	ReturnCode rc = RC_SUCCESS;
+	for (int i = PLAYER_A; i < PlayerIndex::MAX_PLAYER; i++)
+	{
+		string attackFileExtensionPerPlayer = Utils::instance().getAttackFileByPlayer(i);
+		if (NO_ATTACK_FILE == attackFileExtensionPerPlayer)
+		{
+			attackFilePerPlayer.push_back(NO_ATTACK_FILE);
+			continue;
+		}
+		string attackFile = filesPath + attackFileExtensionPerPlayer;
+		hFind = FindFirstFile(attackFile.c_str(), &FindFileData);
+		if (INVALID_HANDLE_VALUE == hFind)
+		{
+			cout << "Missing attack file for player " << Utils::instance().getPlayerCharByIndex(i) << " looking in path: " << filesPath << endl;
+			rc = RC_ERROR;
+		}
+		else
+		{
+			DBG(Debug::DBG_INFO, "The first file found is %s\n", FindFileData.cFileName);
+			attackFilePerPlayer.push_back(filesPath + FindFileData.cFileName);
+			FindClose(hFind);
+		}
+	}
+	return rc;
+}
+
 /**
  * @Details		parses sboard file and initializes the game board
  * @Param		filepath		- path to sboard file
@@ -156,7 +209,7 @@ void Game::readSBoardFile(std::string filePath, char** initBoard)
  * @param		cols			- number of columns
  * @Return		ReturnCode
  */
-ReturnCode Game::parseBoardFile(std::string filePath)
+ReturnCode Game::parseBoardFile(string sboardFileName)
 {
 	// Init board is larger by 1 from actual board in every dimension for 
 	// traversing within the board more easily
@@ -176,7 +229,7 @@ ReturnCode Game::parseBoardFile(std::string filePath)
 		}
 	}
 	// Read from file 
-	readSBoardFile(filePath, initBoard);
+	readSBoardFile(sboardFileName, initBoard);
 
 	/**
 	 *DEBUG
@@ -328,14 +381,53 @@ void Game::initExpectedShipLenMap()
 	m_shipToExpectedLen[PLAYER_A_DESTROYER] = m_shipToExpectedLen[PLAYER_B_DESTROYER] = 4;
 }
 
-ReturnCode Game::init(std::string boardPathFile)
+
+ReturnCode Game::initFilesPath(string& filesPath, string& sboardFile, vector<string>& attackFilePerPlayer)
 {
+	// first check that the folder exists
+	DWORD ftyp = GetFileAttributesA(filesPath.c_str());
+	if ("" != filesPath && 
+		(ftyp == INVALID_FILE_ATTRIBUTES || false == (ftyp & FILE_ATTRIBUTE_DIRECTORY)))
+	{
+		cout << "Wrong path: " << filesPath << endl;
+		return RC_ERROR;  //something is wrong with your path!
+	}
+
+	// path is OK
+	if (RC_SUCCESS != getSboardFileNameFromDirectory(filesPath, sboardFile))
+	{
+		return RC_ERROR;
+	}
+
+	if (RC_SUCCESS != getattackFilesNameFromDirectory(filesPath, attackFilePerPlayer))
+	{
+		return RC_ERROR;
+	}
+
+	return RC_SUCCESS;
+}
+
+
+/**
+ * @Details		receives path to sboard and attack files and initializes the game:
+ *				players, board etc
+ * @Param		filesPath - location of sboard and attack files
+ */
+ReturnCode Game::init(std::string filesPath)
+{
+	string sboardFile, attackAFile, attackBFile;
+	vector<string> attackFilePerPlayer;
+	ReturnCode rc = initFilesPath(filesPath, sboardFile, attackFilePerPlayer);
+	if (RC_SUCCESS != rc)
+	{
+		return rc;
+	}
 	// init ERRORs data structures
 	initErrorDataStructures();
 	// init expected len map
 	initExpectedShipLenMap();
 
-	ReturnCode rc = parseBoardFile(boardPathFile);
+	rc = parseBoardFile(sboardFile);
 	if (RC_SUCCESS != rc)
 	{
 		return rc;

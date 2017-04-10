@@ -71,14 +71,25 @@ int Utils::getShipByIndexAndPlayer(int ship, int player)
 	}
 }
 
-int Utils::getPlayerCharByIndex(int player)
+char Utils::getPlayerCharByIndex(int player)
 {
 	if (MAX_PLAYER < player || 0 > player)
 	{
-		return (int)ReturnCode::RC_ERROR;
+		return '\0';
 	}
 
 	return m_playerIndexToChar[player];
+}
+
+string Utils::getAttackFileByPlayer(int player)
+{
+	// TODO: insert return statement here
+	if (player < 0 || player > MAX_PLAYER)
+	{
+		return "";
+	}
+
+	return m_expectedAttackFilePerPlayer[player];
 }
 
 
