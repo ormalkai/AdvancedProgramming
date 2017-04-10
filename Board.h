@@ -24,6 +24,7 @@ public:
 
 	char** Board::toCharMat();
 	char** Board::toCharMat(PlayerIndex playerId);
+	void buildBoard(char ** initBoard);
 	char getSign(int r, int c);
 	inline void clearCell(int r, int c)
 	{

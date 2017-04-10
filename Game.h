@@ -20,6 +20,11 @@ private:
 		VERTICAL, 
 		HORIZONTAL
 	};
+	enum class ShipLengthSecondDirection
+	{
+		FORWARD,
+		BACKWORD
+	};
 
 
 	static PlayerAlgoFactory m_playerFactory;
@@ -52,13 +57,18 @@ private:
 	bool checkErrors() const;
 	void validateBoard(char** initBoard);
 	void readSBoardFile(string filePath, char** initBoard);
-	ReturnCode parseBoardFile(string filePath);
+	ReturnCode getSboardFileNameFromDirectory(string filesPath, string& sboardFileName);
+	ReturnCode getattackFilesNameFromDirectory(string filesPath, vector<string>& attackFilePerPlayer);
+	ReturnCode initFilesPath(string& filesPath, string& sboardFile, vector<string>& attackFilePerPlayer);
+	ReturnCode parseBoardFile(string sboardFileName, char** initBoard);
 	ReturnCode initListPlayers();
 	void initErrorDataStructures();
 	void initExpectedShipLenMap();
 	ReturnCode fillBoardOfPlayer(PlayerIndex player, Board& board);
 	AttackRequestCode requestAttack(pair<int, int> req);
 	int getShipLength(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthDirection direction);
+	int getShipLengthHorizontal(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction);
+	int getShipLengthVertical(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction);
 	bool isAdjacencyValid(char** initBoard, int i/*row*/, int j/*col*/);
 
 public:
