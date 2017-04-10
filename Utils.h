@@ -53,7 +53,6 @@ class Utils
 private:
 	Utils();
 	map<char, int> m_shipToLen; // conversion map between ship type to expected length
-	map<char, int> m_shipToValue; // conversion map between ship type to expected length
 	vector<char> m_playerIndexToChar
 	{
 		PLAYER_A_CHAR,
@@ -97,7 +96,6 @@ public:
 
 	int getIndexByShip(char c);
 	int getShipLen(char c);
-	int getShipValue(char c);
 	int getShipByIndexAndPlayer(int ship, int player);
 	char getPlayerCharByIndex(int player);
 	string getAttackFileByPlayer(int player);
