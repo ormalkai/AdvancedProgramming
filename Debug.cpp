@@ -2,9 +2,7 @@
 #include "Debug.h"
 #include <cstdarg>
 
-const char* g_enumLevelToStr[Debug::DBG_MAX] = { "Error", "Warning", "Info", "Debug" };
-
-Debug::Debug(): m_logFile("game.log"), m_printToLog(true), m_printToStd(true), m_debugLevel(DBG_ERROR){}
+Debug::Debug(): m_logFile("game.log"), m_printToLog(true), m_printToStd(true), m_debugLevel(Error){}
 
 Debug* Debug::instance()
 {
@@ -18,14 +16,6 @@ void Debug::init(string logFile, bool printToLog, bool printToStd, DebugLevel de
 	m_printToLog = printToLog;
 	m_printToStd = printToStd;
 	m_debugLevel = debugLevel;
-}
-
-void Debug::printWithDebugLevel(DebugLevel debugLevel, const char* fmt, ...)
-{
-	va_list ap;
-	va_start(ap, fmt);
-	vprint(fmt, ap);
-	va_end(ap);
 }
 
 void Debug::print(DebugLevel debugLevel, const char* fmt, ...)

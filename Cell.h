@@ -6,15 +6,17 @@ class Cell {
 public:
 	enum CellStatus {
 		ALIVE,
-		DEAD,
-		EMPTY
+		DEAD
 	};
 
 	Cell();
 	~Cell();
 
 	CellStatus getStatus() { return  m_status; }
-	void clear() { m_status = EMPTY; m_pShip = nullptr; }
+	char getSign() const
+	{
+		return nullptr != m_pShip ? m_pShip->getSign() : SPACE;
+	}
 
 private:
 	CellStatus m_status;

@@ -1,22 +1,22 @@
 
 #include "Board.h"
-#include "Utils.h"
-#include "ShipFactory.h"
 
-void Board::buildBoard(char ** initBoard)
+
+char** Board::toCharMat()
 {
-	// scan from top left to right and bottom
-	// if my upper and left cells are empty I'm new ship
-	for (int i=1; i<= BOARD_ROW_SIZE; i++)
+	char** ret = new char*[m_rows];
+
+	for (int i = 0; i < m_rows; i++)
 	{
-		for (int j = 1; j <= BOARD_COL_SIZE; j++)
+		ret[i] = new char[m_cols];
+
+		for (int j = 0; j < m_cols; j++)
 		{
-			if (SPACE == initBoard[i-1][j] && SPACE == initBoard[i][j-1])
-			{
-				Ship* ship = ShipFactory::instance()->create(i, j, initBoard);
-			}
+			ret[i][j] = m_boardData[i][j].getSign();
 		}
 	}
 
+	return ret;
+}
 
 }
