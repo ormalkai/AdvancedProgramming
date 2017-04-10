@@ -7,7 +7,8 @@ class Cell {
 public:
 	enum CellStatus {
 		ALIVE,
-		DEAD
+		DEAD,
+		FREE
 	};
 
 	Cell();
@@ -23,9 +24,11 @@ public:
 	int row() const { return m_rIndex; }
 	int col() const { return m_cIndex; }
 	Ship* getShip() const { return m_pShip; }
+	void setShip(Ship* ship) { m_pShip = ship; }
+	void setStatus(CellStatus status) { m_status = status; }
+	void setIndex(int i, int j) { m_rIndex = i; m_cIndex = j; }
 	
-	
-	void clear() { m_status = DEAD; m_pShip = nullptr; }
+	void clear() { m_status = FREE; m_pShip = nullptr; }
 
 private:
 	CellStatus m_status;

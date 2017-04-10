@@ -4,6 +4,9 @@
 #include "Utils.h"
 #include "ShipFactory.h"
 
+#define INC_ROW(IS_VERTICAL, ROW, OFFSET) (((true) == (IS_VERTICAL)) ? ((ROW) + (OFFSET)) : (ROW))
+#define INC_COL(IS_VERTICAL, COL, OFFSET) (((false) == (IS_VERTICAL)) ? ((COL) + (OFFSET)) : (COL))
+
 void Board::buildBoard(char ** initBoard)
 {
 	// scan from top left to right and bottom
@@ -12,9 +15,25 @@ void Board::buildBoard(char ** initBoard)
 	{
 		for (int j = 1; j <= BOARD_COL_SIZE; j++)
 		{
+			// initalize index of Cell
+			m_boardData[i][j].setIndex(i, j);
+			// check if the is the start of ship
 			if (SPACE == initBoard[i - 1][j] && SPACE == initBoard[i][j - 1])
 			{
+				// create the ship
 				Ship* ship = ShipFactory::instance()->create(i, j, initBoard);
+
+				// init ship in relevant cells and cells in the ship
+				int shipLen = Utils::instance().getShipLen(initBoard[i][j]);
+				bool isVertical = initBoard[i][j] == initBoard[i + 1][j];
+				for (int k = 0; k < shipLen; k++)
+				{
+					int row = INC_ROW(isVertical, i, k);
+					int col = INC_COL(isVertical, i, k);
+					m_boardData[row][col].setShip(ship);
+					m_boardData[row][col].setStatus(Cell::ALIVE);
+					ship->addCell(&(m_boardData[row][col]));
+				}
 			}
 		}
 	}

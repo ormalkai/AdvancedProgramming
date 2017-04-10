@@ -15,7 +15,7 @@ private:
 	char m_sign; // Player 
 				 // Color
 
-	vector<Cell*> cellList;
+	vector<Cell*> m_cellList;
 
 public:
 	Ship();
@@ -27,6 +27,7 @@ public:
 	void setLength(int length) { m_length = length; }
 	void setValue(int value) { m_value = value; }
 	void setSign(int sign) { m_sign = sign; }
+	void addCell(Cell* cell) { m_cellList.push_back(cell); }
 
 
 	Ship(char sign, int length, int value);
