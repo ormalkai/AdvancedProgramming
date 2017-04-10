@@ -24,16 +24,16 @@
 #include <map>
 using namespace std;
 
-enum ReturnCode
+typedef enum ReturnCode
 {
     RC_ERROR = -1,
     RC_SUCCESS,
     RC_INVALID_ARG
-};
+} ReturnCode;
 
 typedef enum PlayerIndex
 {
-    PLAYER_A,
+    PLAYER_A = 0,
     PLAYER_B,
     MAX_PLAYER
 } PlayerIndex;
@@ -46,6 +46,14 @@ enum ShipType
     DESTROYER,
     MAX_SHIP
 };
+
+typedef enum AttackRequestCode
+{
+	ARC_ERROR,
+	ARC_SUCCESS,
+	ARC_NO_REQ
+} AttackRequestCode;
+
 
 
 class Utils
