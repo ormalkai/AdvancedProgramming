@@ -7,6 +7,11 @@ Utils::Utils()
 	m_shipToLen[PLAYER_A_ROCKET_SHIP] = m_shipToLen[PLAYER_B_ROCKET_SHIP] = 2;
 	m_shipToLen[PLAYER_A_SUBMARINE]   = m_shipToLen[PLAYER_B_SUBMARINE] = 3;
 	m_shipToLen[PLAYER_A_DESTROYER]   = m_shipToLen[PLAYER_B_DESTROYER] = 4;
+
+	m_shipToValue[PLAYER_A_RUBBER_SHIP] = m_shipToValue[PLAYER_B_RUBBER_SHIP] = 2;
+	m_shipToValue[PLAYER_A_ROCKET_SHIP] = m_shipToValue[PLAYER_B_ROCKET_SHIP] = 3;
+	m_shipToValue[PLAYER_A_SUBMARINE] = m_shipToValue[PLAYER_B_SUBMARINE] = 7;
+	m_shipToValue[PLAYER_A_DESTROYER] = m_shipToValue[PLAYER_B_DESTROYER] = 8;
 }
 
 Utils& Utils::instance()
@@ -59,6 +64,11 @@ int Utils::getIndexByShip(char c)
 int Utils::getShipLen(char c)
 {
 	return m_shipToLen[c];
+}
+
+int Utils::getShipValue(char c)
+{
+	return m_shipToValue[c];
 }
 
 int Utils::getShipByIndexAndPlayer(int ship, int player)
