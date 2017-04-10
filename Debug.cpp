@@ -24,6 +24,7 @@ void Debug::print(DebugLevel debugLevel, const char* fmt, ...)
 	{
 		return;
 	}
+	
 	va_list ap;
 	va_start(ap, fmt);
 	vprint(fmt, ap);

@@ -7,6 +7,7 @@
 #include "PlayerAlgoFactory.h"
 #include <vector>
 #include "Board.h"
+#include "PlayerAlgo.h"
 
 using namespace std;
 
@@ -28,6 +29,7 @@ private:
 	vector<PlayerAlgo*> m_players;
 	//map<PlayerAlgo*, Board> m_boards;
 
+	map<char, int> m_shipToExpectedLen; // conversion map between ship type to expected length
 	vector<int> m_numOfShipsPerPlayer;
 
 	// ERRORS data structures
@@ -36,7 +38,7 @@ private:
 	int m_rows;
 	int m_cols;
 
-	Game(int rows = BOARD_ROW_SIZE, int cols = BOARD_ROW_SIZE) : m_rows(rows), m_cols(cols)
+	Game(int rows = BOARD_ROW_SIZE, int cols = BOARD_ROW_SIZE) : m_rows(rows), m_cols(cols), m_foundAdjacentShips(false)
 	{
 	}
 
@@ -54,7 +56,8 @@ private:
 	ReturnCode initListPlayers();
 	void initErrorDataStructures();
 	void initExpectedShipLenMap();
-
+	ReturnCode fillBoardOfPlayer(PlayerIndex player, Board& board);
+	AttackRequestCode requestAttack(pair<int, int> req);
 	int getShipLength(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthDirection direction);
 	bool isAdjacencyValid(char** initBoard, int i/*row*/, int j/*col*/);
 

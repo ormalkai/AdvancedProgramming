@@ -32,7 +32,7 @@ Ship* ShipFactory::create(int i, int j, char ** initBoard)
 		result = new Destroyer();
 		break;
 	default:
-		DBG(Debug::DBG_ERROR, "Invalid ship type %c", ship);
+		DBG(Debug::Error, "Invalid ship type %c", ship);
 		return nullptr;
 	}
 

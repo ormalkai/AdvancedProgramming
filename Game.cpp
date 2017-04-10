@@ -244,8 +244,10 @@ ReturnCode Game::parseBoardFile(string sboardFileName, char** initBoard)
 	 *
 	 */
 
+	readSBoardFile(filePath, (char**)initBoard);
 	// input validation
 	validateBoard(initBoard);
+	validateBoard((char**)initBoard);
 	// Print errors and return ERROR if needed
 	ReturnCode result = RC_SUCCESS;
 	if (false == checkErrors())
@@ -327,6 +329,7 @@ int Game::getShipLengthVertical(char** initBoard, char expectedShip, int i/*row*
 int Game::getShipLength(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthDirection direction)
 {
 	// sanity
+	// stop condition
 	if (expectedShip != initBoard[i][j])
 	{
 		return 0;
@@ -336,11 +339,15 @@ int Game::getShipLength(char** initBoard, char expectedShip, int i/*row*/, int j
 	{
 		return (1 + Game::getShipLengthHorizontal(initBoard, expectedShip, i, j - 1, ShipLengthSecondDirection::BACKWORD) +
 			Game::getShipLengthHorizontal(initBoard, expectedShip, i, j + 1, ShipLengthSecondDirection::FORWARD));
+		return (1 + Game::getShipLength(initBoard, expectedShip, i, j - 1, direction) +
+			Game::getShipLength(initBoard, expectedShip, i, j + 1, direction));
 	}
 	else /*GetShipLengthDirection::VERTICAL == direction*/
 	{
 		return (1 + Game::getShipLengthVertical(initBoard, expectedShip, i - 1, j, ShipLengthSecondDirection::BACKWORD) +
 			Game::getShipLengthVertical(initBoard, expectedShip, i + 1, j, ShipLengthSecondDirection::FORWARD));
+		return (1 + Game::getShipLength(initBoard, expectedShip, i - 1, j, direction) +
+			Game::getShipLength(initBoard, expectedShip, i + 1, j, direction));
 	}
 }
 

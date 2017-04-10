@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IBattleshipGameAlgo.h"
+#include "PlayerAlgo.h"
 
 enum class AlgoType {
 	FILE
@@ -9,15 +9,14 @@ enum class AlgoType {
 class PlayerAlgoFactory {
 public:
 
-
-	IBattleshipGameAlgo* create(AlgoType type);
+	PlayerAlgo* create(AlgoType type);
 	static PlayerAlgoFactory& instance();
 private:
 	int m_id;
 
 	PlayerAlgoFactory()
 		: m_id(0) {}
-	PlayerAlgoFactory(const PlayerAlgoFactory &) { }
+	PlayerAlgoFactory(const PlayerAlgoFactory &) = delete;
 	PlayerAlgoFactory &operator=(const PlayerAlgoFactory &) { return *this; }
 	
 

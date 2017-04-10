@@ -1,7 +1,7 @@
 #include "PlayerAlgoFactory.h"
 #include "BattleshipAlgoFromFile.h"
 
-IBattleshipGameAlgo* PlayerAlgoFactory::create(AlgoType type)
+PlayerAlgo* PlayerAlgoFactory::create(AlgoType type)
 {
 	switch (type)
 	{

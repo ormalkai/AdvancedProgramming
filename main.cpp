@@ -7,6 +7,8 @@ using ::Debug;
 
 int main() 
 {
+	string boardPathFile = "Board.txt";
+
 	// init log
 	Debug::instance()->init("game.log", true, true, Debug::Error);
 	DBG(Debug::Error, "hello world");
