@@ -110,10 +110,14 @@ void Game::validateBoard(char** initBoard)
 				{
 					m_numOfShipsPerPlayer[playerIndex]++;
 				}
+				// count legal ship
+				m_numOfShipsPerPlayer[playerIndex]++;
 			}
 			
+
 			//check Adjacency
 			if (false == Game::isAdjacencyValid(initBoard, i, j))
+			if (false == Game::isAdjacencyValid((char**)initBoard, i, j))
 			{
 				// ERROR Adjacency
 				m_foundAdjacentShips = true;
@@ -138,6 +142,7 @@ void Game::readSBoardFile(std::string filePath, char** initBoard)
 			if (PlayerIndex::MAX_PLAYER != Utils::instance().getPlayerIdByShip(c))
 			{
 				initBoard[rowIndex][colIndex] = c;
+				initBoard[colIndex][rowIndex] = c;
 			}
 			// parse nex char
 			colIndex++;
@@ -209,8 +214,12 @@ ReturnCode Game::getattackFilesNameFromDirectory(string filesPath, vector<string
  * @Return		ReturnCode
  */
 ReturnCode Game::parseBoardFile(string sboardFileName, char** initBoard)
+ReturnCode Game::parseBoardFile(std::string filePath)
 {
-	// TODO delete initBoard
+	// Init board is larger by 1 from actual board in every dimension for 
+	// traversing within the board more easily
+	char initBoard[INIT_BOARD_ROW_SIZE][INIT_BOARD_COL_SIZE];
+	
 	// Init board file with spaces
 	for (int i = 0; i < INIT_BOARD_ROW_SIZE; ++i)
 	{
@@ -372,6 +381,7 @@ void Game::initErrorDataStructures()
 }
 
 ReturnCode Game::initFilesPath(string& filesPath, string& sboardFile, vector<string>& attackFilePerPlayer)
+void Game::initExpectedShipLenMap()
 {
 	// first check that the folder exists
 	DWORD ftyp = GetFileAttributesA(filesPath.c_str());
@@ -394,6 +404,10 @@ ReturnCode Game::initFilesPath(string& filesPath, string& sboardFile, vector<str
 	}
 
 	return RC_SUCCESS;
+	m_shipToExpectedLen[PLAYER_A_RUBBER_SHIP] = m_shipToExpectedLen[PLAYER_B_RUBBER_SHIP] = 1;
+	m_shipToExpectedLen[PLAYER_A_ROCKET_SHIP] = m_shipToExpectedLen[PLAYER_B_ROCKET_SHIP] = 2;
+	m_shipToExpectedLen[PLAYER_A_SUBMARINE] = m_shipToExpectedLen[PLAYER_B_SUBMARINE] = 3;
+	m_shipToExpectedLen[PLAYER_A_DESTROYER] = m_shipToExpectedLen[PLAYER_B_DESTROYER] = 4;
 }
 
 
@@ -413,6 +427,8 @@ ReturnCode Game::init(std::string filesPath)
 	}
 	// init ERRORs data structures
 	initErrorDataStructures();
+	// init expected len map
+	initExpectedShipLenMap();
 
 	// Init board is larger by 1 from actual board in every dimension for 
 	// traversing within the board more easily
@@ -423,8 +439,10 @@ ReturnCode Game::init(std::string filesPath)
 		initBoard[i] = new char[INIT_BOARD_COL_SIZE];
 	}
 	rc = parseBoardFile(sboardFile, initBoard);
+	ReturnCode rc = parseBoardFile(boardPathFile);
 	if (RC_SUCCESS != rc)
 	{
+		DBG(Debug::Error, "Failed parsing board file rc[%d]", rc);
 		return rc;
 	}
 
@@ -436,14 +454,24 @@ ReturnCode Game::init(std::string filesPath)
 	{
 		m_players[i] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
 		//m_boards[m_players[i]] = 
+	m_players[PLAYER_A] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
+	//rc = fillBoardOfPlayer(PLAYER_A, m_boards[m_players[PLAYER_A]]);
+	char** playerABoard = m_board.toCharMat(PLAYER_A);
+	//m_players[PLAYER_A]->setBoard(playerABoard, m_rows, m_cols);
+
+	m_players[PLAYER_B] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
+	char** playerBBoard = m_board.toCharMat(PLAYER_B);
+	//m_players[PLAYER_B]->setBoard(playerBBoard, m_rows, m_cols);
 	
 	}
 	
 	// initListPlayers + init foreach player
 	// Set board for Players
 	//
+	// For more players - add new section
 
 	return ReturnCode::RC_SUCCESS;
+	return RC_SUCCESS;
 }
 
 //ReturnCode Game::fillBoardOfPlayer(vector<char> playerChars, Board& board)
@@ -461,17 +489,92 @@ ReturnCode Game::init(std::string filesPath)
 //	}
 //	
 //}
+ReturnCode Game::fillBoardOfPlayer(PlayerIndex player, Board& board)
+{
+	for (int i = 0; i < m_rows; i++)
+	{
+		for (int j = 0; j < m_cols; j++)
+		{
+			board.get(i, j) = m_board.get(i, j);
+
+			char c = m_board.getSign(i, j);
+			if (SPACE == c || Utils::instance().getIndexByShip(c) != player)
+			{
+				board.get(i,j).clear();
+			}
+		}
+	}
+	
+	return RC_SUCCESS;
+}
+
+AttackRequestCode Game::requestAttack(pair<int, int> req)
+{
+	if (ARC_NO_REQ == req.first)
+		return ARC_NO_REQ;
+	else if (req.first < 0 || req.first >= m_rows ||
+		req.second < 0 || req.second >= m_cols)
+		return ARC_ERROR;
+	else
+		return ARC_SUCCESS;
+}
 
 ReturnCode Game::startGame()
 {
 	vector<IBattleshipGameAlgo*>::iterator iter = m_players.begin();
 	pair<int, int> attackReq;
 	IBattleshipGameAlgo* currentPlayer;
+	//vector<IBattleshipGameAlgo*>::iterator iter = m_players.begin();
+	
+	// Just for Ex1 
+	if (m_players.size() != NUM_OF_PLAYERS)
+	{
+		DBG(Debug::Error, "Wrong number of players - [%d]", m_players.size());
+		return RC_ERROR;
+	}
 
+
+	pair<int, int> attackReq;
+	PlayerAlgo* currentPlayer = m_players[PLAYER_A];
+	int currentPlayerIndex = PLAYER_A;
+	
 	while (true)
 	{
 		currentPlayer = (*iter);
+		currentPlayer = m_players[currentPlayerIndex];
 		attackReq = currentPlayer->attack();
+
+		AttackRequestCode arc = requestAttack(attackReq);
+		switch (arc)
+		{
+		case ARC_NO_REQ:
+			// TODO: Maybe print info
+			break;
+		case ARC_ERROR:
+			DBG(Debug::Error, "Attack failed ! values: %d-%d. Skipping.. arc[%d]", attackReq.first, attackReq.second, arc);
+			break;
+		default:
+			break;
+		}
+		
+
+		Cell attackedCell = m_board.get(attackReq);
+		AttackResult ar;
+
+		if (Cell::DEAD == attackedCell.getStatus())
+		{
+			DBG(Debug::Info, "This cell already attacked, go to sleep...");
+			// TODO: ar = ?
+		}
+		else
+		{
+			if (attackedCell.getSign())
+			{
+				
+			}
+			
+		}
+
 		// Check attack status (hit,miss)
 		// Notify for all players
 		// If game over break
