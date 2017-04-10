@@ -33,7 +33,6 @@ private:
 	vector<IBattleshipGameAlgo*> m_players;
 	map<IBattleshipGameAlgo*, Board> m_boards;
 
-	map<char, int> m_shipToExpectedLen; // conversion map between ship type to expected length
 	vector<int> m_numOfShipsPerPlayer;
 
 	// ERRORS data structures
@@ -58,8 +57,8 @@ private:
 	void readSBoardFile(std::string filePath, char** initBoard);
 	ReturnCode getSboardFileNameFromDirectory(string filesPath, string& sboardFileName);
 	ReturnCode getattackFilesNameFromDirectory(string filesPath, vector<string>& attackFilePerPlayer);
+	ReturnCode parseBoardFile(string sboardFileName, char ** initBoard);
 	ReturnCode initFilesPath(string& filesPath, string& sboardFile, vector<string>& attackFilePerPlayer);
-	ReturnCode parseBoardFile(std::string filesPath);
 	ReturnCode initListPlayers();
 	void initErrorDataStructures();
 	void initExpectedShipLenMap();

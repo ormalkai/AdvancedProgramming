@@ -8,8 +8,6 @@
 #include "Utils.h"
 #include "Debug.h"
 
-#define INIT_BOARD_ROW_SIZE (BOARD_ROW_SIZE + 2)
-#define INIT_BOARD_COL_SIZE (BOARD_COL_SIZE + 2)
 #define SHIPS_PER_PLAYER (5)
 
 using namespace std;
@@ -91,7 +89,7 @@ void Game::validateBoard(char** initBoard)
 			char currentShip = initBoard[i][j];
 			int horizontalShipLen = getShipLength(initBoard, currentShip, i, j, ShipLengthDirection::HORIZONTAL);
 			int verticalShipLen = getShipLength(initBoard, currentShip, i, j, ShipLengthDirection::VERTICAL);
-			int expectedLen = m_shipToExpectedLen[currentShip];
+			int expectedLen = Utils::instance().getShipLen(currentShip);
 
 			PlayerIndex playerIndex = Utils::instance().getPlayerIdByShip(currentShip);
 			int shipIndex = Utils::instance().getIndexByShip(currentShip);
@@ -154,7 +152,7 @@ ReturnCode Game::getSboardFileNameFromDirectory(string filesPath, string& sboard
 {
 	WIN32_FIND_DATA FindFileData;
 	HANDLE hFind;
-	
+
 	string sboardFile = filesPath + "*.sboard";
 	DBG(Debug::DBG_DEBUG, "sboardFile [%s]", sboardFile.c_str());
 	hFind = FindFirstFile(sboardFile.c_str(), &FindFileData);
@@ -209,16 +207,8 @@ ReturnCode Game::getattackFilesNameFromDirectory(string filesPath, vector<string
  * @param		cols			- number of columns
  * @Return		ReturnCode
  */
-ReturnCode Game::parseBoardFile(string sboardFileName)
+ReturnCode Game::parseBoardFile(string sboardFileName, char** initBoard)
 {
-	// Init board is larger by 1 from actual board in every dimension for 
-	// traversing within the board more easily
-	//char initBoard[INIT_BOARD_ROW_SIZE][INIT_BOARD_COL_SIZE];
-	char** initBoard = new char*[INIT_BOARD_ROW_SIZE];
-	for (int i = 0; i < INIT_BOARD_ROW_SIZE; ++i)
-	{
-		initBoard[i] = new char[INIT_BOARD_COL_SIZE];
-	}
 	// TODO delete initBoard
 	// Init board file with spaces
 	for (int i = 0; i < INIT_BOARD_ROW_SIZE; ++i)
@@ -373,15 +363,6 @@ void Game::initErrorDataStructures()
 	m_foundAdjacentShips = false;
 }
 
-void Game::initExpectedShipLenMap()
-{
-	m_shipToExpectedLen[PLAYER_A_RUBBER_SHIP] = m_shipToExpectedLen[PLAYER_B_RUBBER_SHIP] = 1;
-	m_shipToExpectedLen[PLAYER_A_ROCKET_SHIP] = m_shipToExpectedLen[PLAYER_B_ROCKET_SHIP] = 2;
-	m_shipToExpectedLen[PLAYER_A_SUBMARINE] = m_shipToExpectedLen[PLAYER_B_SUBMARINE] = 3;
-	m_shipToExpectedLen[PLAYER_A_DESTROYER] = m_shipToExpectedLen[PLAYER_B_DESTROYER] = 4;
-}
-
-
 ReturnCode Game::initFilesPath(string& filesPath, string& sboardFile, vector<string>& attackFilePerPlayer)
 {
 	// first check that the folder exists
@@ -424,14 +405,23 @@ ReturnCode Game::init(std::string filesPath)
 	}
 	// init ERRORs data structures
 	initErrorDataStructures();
-	// init expected len map
-	initExpectedShipLenMap();
 
-	rc = parseBoardFile(sboardFile);
+	// Init board is larger by 1 from actual board in every dimension for 
+	// traversing within the board more easily
+	//char initBoard[INIT_BOARD_ROW_SIZE][INIT_BOARD_COL_SIZE];
+	char** initBoard = new char*[INIT_BOARD_ROW_SIZE];
+	for (int i = 0; i < INIT_BOARD_ROW_SIZE; ++i)
+	{
+		initBoard[i] = new char[INIT_BOARD_COL_SIZE];
+	}
+	rc = parseBoardFile(sboardFile, initBoard);
 	if (RC_SUCCESS != rc)
 	{
 		return rc;
 	}
+
+	// now the board is valid lets build our board
+	//buildBoard(initBoard);
 
 	// Create players and boards
 	for (size_t i = 0; i < NUM_OF_PLAYERS; i++)

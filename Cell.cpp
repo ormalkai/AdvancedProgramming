@@ -1,6 +1,6 @@
 #include "Cell.h"
 
-Cell::Cell() : m_status(ALIVE), m_pShip(nullptr)
+Cell::Cell() : m_status(EMPTY), m_pShip(nullptr)
 {
 }
 

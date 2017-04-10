@@ -1,6 +1,13 @@
 
 #include "Utils.h"
 
+Utils::Utils()
+{
+	m_shipToLen[PLAYER_A_RUBBER_SHIP] = m_shipToLen[PLAYER_B_RUBBER_SHIP] = 1;
+	m_shipToLen[PLAYER_A_ROCKET_SHIP] = m_shipToLen[PLAYER_B_ROCKET_SHIP] = 2;
+	m_shipToLen[PLAYER_A_SUBMARINE]   = m_shipToLen[PLAYER_B_SUBMARINE] = 3;
+	m_shipToLen[PLAYER_A_DESTROYER]   = m_shipToLen[PLAYER_B_DESTROYER] = 4;
+}
 
 Utils& Utils::instance()
 {
@@ -47,6 +54,11 @@ int Utils::getIndexByShip(char c)
 	default:
 		return (int)ReturnCode::RC_ERROR;
 	}
+}
+
+int Utils::getShipLen(char c)
+{
+	return m_shipToLen[c];
 }
 
 int Utils::getShipByIndexAndPlayer(int ship, int player)

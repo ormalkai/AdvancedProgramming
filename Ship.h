@@ -1,7 +1,7 @@
 #pragma once
 
 #include <map>
-#include <list>
+#include <vector>
 
 using namespace std;
 
@@ -15,7 +15,7 @@ private:
 	char m_sign; // Player 
 	// Color
 			  
-	list<Cell*> cellList;
+	vector<Cell*> cellList;
 
 public:
 

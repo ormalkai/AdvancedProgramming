@@ -3,6 +3,8 @@
 #define NUM_OF_PLAYERS (2)
 #define BOARD_ROW_SIZE (10)
 #define BOARD_COL_SIZE (10)
+#define INIT_BOARD_ROW_SIZE (BOARD_ROW_SIZE + 2)
+#define INIT_BOARD_COL_SIZE (BOARD_COL_SIZE + 2)
 #define SPACE ' '
 #define PLAYER_A_CHAR 'A'
 #define PLAYER_B_CHAR 'B'
@@ -19,6 +21,7 @@
 #define NO_ATTACK_FILE ""
 
 #include <vector>
+#include <map>
 using namespace std;
 
 enum ReturnCode
@@ -48,6 +51,8 @@ enum ShipType
 class Utils
 {
 private:
+	Utils();
+	map<char, int> m_shipToLen; // conversion map between ship type to expected length
 	vector<char> m_playerIndexToChar
 	{
 		PLAYER_A_CHAR,
@@ -90,7 +95,7 @@ public:
 	PlayerIndex getPlayerIdByShip(char c);
 
 	int getIndexByShip(char c);
-
+	int getShipLen(char c);
 	int getShipByIndexAndPlayer(int ship, int player);
 	char getPlayerCharByIndex(int player);
 	string getAttackFileByPlayer(int player);
