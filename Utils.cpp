@@ -25,11 +25,11 @@ Utils& Utils::instance()
  PlayerIndex Utils::getPlayerIdByShip(char c)
 {
 
-	if (std::find(m_playerALegalSign.begin(), m_playerALegalSign.end(), c) != m_playerALegalSign.end())
+	if (isExistInVec(m_playerALegalSign, c))
 	{
 		return PlayerIndex::PLAYER_A;
 	}
-	else if (std::find(m_playerBLegalSign.begin(), m_playerBLegalSign.end(), c) != m_playerBLegalSign.end())
+	else if (isExistInVec(m_playerBLegalSign, c))
 	{
 		return PlayerIndex::PLAYER_B;
 	}
@@ -52,7 +52,7 @@ int Utils::getIndexByShip(char c)
 	case 'D':
 		return DESTROYER;
 	default:
-		return (int)ReturnCode::RC_ERROR;
+		return static_cast<int>(ReturnCode::RC_ERROR);
 	}
 }
 
