@@ -3,11 +3,12 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <windows.h>
 #include "Game.h"
 #include "Utils.h"
 #include "Debug.h"
 
+#define INIT_BOARD_ROW_SIZE (BOARD_ROW_SIZE + 2)
+#define INIT_BOARD_COL_SIZE (BOARD_COL_SIZE + 2)
 #define SHIPS_PER_PLAYER (5)
 
 using namespace std;
@@ -66,11 +67,11 @@ bool Game::checkErrors() const
 {
 	bool result = true;
 	// Wrong size or shape for ship errors
-	result = checkWrongSizeOrShape() && result;
+	result = result && checkWrongSizeOrShape();
 	// Too many/few ships for player errors
-	result = checkNumberOfShips() && result;
+	result = result && checkNumberOfShips();
 	// Adjacent Ships on board error
-	result = checkAdjacentShips() && result;
+	result = result && checkAdjacentShips();
 	return result;
 }
 
@@ -87,14 +88,14 @@ void Game::validateBoard(char** initBoard)
 				continue;
 			}
 			char currentShip = initBoard[i][j];
-			int horizontalShipLen = getShipLength(initBoard, currentShip, i, j, ShipLengthDirection::HORIZONTAL);
-			int verticalShipLen = getShipLength(initBoard, currentShip, i, j, ShipLengthDirection::VERTICAL);
-			int expectedLen = Utils::instance().getShipLen(currentShip);
+			int horizontalShipLen = getShipLength((char**)initBoard, currentShip, i, j, ShipLengthDirection::HORIZONTAL);
+			int verticalShipLen = getShipLength((char**)initBoard, currentShip, i, j, ShipLengthDirection::VERTICAL);
+			int expectedLen = m_shipToExpectedLen[currentShip];
 
 			PlayerIndex playerIndex = Utils::instance().getPlayerIdByShip(currentShip);
 			int shipIndex = Utils::instance().getIndexByShip(currentShip);
-			if (((expectedLen != horizontalShipLen) || (expectedLen == horizontalShipLen && 1 != verticalShipLen)) &&
-				((expectedLen != verticalShipLen)   || (expectedLen == verticalShipLen && 1 != horizontalShipLen)))
+			if ((expectedLen != horizontalShipLen && 1 != verticalShipLen) ||
+				(expectedLen != verticalShipLen && 1 != horizontalShipLen))
 			{
 				// ERROR - wrong size or shape for currentShip(player too)
 				m_wrongSizeOrShapePerPlayer[playerIndex][shipIndex] = true;

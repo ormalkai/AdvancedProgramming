@@ -3,25 +3,19 @@
 #define NUM_OF_PLAYERS (2)
 #define BOARD_ROW_SIZE (10)
 #define BOARD_COL_SIZE (10)
-#define INIT_BOARD_ROW_SIZE (BOARD_ROW_SIZE + 2)
-#define INIT_BOARD_COL_SIZE (BOARD_COL_SIZE + 2)
 #define SPACE ' '
 #define PLAYER_A_CHAR 'A'
 #define PLAYER_B_CHAR 'B'
-#define PLAYER_A_RUBBER_SHIP 'B'
-#define PLAYER_B_RUBBER_SHIP 'b'
-#define PLAYER_A_ROCKET_SHIP 'P'
-#define PLAYER_B_ROCKET_SHIP 'p'
-#define PLAYER_A_SUBMARINE	 'M'
-#define PLAYER_B_SUBMARINE	 'm'
-#define PLAYER_A_DESTROYER	 'D'
-#define PLAYER_B_DESTROYER	 'd'
-#define PLAYER_A_ATTACK_FILE "*.attack-a"
-#define PLAYER_B_ATTACK_FILE "*.attack-b"
-#define NO_ATTACK_FILE ""
+#define PLAYER_A_RUBBER_SHIP 'b'
+#define PLAYER_B_RUBBER_SHIP 'B'
+#define PLAYER_A_ROCKET_SHIP 'p'
+#define PLAYER_B_ROCKET_SHIP 'P'
+#define PLAYER_A_SUBMARINE	 'm'
+#define PLAYER_B_SUBMARINE	 'M'
+#define PLAYER_A_DESTROYER	 'd'
+#define PLAYER_B_DESTROYER	 'D'
 
 #include <vector>
-#include <map>
 using namespace std;
 
 enum ReturnCode
@@ -51,8 +45,6 @@ enum ShipType
 class Utils
 {
 private:
-	Utils();
-	map<char, int> m_shipToLen; // conversion map between ship type to expected length
 	vector<char> m_playerIndexToChar
 	{
 		PLAYER_A_CHAR,
@@ -75,13 +67,6 @@ private:
 		PLAYER_B_DESTROYER 
 	};
 
-	vector<string> m_expectedAttackFilePerPlayer = 
-	{
-		// if no attack file - empty string
-		PLAYER_A_ATTACK_FILE,
-		PLAYER_B_ATTACK_FILE
-	};
-
 public:
 	static Utils& instance();
 
@@ -95,10 +80,8 @@ public:
 	PlayerIndex getPlayerIdByShip(char c);
 
 	int getIndexByShip(char c);
-	int getShipLen(char c);
+
 	int getShipByIndexAndPlayer(int ship, int player);
-	char getPlayerCharByIndex(int player);
-	string getAttackFileByPlayer(int player);
 
 	template<class T>
 	bool isExistInVec(vector<T> vec, T val);
