@@ -12,23 +12,18 @@ class Ship {
 private:
 	int m_length;
 	int m_value;
-	char m_sign; // Player 
-<<<<<<< HEAD
-				 // Color
+	char m_sign;				// Player 
 	int m_numOfAliveCells;
-=======
-	_In_ WORD m_color;		 // Color
-
->>>>>>> origin/master
+	_In_ WORD m_color;			// Color
 	vector<Cell*> m_cellList;
 
 public:
 	Ship(char sign, int length, int value, _In_ WORD color);
 	~Ship() = default;
-	int getLength() { return m_length; }
-	int getValue() { return m_value; }
-	char getSign() { return m_sign; }
-	_In_ WORD getColor() { return m_color; }
+	int getLength() const { return m_length; }
+	int getValue() const { return m_value; }
+	char getSign() const  { return m_sign; }
+	_In_ WORD getColor() const  { return m_color; }
 
 	void setLength(int length) { m_length = length; }
 	void setValue(int value) { m_value = value; }

@@ -22,18 +22,15 @@ public:
 	~Board();
 	Board(const Board &) = default;
 
-<<<<<<< HEAD
 	void dump() const;
 	Cell& get(int r, int c) { return  m_boardData[r][c]; }
 	Cell& get(pair<int, int> i) { return get(i.first, i.second); }
-=======
+
 	void printBoard();
 	void printAttack(int i, int j, AttackResult attackResult);
 	void setIsQuiet(bool isQuiet) { m_isQuiet = isQuiet; }
 	void setDelay(int delay) { m_delay = delay; }
-	Cell get(int r, int c) { return  m_boardData[r][c]; }
-	Cell get(pair<int, int> i);
->>>>>>> origin/master
+
 	void put(int r, int c);
 
 	char** Board::toCharMat();

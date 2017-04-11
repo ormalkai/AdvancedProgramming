@@ -103,19 +103,15 @@ char Board::getSign(int r, int c)
 	return get(r, c).getSign();
 }
 
-<<<<<<< HEAD
-void Board::dump() const
-=======
 Board::~Board()
 {
-	for (std::vector<Ship*>::iterator it = m_shipsOnBoard.begin(); it != m_shipsOnBoard.end(); ++it)
+	for (vector<Ship*>::iterator it = m_shipsOnBoard.begin(); it != m_shipsOnBoard.end(); ++it)
 	{
 		delete (*it);
 	}
 }
 
 void Board::printBoard()
->>>>>>> origin/master
 {
 	if (true == m_isQuiet)
 	{
