@@ -419,18 +419,7 @@ ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
 	}
 	delete[] initBoard;
 
-	/* DEBUG */
-	m_board.printBoard();
-	/*m_board.printAttack(5, 5, AttackResult::Hit);
-	m_board.printAttack(5, 6, AttackResult::Miss);
-	m_board.printAttack(5, 7, AttackResult::Sink);
-	m_board.printAttack(5, 8, AttackResult::Hit);
-	m_board.printAttack(4, 2, AttackResult::Miss);*/
-	/*********/
-
-
-
-	
+	// init players
 	m_players[PLAYER_A] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
 	(dynamic_cast<BattleshipAlgoFromFile*>(m_players[PLAYER_A]))->AttackFileParser(attackFilePerPlayer[PLAYER_A]);
 	char** playerABoard = m_board.toCharMat(PLAYER_A);
@@ -440,9 +429,6 @@ ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
 	(dynamic_cast<BattleshipAlgoFromFile*>(m_players[PLAYER_B]))->AttackFileParser(attackFilePerPlayer[PLAYER_A]);
 	char** playerBBoard = m_board.toCharMat(PLAYER_B);
 	m_players[PLAYER_B]->setBoard(const_cast<const char **>(playerBBoard), m_rows, m_cols);
-
-	// TODO: Release matrix 
-	
 
 	// For more players - add new section
 
@@ -465,6 +451,7 @@ AttackRequestCode Game::requestAttack(pair<int, int> req) const
 
 void Game::startGame()
 {
+	m_board.printBoard();
 
 	pair<int, int> attackReq;
 	PlayerAlgo* currentPlayer = m_players[PLAYER_A];
