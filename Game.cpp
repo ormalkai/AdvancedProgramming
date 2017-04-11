@@ -8,6 +8,7 @@
 #include "Utils.h"
 #include "Debug.h"
 #include "Board.h"
+#include "BattleshipAlgoFromFile.h"
 
 #define SHIPS_PER_PLAYER (5)
 
@@ -420,21 +421,23 @@ ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
 
 	/* DEBUG */
 	m_board.printBoard();
-	m_board.printAttack(5, 5, AttackResult::Hit);
+	/*m_board.printAttack(5, 5, AttackResult::Hit);
 	m_board.printAttack(5, 6, AttackResult::Miss);
 	m_board.printAttack(5, 7, AttackResult::Sink);
 	m_board.printAttack(5, 8, AttackResult::Hit);
-	m_board.printAttack(4, 2, AttackResult::Miss);
+	m_board.printAttack(4, 2, AttackResult::Miss);*/
 	/*********/
 
 
 
 	
 	m_players[PLAYER_A] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
+	(dynamic_cast<BattleshipAlgoFromFile*>(m_players[PLAYER_A]))->AttackFileParser(attackFilePerPlayer[PLAYER_A]);
 	char** playerABoard = m_board.toCharMat(PLAYER_A);
 	m_players[PLAYER_A]->setBoard(const_cast<const char **>(playerABoard), m_rows, m_cols);
 
 	m_players[PLAYER_B] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
+	(dynamic_cast<BattleshipAlgoFromFile*>(m_players[PLAYER_B]))->AttackFileParser(attackFilePerPlayer[PLAYER_A]);
 	char** playerBBoard = m_board.toCharMat(PLAYER_B);
 	m_players[PLAYER_B]->setBoard(const_cast<const char **>(playerBBoard), m_rows, m_cols);
 

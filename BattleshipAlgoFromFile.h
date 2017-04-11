@@ -16,7 +16,6 @@ private:
 	int m_cols;
 	vector<pair<int, int>> m_attackQueue;
 
-	void AttackFileParser(string & attackPath);
 	int checkLine(string str, int k);
 	int cleanSpace(string str, int index);
 
@@ -30,7 +29,7 @@ public:
 	Initialize attack queue
 	*/
 	int parseAttackFile();
-
+	void AttackFileParser(string & attackPath);
 	/*
 	Initialize data members
 	*/
