@@ -569,6 +569,8 @@ void Game::startGame()
 
 void Game::printSummary() const
 {
+
+	Utils::instance().gotoxy(13, 0);
 	bool winnerFound = false;
 
 	// Notify winner
