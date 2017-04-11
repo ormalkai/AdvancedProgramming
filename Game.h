@@ -82,7 +82,7 @@ public:
 	*/
 	ReturnCode init(string filesPath, bool isQuiet, int delay);
 	
-	ReturnCode startGame();
+	void startGame();
 
 	static Game& getInstance()
 	{

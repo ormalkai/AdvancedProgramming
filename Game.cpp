@@ -460,7 +460,7 @@ AttackRequestCode Game::requestAttack(pair<int, int> req) const
 
 
 
-ReturnCode Game::startGame()
+void Game::startGame()
 {
 
 	pair<int, int> attackReq;
@@ -570,6 +570,4 @@ ReturnCode Game::startGame()
 	{
 		// Notify Player B is the man
 	}
-
-	return ReturnCode::RC_SUCCESS;
 }

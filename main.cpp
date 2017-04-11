@@ -57,7 +57,10 @@ int main(int argc, char* argv[])
 	int delay;
 	parseArgs(argc, argv, filesLocation, isQuiet, delay);
 
-	game.init(filesLocation, isQuiet, delay);
+	ReturnCode rc = game.init(filesLocation, isQuiet, delay);
+	if (RC_SUCCESS != rc)
+		return RC_ERROR;
+
 	game.startGame();
 
 	int number;
