@@ -568,22 +568,21 @@ void Game::printSummary() const
 {
 
 	Utils::instance().gotoxy(13, 0);
-	bool winnerFound = false;
+
+	int maxScore = -1;
+	int winner = MAX_PLAYER;
 
 	// Notify winner
 	for (int i = 0; i < NUM_OF_PLAYERS; i++)
 	{
-		if (m_numOfShipsPerPlayer[i] == 0)
+		if (maxScore < m_players[i]->getScore())
 		{
-			cout << "Player " << Utils::instance().getPlayerCharByIndex(i) << " Won" << endl;
-			winnerFound = true;
-			break;
+			maxScore = m_players[i]->getScore();
+			winner = i;
 		}
 	}
-		
-	if (!winnerFound)
-		cout << "Draw" << endl;
 
+	cout << "Player " << Utils::instance().getPlayerCharByIndex(winner) << " Won" << endl;
 
 	// Print points
 	cout << "Points:" << endl;
