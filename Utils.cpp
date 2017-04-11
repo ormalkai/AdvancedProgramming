@@ -164,11 +164,11 @@ std::istream& Utils::safeGetline(std::istream& is, std::string& t)
 	}
 }
 
-void Utils::gotoxy(int x, int y)
+void Utils::gotoxy(int row, int col)
 {
 	COORD coord;
-	coord.X = x;
-	coord.Y = y;
+	coord.X = col; // y is the lines
+	coord.Y = row; // x is the columns
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
 

@@ -114,7 +114,7 @@ public:
 	string getAttackFileByPlayer(int player);
 
 	std::istream& safeGetline(std::istream& is, std::string& t);
-	void gotoxy(int x, int y);
+	void gotoxy(int row, int col);
 	void setTextColor(WORD color);
 
 
