@@ -28,6 +28,7 @@ private:
 
 
 	static PlayerAlgoFactory m_playerFactory;
+	bool m_isQuiet;
 
 	Board m_board;
 	int m_currentPlayerIndex;

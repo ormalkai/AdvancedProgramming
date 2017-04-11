@@ -390,6 +390,7 @@ ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
 	}
 
 	// set printOut parameters
+	m_isQuiet = isQuiet;
 	m_board.setDelay(delay);
 	m_board.setIsQuiet(isQuiet);
 
@@ -566,8 +567,10 @@ void Game::startGame()
 
 void Game::printSummary() const
 {
-
-	Utils::instance().gotoxy(13, 0);
+	if (false == m_isQuiet)
+	{
+		Utils::instance().gotoxy(13, 0);
+	}
 
 	int maxScore = -1;
 	int winner = MAX_PLAYER;
