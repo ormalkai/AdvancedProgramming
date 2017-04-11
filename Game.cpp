@@ -516,7 +516,12 @@ void Game::startGame()
 			else
 			{
 				attackResult = AttackResult::Sink;
+
+				// Update number of alive ships
 				m_numOfShipsPerPlayer[m_otherPlayerIndex]--;
+
+				// Update score for player
+				currentPlayer->addToScore(pShip->getValue());
 			}
 			attackResult = pShip->isShipAlive() ? AttackResult::Hit : AttackResult::Sink;
 		}

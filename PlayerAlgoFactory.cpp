@@ -3,13 +3,19 @@
 
 PlayerAlgo* PlayerAlgoFactory::create(AlgoType type)
 {
+	PlayerAlgo* ret;
+
 	switch (type)
 	{
 	case(AlgoType::FILE):
-		return new BattleshipAlgoFromFile(m_id++);
+		ret = new BattleshipAlgoFromFile(m_id++);
 	default:
-		return nullptr;
+		ret = nullptr;
 	}
+
+	ret->setScore(0);
+
+	return ret;
 }
 
 PlayerAlgoFactory& PlayerAlgoFactory::instance()

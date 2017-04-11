@@ -45,6 +45,7 @@ private:
 	int m_rows;
 	int m_cols;
 	bool m_foundAdjacentShips; // need to print Adjacency error per player TODO init in game init
+	int m_numOfAliveCellsOnBoard;
 
 	Game(int rows = BOARD_ROW_SIZE, int cols = BOARD_ROW_SIZE) : m_rows(rows), m_cols(cols), m_foundAdjacentShips(false)
 	{
@@ -54,6 +55,7 @@ private:
 	{
 	}
 
+	bool hasAliveCells() const { return (BOARD_ROW_SIZE * BOARD_COL_SIZE) == m_numOfAliveCellsOnBoard; }
 	bool checkWrongSizeOrShape() const;
 	bool checkNumberOfShips() const;
 	bool checkAdjacentShips() const;
