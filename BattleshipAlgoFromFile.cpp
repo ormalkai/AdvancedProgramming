@@ -1,7 +1,6 @@
 #include "BattleshipAlgoFromFile.h"
 #include <fstream>
 #include <sstream>
-#include <vector>
 
 #include <algorithm> 
 #include <functional> 
@@ -48,8 +47,8 @@ std::pair<int, int> BattleshipAlgoFromFile::attack()
 		}
 		return std::pair<int, int>(-1, -1);
 	}
-	std::pair<int, int> attack = m_attackQueue[m_attackQueue.size() - 1];
-	m_attackQueue.pop_back();
+	std::pair<int, int> attack = m_attackQueue.front();
+	m_attackQueue.pop();
 	return attack;
 }
 
@@ -98,7 +97,7 @@ void BattleshipAlgoFromFile::AttackFileParser(string& attackPath) {
 		}
 
 		pair<int, int> aPair(i, j);
-		m_attackQueue.push_back(aPair);
+		m_attackQueue.push(aPair);
 	}
 }
 

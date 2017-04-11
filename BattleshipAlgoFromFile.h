@@ -14,7 +14,7 @@ private:
 	char** m_board;
 	int m_rows;
 	int m_cols;
-	vector<pair<int, int>> m_attackQueue;
+	queue<pair<int, int>> m_attackQueue;
 
 	int checkLine(string str, int k);
 	int cleanSpace(string str, int index);
