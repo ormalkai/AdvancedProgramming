@@ -86,7 +86,7 @@ void BattleshipAlgoFromFile::AttackFileParser(string& attackPath) {
 		j = stoi(tokens[1]);
 
 		// input validation
-		if (i < 1 || j < 1 || i > 10 || j > 10)
+		if (i < 1 || j < 1 || i > BOARD_ROW_SIZE || j > BOARD_COL_SIZE)
 		{
 			return;
 		}
