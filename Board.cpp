@@ -80,24 +80,12 @@ char** Board::toCharMat(PlayerIndex playerId)
 	return ret;
 }
 
-AttackResult Board::executeAttack(int r, int c)
-{
-	//if ()
-	return  AttackResult::Hit;
-}
-
-
-Cell Board::get(pair<int, int> i)
-{
-	return get(i.first, i.second);
-}
-
 char Board::getSign(int r, int c)
 {
 	return get(r, c).getSign();
 }
 
-void Board::dump()
+void Board::dump() const
 {
 	printf("Dumping Board\n");
 	for (int i = 0; i < INIT_BOARD_ROW_SIZE; ++i)

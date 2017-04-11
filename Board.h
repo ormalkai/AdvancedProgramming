@@ -19,9 +19,9 @@ public:
 	~Board() = default;
 	Board(const Board &) = default;
 
-	void dump();
-	Cell get(int r, int c) { return  m_boardData[r][c]; }
-	Cell get(pair<int, int> i);
+	void dump() const;
+	Cell& get(int r, int c) { return  m_boardData[r][c]; }
+	Cell& get(pair<int, int> i) { return get(i.first, i.second); }
 	void put(int r, int c);
 
 	char** Board::toCharMat();
@@ -32,6 +32,4 @@ public:
 	{
 		m_boardData[r][c].clear();
 	}
-
-	AttackResult executeAttack(int r, int c);
 };

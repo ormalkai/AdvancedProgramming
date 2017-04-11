@@ -440,41 +440,24 @@ ReturnCode Game::init(std::string filesPath)
 	{
 		m_players[i] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
 		//m_boards[m_players[i]] = 
-	m_players[PLAYER_A] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
-	//rc = fillBoardOfPlayer(PLAYER_A, m_boards[m_players[PLAYER_A]]);
-	char** playerABoard = m_board.toCharMat(PLAYER_A);
-	//m_players[PLAYER_A]->setBoard(playerABoard, m_rows, m_cols);
+		m_players[PLAYER_A] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
+		char** playerABoard = m_board.toCharMat(PLAYER_A);
+		m_players[PLAYER_A]->setBoard(const_cast<const char **>(playerABoard), m_rows, m_cols);
 
-	m_players[PLAYER_B] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
-	char** playerBBoard = m_board.toCharMat(PLAYER_B);
-	//m_players[PLAYER_B]->setBoard(playerBBoard, m_rows, m_cols);
-	
+		m_players[PLAYER_B] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
+		char** playerBBoard = m_board.toCharMat(PLAYER_B);
+		m_players[PLAYER_B]->setBoard(const_cast<const char **>(playerBBoard), m_rows, m_cols);
+
+		// TODO: Release matrix 
 	}
-	
-	// initListPlayers + init foreach player
-	// Set board for Players
-	//
+
+
 	// For more players - add new section
 
 	return RC_SUCCESS;
 }
 
-//ReturnCode Game::fillBoardOfPlayer(vector<char> playerChars, Board& board)
-//{
-//	for (size_t i = 0; i < m_rows; i++)
-//	{
-//		for (size_t i = 0; i < m_cols; i++)
-//		{
-//			char c = m_board.getSign(i, j);
-//			if (SPACE != c && Utils::instance().isExistInVec(playerChars, c))
-//			{
-//				m_board.getSign(i, j) 
-//			}
-//		}
-//	}
-//	
-//}
-ReturnCode Game::fillBoardOfPlayer(PlayerIndex player, Board& board)
+/*ReturnCode Game::fillBoardOfPlayer(PlayerIndex player, Board& board)
 {
 	for (int i = 0; i < m_rows; i++)
 	{
@@ -489,9 +472,9 @@ ReturnCode Game::fillBoardOfPlayer(PlayerIndex player, Board& board)
 			}
 		}
 	}
-	
+
 	return RC_SUCCESS;
-}
+}*/
 
 AttackRequestCode Game::requestAttack(pair<int, int> req)
 {
@@ -504,71 +487,101 @@ AttackRequestCode Game::requestAttack(pair<int, int> req)
 		return ARC_SUCCESS;
 }
 
+
+
+
 ReturnCode Game::startGame()
 {
-	//vector<IBattleshipGameAlgo*>::iterator iter = m_players.begin();
-	//pair<int, int> attackReq;
-	//IBattleshipGameAlgo* currentPlayer;
-	////vector<IBattleshipGameAlgo*>::iterator iter = m_players.begin();
-	//
-	//// Just for Ex1 
-	//if (m_players.size() != NUM_OF_PLAYERS)
-	//{
-	//	DBG(Debug::DBG_ERROR, "Wrong number of players - [%d]", m_players.size());
-	//	return RC_ERROR;
-	//}
+
+	if (m_players.size() != NUM_OF_PLAYERS)
+	{
+		DBG(Debug::DBG_ERROR, "Wrong number of players - [%d]", m_players.size());
+		return RC_ERROR;
+	}
 
 
-	//pair<int, int> attackReq;
-	//PlayerAlgo* currentPlayer = m_players[PLAYER_A];
-	//int currentPlayerIndex = PLAYER_A;
-	//
-	//while (true)
-	//{
-	//	currentPlayer = (*iter);
-	//	currentPlayer = m_players[currentPlayerIndex];
-	//	attackReq = currentPlayer->attack();
+	pair<int, int> attackReq;
+	PlayerAlgo* currentPlayer = m_players[PLAYER_A];
+	m_currentPlayerIndex = PLAYER_A;
 
-	//	AttackRequestCode arc = requestAttack(attackReq);
-	//	switch (arc)
-	//	{
-	//	case ARC_NO_REQ:
-	//		// TODO: Maybe print info
-	//		break;
-	//	case ARC_ERROR:
-	//		DBG(Debug::DBG_ERROR, "Attack failed ! values: %d-%d. Skipping.. arc[%d]", attackReq.first, attackReq.second, arc);
-	//		break;
-	//	default:
-	//		break;
-	//	}
-	//	
+	// Game loop
+	while (true)
+	{
+		currentPlayer = m_players[m_currentPlayerIndex];
+		attackReq = currentPlayer->attack();
 
-	//	Cell attackedCell = m_board.get(attackReq);
-	//	AttackResult ar;
+		// Check attack request 
+		AttackRequestCode arc = requestAttack(attackReq);
+		switch (arc)
+		{
+		case ARC_NO_REQ:
+			proceedToNextPlayer();
+			break;
+		case ARC_ERROR:
+			DBG(Debug::DBG_ERROR, "Attack failed ! values: %d-%d. Skipping.. arc[%d]", attackReq.first, attackReq.second, arc);
+			break;
+		default:
+			break;
+		}
 
-	//	if (Cell::DEAD == attackedCell.getStatus())
-	//	{
-	//		DBG(Debug::DBG_INFO, "This cell already attacked, go to sleep...");
-	//		// TODO: ar = ?
-	//	}
-	//	else
-	//	{
-	//		if (attackedCell.getSign())
-	//		{
-	//			
-	//		}
-	//		
-	//	}
+		Cell& attackedCell = m_board.get(attackReq);
+		AttackResult attackResult;
 
-	//	// Check attack status (hit,miss)
-	//	// Notify for all players
-	//	// If game over break
+		// Check attack result
+		switch (attackedCell.getStatus())
+		{
+		case Cell::ALIVE:
+		{
+			attackedCell.setStatus(Cell::DEAD);
 
-	//	// If attack failed - iter.next
-	//	// If iter == last do iter = begin
-	//}
+			// Notify the user his ridiculous mistake
+			if (attackedCell.getPlayerIndexOwner() == m_currentPlayerIndex)
+			{
+				DBG(Debug::DBG_INFO, "In the cell there is a ship of you, probably u r an idiot...");
+			}
 
-	//// Notify winner
+			Ship* pShip = attackedCell.getShip();
+			pShip->executeAttack();
+
+			attackResult = pShip->isShipAlive() ? AttackResult::Hit : AttackResult::Sink;
+		}
+		break;
+		case Cell::DEAD:
+		{
+			DBG(Debug::DBG_INFO, "This cell already attacked, go to sleep bro...");
+			attackResult = AttackResult::Miss;
+		}
+		break;
+		case Cell::FREE:
+		{
+			attackedCell.executeAttack();
+			attackResult = AttackResult::Miss;
+		}
+		break;
+		default:
+			attackResult = AttackResult::Miss;
+		}
+
+		// Notify for all players
+		for (int i = 0; i < NUM_OF_PLAYERS; i++)
+		{
+			m_players[i]->notifyOnAttackResult(m_currentPlayerIndex, attackReq.first, attackReq.second, attackResult);
+		}
+
+		// If game over break
+
+		// If attack failed - iter.next
+		// If iter == last do iter = begin
+
+		// Update next turn
+		if (AttackResult::Miss == attackResult)
+		{
+			proceedToNextPlayer();
+		}
+
+	}
+
+	// Notify winner
 
 	return ReturnCode::RC_SUCCESS;
 }

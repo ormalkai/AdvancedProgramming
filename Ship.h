@@ -1,6 +1,5 @@
 #pragma once
 
-#include <map>
 #include <vector>
 
 using namespace std;
@@ -14,7 +13,7 @@ private:
 	int m_value;
 	char m_sign; // Player 
 				 // Color
-
+	int m_numOfAliveCells;
 	vector<Cell*> m_cellList;
 
 public:
@@ -27,8 +26,9 @@ public:
 	void setLength(int length) { m_length = length; }
 	void setValue(int value) { m_value = value; }
 	void setSign(int sign) { m_sign = sign; }
-	void addCell(Cell* cell) { m_cellList.push_back(cell); }
-
+	void addCell(Cell* cell) { m_cellList.push_back(cell); ++m_numOfAliveCells; }
+	bool isShipAlive() const { return 0 == m_numOfAliveCells; }
+	void executeAttack();
 
 	Ship(char sign, int length, int value);
 

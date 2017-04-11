@@ -30,6 +30,7 @@ private:
 	static PlayerAlgoFactory m_playerFactory;
 
 	Board m_board;
+	int m_currentPlayerIndex;
 
 	vector<PlayerAlgo*> m_players;
 	//map<PlayerAlgo*, Board> m_boards;
@@ -39,9 +40,10 @@ private:
 
 	// ERRORS data structures
 	vector<vector<bool>> m_wrongSizeOrShapePerPlayer; // 2 players X 4 ships TODO init in game init
-	bool m_foundAdjacentShips; // need to print Adjacency error per player TODO init in game init
+	
 	int m_rows;
 	int m_cols;
+	bool m_foundAdjacentShips; // need to print Adjacency error per player TODO init in game init
 
 	Game(int rows = BOARD_ROW_SIZE, int cols = BOARD_ROW_SIZE) : m_rows(rows), m_cols(cols), m_foundAdjacentShips(false)
 	{
@@ -64,13 +66,13 @@ private:
 	ReturnCode initListPlayers();
 	void initErrorDataStructures();
 	void initExpectedShipLenMap();
-	ReturnCode fillBoardOfPlayer(PlayerIndex player, Board& board);
+	//ReturnCode fillBoardOfPlayer(PlayerIndex player, Board& board);
 	AttackRequestCode requestAttack(pair<int, int> req);
 	int getShipLength(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthDirection direction);
 	int getShipLengthHorizontal(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction);
 	int getShipLengthVertical(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction);
 	bool isAdjacencyValid(char** initBoard, int i/*row*/, int j/*col*/);
-
+	void proceedToNextPlayer() { (++m_currentPlayerIndex) % MAX_PLAYER; }
 public:
 
 	Game(const Game&) = delete;
