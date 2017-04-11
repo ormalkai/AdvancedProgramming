@@ -9,6 +9,7 @@ PlayerAlgo* PlayerAlgoFactory::create(AlgoType type)
 	{
 	case(AlgoType::FILE):
 		ret = new BattleshipAlgoFromFile(m_id++);
+		break;
 	default:
 		ret = nullptr;
 	}
