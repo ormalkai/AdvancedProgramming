@@ -1,6 +1,10 @@
 #pragma once
 
 #include "PlayerAlgo.h"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
 #include <queue>
 
 using namespace std;
@@ -10,7 +14,12 @@ private:
 	char** m_board;
 	int m_rows;
 	int m_cols;
-	std::queue<pair<int,int>> m_attackQueue;
+	vector<pair<int, int>> m_attackQueue;
+
+	void AttackFileParser(string & attackPath);
+	int checkLine(string str, int k);
+	int cleanSpace(string str, int index);
+
 
 
 public:
@@ -18,25 +27,26 @@ public:
 	~BattleshipAlgoFromFile() = default;
 
 	/*
-		Initialize attack queue
+	Initialize attack queue
 	*/
 	int parseAttackFile();
 
 	/*
-		Initialize data members
+	Initialize data members
 	*/
 	void setBoard(const char** board, int numRows, int numCols);
-	
+
 	/*
-		Simulate attack- pop attack from attack queue
+	Simulate attack- pop attack from attack queue
 	*/
 	std::pair<int, int> attack();
 
 	/*
-		Empty implementation
+	Empty implementation
 	*/
 	void notifyOnAttackResult(int player, int row, int col, AttackResult result);
-	
+
+
 
 
 
