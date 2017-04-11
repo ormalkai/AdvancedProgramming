@@ -68,7 +68,7 @@ private:
 	void initErrorDataStructures();
 	void initExpectedShipLenMap();
 	//ReturnCode fillBoardOfPlayer(PlayerIndex player, Board& board);
-	AttackRequestCode requestAttack(pair<int, int> req);
+	AttackRequestCode requestAttack(pair<int, int> req) const;
 	int getShipLength(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthDirection direction);
 	int getShipLengthHorizontal(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction);
 	int getShipLengthVertical(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction);

@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
 	parseArgs(argc, argv, filesLocation, isQuiet, delay);
 
 	game.init(filesLocation, isQuiet, delay);
-	//game.startGame();
+	game.startGame();
 
 	int number;
 	std::cin >> number;

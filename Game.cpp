@@ -450,26 +450,7 @@ ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
 	return RC_SUCCESS;
 }
 
-/*ReturnCode Game::fillBoardOfPlayer(PlayerIndex player, Board& board)
-{
-	for (int i = 0; i < m_rows; i++)
-	{
-		for (int j = 0; j < m_cols; j++)
-		{
-			board.get(i, j) = m_board.get(i, j);
-
-			char c = m_board.getSign(i, j);
-			if (SPACE == c || Utils::instance().getIndexByShip(c) != player)
-			{
-				board.get(i,j).clear();
-			}
-		}
-	}
-
-	return RC_SUCCESS;
-}*/
-
-AttackRequestCode Game::requestAttack(pair<int, int> req)
+AttackRequestCode Game::requestAttack(pair<int, int> req) const
 {
 	if (ARC_NO_REQ == req.first)
 		return ARC_NO_REQ;
