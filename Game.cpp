@@ -132,7 +132,7 @@ void Game::readSBoardFile(std::string filePath, char** initBoard)
 	string line;
 	int rowIndex = 1;
 	// Line by line up to 10 line and up to 10 chars per line
-	while (getline(sboard, line) && rowIndex <= BOARD_ROW_SIZE)
+	while (Utils::instance().safeGetline(sboard, line) && rowIndex <= BOARD_ROW_SIZE)
 	{
 		int colIndex = 1;
 		for (std::string::size_type i = 0; i < line.size() && colIndex <= 10; i++)

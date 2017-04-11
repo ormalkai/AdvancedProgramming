@@ -113,8 +113,16 @@ public:
 	char getPlayerCharByIndex(int player);
 	string getAttackFileByPlayer(int player);
 
+	std::istream& safeGetline(std::istream& is, std::string& t);
+
 	template<class T>
-	bool isExistInVec(vector<T> vec, T val);
+	bool isExistInVec(vector<T> vec, T val)
+	{
+		if (find(vec.begin(), vec.end(), val) != vec.end()) {
+			return true;
+		}
+		return false;
+	}
 
 };
 
