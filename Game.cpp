@@ -518,11 +518,23 @@ void Game::startGame()
 			{
 				attackResult = AttackResult::Sink;
 
-				// Update number of alive ships
-				m_numOfShipsPerPlayer[m_otherPlayerIndex]--;
+				
 
-				// Update score for player
-				currentPlayer->addToScore(pShip->getValue());
+				// Hit myself
+				if (attackedCell.getPlayerIndexOwner() == m_currentPlayerIndex)
+				{
+					m_players[m_otherPlayerIndex]->addToScore(pShip->getValue());
+	
+					m_numOfShipsPerPlayer[m_currentPlayerIndex]--;
+				}
+				else
+				{
+					// Update score for player
+					currentPlayer->addToScore(pShip->getValue());
+
+					// Update number of alive ships
+					m_numOfShipsPerPlayer[m_otherPlayerIndex]--;
+				}		
 			}
 		}
 		break;
@@ -549,6 +561,7 @@ void Game::startGame()
 		if (Utils::instance().isExistInVec(m_numOfShipsPerPlayer, 0))
 		{
 			gameOver = true;
+			DBG(Debug::DBG_DEBUG, "Game over - 0 ships remaining");
 		}
 		// If attack failed - iter.next
 		// If iter == last do iter = begin
