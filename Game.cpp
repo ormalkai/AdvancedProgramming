@@ -430,7 +430,7 @@ ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
 	char** playerBBoard = m_board.toCharMat(PLAYER_B);
 	m_players[PLAYER_B]->setBoard(const_cast<const char **>(playerBBoard), m_rows, m_cols);
 
-	for (int i = 0; i < m_row; i++)
+	for (int i = 0; i < m_board.rows(); i++)
 	{
 		delete[] playerABoard[i];
 		delete[] playerBBoard[i];

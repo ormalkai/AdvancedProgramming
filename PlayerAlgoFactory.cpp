@@ -15,6 +15,7 @@ PlayerAlgo* PlayerAlgoFactory::create(AlgoType type)
 	}
 
 	ret->setScore(0);
+	ret->setNumOfVictories(0);
 
 	return ret;
 }

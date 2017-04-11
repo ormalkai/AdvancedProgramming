@@ -25,6 +25,9 @@ public:
 	Cell& get(int r, int c) { return  m_boardData[r][c]; }
 	Cell& get(pair<int, int> i) { return get(i.first, i.second); }
 
+
+	int rows() const { return m_rows; }
+	int cols() const { return m_cols; }
 	void printBoard();
 	void printAttack(int i, int j, AttackResult attackResult);
 	void setIsQuiet(bool isQuiet) { m_isQuiet = isQuiet; }
