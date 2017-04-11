@@ -451,8 +451,8 @@ ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
 
 AttackRequestCode Game::requestAttack(pair<int, int> req) const
 {
-	if (ARC_NO_REQ == req.first)
-		return ARC_NO_REQ;
+	if (ARC_FINISH_REQ == req.first && ARC_FINISH_REQ == req.second)
+		return ARC_FINISH_REQ;
 	else if (	req.first < 0 || req.first > m_rows ||
 				req.second < 0 || req.second > m_cols)
 		return ARC_ERROR;
@@ -476,14 +476,14 @@ void Game::startGame()
 	while (!gameOver)
 	{
 		currentPlayer = m_players[m_currentPlayerIndex];
-		
+
 		attackReq = currentPlayer->attack();
 
 		// Check attack request 
 		AttackRequestCode arc = requestAttack(attackReq);
 		switch (arc)
 		{
-		case ARC_NO_REQ:
+		case ARC_FINISH_REQ:
 			proceedToNextPlayer();
 			continue;
 		case ARC_ERROR:
@@ -538,7 +538,7 @@ void Game::startGame()
 		default:
 			attackResult = AttackResult::Miss;
 		}
-		
+
 		m_board.printAttack(attackReq.first, attackReq.second, attackResult);
 
 		// Notify for all players
@@ -561,15 +561,35 @@ void Game::startGame()
 			proceedToNextPlayer();
 		}
 
-	}
+	} 
+	
+
+	printSummary();
+}
+
+void Game::printSummary() const
+{
+	bool winnerFound = false;
 
 	// Notify winner
-	if (m_numOfShipsPerPlayer[PLAYER_A] == 0)
+	for (int i = 0; i < NUM_OF_PLAYERS; i++)
 	{
-		// Notify Player B is the man
+		if (m_numOfShipsPerPlayer[i] == 0)
+		{
+			cout << "Player " << Utils::instance().getPlayerCharByIndex(i) << " Won" << endl;
+			winnerFound = true;
+			break;
+		}
 	}
-	else /*(m_numOfShipsPerPlayer[PLAYER_B] == 0)*/
+		
+	if (!winnerFound)
+		cout << "Draw" << endl;
+
+
+	// Print points
+	cout << "Points:" << endl;
+	for (int i = 0; i < NUM_OF_PLAYERS; i++)
 	{
-		// Notify Player B is the man
+		cout << "Player " << Utils::instance().getPlayerCharByIndex(i) << ": " << m_players[i]->getScore() << endl;
 	}
 }

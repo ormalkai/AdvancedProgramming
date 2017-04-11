@@ -74,7 +74,10 @@ private:
 	int getShipLengthVertical(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction);
 	bool isAdjacencyValid(char** initBoard, int i/*row*/, int j/*col*/);
 	void proceedToNextPlayer() { m_currentPlayerIndex = (++m_currentPlayerIndex) % MAX_PLAYER;  m_otherPlayerIndex = (++m_otherPlayerIndex) % MAX_PLAYER; }
-public:
+	void printSummary() const;
+	
+	
+	public:
 
 	Game(const Game&) = delete;
 	void operator=(Game const&) = delete;
