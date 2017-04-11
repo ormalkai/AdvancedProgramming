@@ -29,7 +29,7 @@ public:
 	void setValue(int value) { m_value = value; }
 	void setSign(int sign) { m_sign = sign; }
 	void addCell(Cell* cell) { m_cellList.push_back(cell); ++m_numOfAliveCells; }
-	bool isShipAlive() const { return 0 == m_numOfAliveCells; }
+	bool isShipAlive() const { return 0 != m_numOfAliveCells; }
 	void executeAttack();
 
 

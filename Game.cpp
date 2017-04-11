@@ -474,7 +474,7 @@ void Game::startGame()
 			proceedToNextPlayer();
 			continue;
 		case ARC_ERROR:
-			DBG(Debug::DBG_ERROR, "Attack failed ! values: %d-%d. Skipping.. arc[%d]", attackReq.first, attackReq.second, arc);
+			DBG(Debug::DBG_INFO, "Attack failed ! values: %d-%d. Skipping.. arc[%d]", attackReq.first, attackReq.second, arc);
 			break;
 		default:
 			break;
