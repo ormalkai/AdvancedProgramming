@@ -33,7 +33,7 @@ private:
 	int m_currentPlayerIndex;
 	int m_otherPlayerIndex;
 
-	vector<PlayerAlgo*> m_players;
+	PlayerAlgo* m_players[MAX_PLAYER];
 	//map<PlayerAlgo*, Board> m_boards;
 
 	map<char, int> m_shipToExpectedLen; // conversion map between ship type to expected length
@@ -66,14 +66,12 @@ private:
 	ReturnCode parseBoardFile(string sboardFileName, char** initBoard);
 	ReturnCode initListPlayers();
 	void initErrorDataStructures();
-	void initExpectedShipLenMap();
-	//ReturnCode fillBoardOfPlayer(PlayerIndex player, Board& board);
 	AttackRequestCode requestAttack(pair<int, int> req) const;
 	int getShipLength(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthDirection direction);
 	int getShipLengthHorizontal(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction);
 	int getShipLengthVertical(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction);
 	bool isAdjacencyValid(char** initBoard, int i/*row*/, int j/*col*/);
-	void proceedToNextPlayer() { (++m_currentPlayerIndex) % MAX_PLAYER;  (++m_otherPlayerIndex) % MAX_PLAYER; }
+	void proceedToNextPlayer() { m_currentPlayerIndex = (++m_currentPlayerIndex) % MAX_PLAYER;  m_otherPlayerIndex = (++m_otherPlayerIndex) % MAX_PLAYER; }
 public:
 
 	Game(const Game&) = delete;
