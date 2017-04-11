@@ -453,8 +453,8 @@ AttackRequestCode Game::requestAttack(pair<int, int> req) const
 {
 	if (ARC_NO_REQ == req.first)
 		return ARC_NO_REQ;
-	else if (req.first < 0 || req.first >= m_rows ||
-		req.second < 0 || req.second >= m_cols)
+	else if (	req.first < 0 || req.first > m_rows ||
+				req.second < 0 || req.second > m_cols)
 		return ARC_ERROR;
 	else
 		return ARC_SUCCESS;
@@ -485,7 +485,7 @@ void Game::startGame()
 		{
 		case ARC_NO_REQ:
 			proceedToNextPlayer();
-			break;
+			continue;
 		case ARC_ERROR:
 			DBG(Debug::DBG_ERROR, "Attack failed ! values: %d-%d. Skipping.. arc[%d]", attackReq.first, attackReq.second, arc);
 			break;
@@ -526,21 +526,15 @@ void Game::startGame()
 				// Update score for player
 				currentPlayer->addToScore(pShip->getValue());
 			}
-			attackResult = pShip->isShipAlive() ? AttackResult::Hit : AttackResult::Sink;
 		}
 		break;
 		case Cell::DEAD:
 		{
 			DBG(Debug::DBG_INFO, "This cell already attacked, go to sleep bro...");
-			attackResult = AttackResult::Miss;
+			attackResult = AttackResult::Hit;
 		}
 		break;
 		case Cell::FREE:
-		{
-			attackedCell.executeAttack();
-			attackResult = AttackResult::Miss;
-		}
-		break;
 		default:
 			attackResult = AttackResult::Miss;
 		}
