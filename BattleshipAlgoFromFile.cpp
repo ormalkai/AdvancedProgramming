@@ -7,6 +7,7 @@
 #include <functional> 
 #include <cctype>
 #include <locale>
+#include "Debug.h"
 
 // trim from start (in place)
 static inline void ltrim(std::string &s) {
@@ -40,6 +41,11 @@ std::pair<int, int> BattleshipAlgoFromFile::attack()
 {
 	if (0 == m_attackQueue.size())
 	{
+		static bool isFirst = true;
+		if (true == isFirst)
+		{
+			DBG(Debug::DBG_DEBUG, "Attacks of player %c done", getId());
+		}
 		return std::pair<int, int>(-1, -1);
 	}
 	std::pair<int, int> attack = m_attackQueue[m_attackQueue.size() - 1];

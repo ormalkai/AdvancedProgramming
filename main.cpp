@@ -42,7 +42,7 @@ void parseArgs(int argc, char* argv[], string& filesLocation, bool& isQuiet, int
 int main(int argc, char* argv[])
 {
 	// init log
-	Debug::instance()->init("game.log", true, false, Debug::DBG_DEBUG);
+	Debug::instance()->init("game.log", true, false, Debug::DBG_MAX);
 
 	Game& game = Game::getInstance();
 	// add is initialize ?
