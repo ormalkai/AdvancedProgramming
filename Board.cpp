@@ -1,11 +1,29 @@
 // Board.cpp
 
+#include <windows.h> 
+#include <iostream>
+#include <conio.h>
 #include "Board.h"
 #include "Utils.h"
 #include "ShipFactory.h"
 
 #define INC_ROW(IS_VERTICAL, ROW, OFFSET) (((true) == (IS_VERTICAL)) ? ((ROW) + (OFFSET)) : (ROW))
 #define INC_COL(IS_VERTICAL, COL, OFFSET) (((false) == (IS_VERTICAL)) ? ((COL) + (OFFSET)) : (COL))
+
+
+void gotoxy(int x, int y)
+{
+	COORD coord;
+	coord.X = x;
+	coord.Y = y;
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+}
+
+void setTextColor(_In_ WORD color)
+{
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);  // Get handle to standard output
+	SetConsoleTextAttribute(hConsole, color);
+}
 
 void Board::buildBoard(char ** initBoard)
 {
@@ -22,7 +40,7 @@ void Board::buildBoard(char ** initBoard)
 			{
 				// create the ship
 				Ship* ship = ShipFactory::instance()->create(i, j, initBoard);
-
+				m_shipsOnBoard.push_back(ship);
 				// init ship in relevant cells and cells in the ship
 				int shipLen = Utils::instance().getShipLen(initBoard[i][j]);
 				bool isVertical = initBoard[i][j] == initBoard[i + 1][j];
@@ -85,22 +103,71 @@ char Board::getSign(int r, int c)
 	return get(r, c).getSign();
 }
 
+<<<<<<< HEAD
 void Board::dump() const
+=======
+Board::~Board()
 {
-	printf("Dumping Board\n");
+	for (std::vector<Ship*>::iterator it = m_shipsOnBoard.begin(); it != m_shipsOnBoard.end(); ++it)
+	{
+		delete (*it);
+	}
+}
+
+void Board::printBoard()
+>>>>>>> origin/master
+{
+	if (true == m_isQuiet)
+	{
+		return;
+	}
 	for (int i = 0; i < INIT_BOARD_ROW_SIZE; ++i)
 	{
 		for (int j = 0; j < INIT_BOARD_COL_SIZE; ++j)
 		{
+			gotoxy(i, j);
 			if (SPACE == m_boardData[i][j].getSign())
 			{
-				printf("@");
+				setTextColor(BACKGROUND_BLUE | BACKGROUND_RED | BACKGROUND_GREEN);
+				cout << " ";
 			}
 			else
 			{
-				printf("%c", m_boardData[i][j].getSign());
+				setTextColor(m_boardData[i][j].getShip()->getColor());
+				cout << m_boardData[i][j].getSign();
 			}
 		}
-		printf("\n");
+		cout << endl;
 	}
+}
+
+void Board::printAttack(int i, int j, AttackResult attackResult)
+{
+	if (true == m_isQuiet)
+	{
+		return;
+	}
+
+	for (int k = 0; k < 5; k++)
+	{
+		gotoxy(i, j);
+		cout << "@";
+		Sleep(100);
+		gotoxy(i, j);
+		cout << m_boardData[i][j].getSign();
+		Sleep(100);
+	}
+	switch (attackResult)
+	{
+	case (AttackResult::Hit):
+	case (AttackResult::Sink):
+		gotoxy(i, j);
+		cout << "*";
+		break;
+	case (AttackResult::Miss):
+		gotoxy(i, j);
+		cout << SPACE;
+		break;
+	}
+	Sleep(m_delay);
 }

@@ -1,5 +1,5 @@
 #include "Destroyer.h"
 
-Destroyer::Destroyer(char sign, int length, int value) : Ship(sign, length, value)
+Destroyer::Destroyer(char sign, int length, int value, _In_ WORD color) : Ship(sign, length, value, color)
 {
 }

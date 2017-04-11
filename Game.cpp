@@ -159,7 +159,6 @@ ReturnCode Game::getSboardFileNameFromDirectory(string filesPath, string& sboard
 	HANDLE hFind;
 
 	string sboardFile = filesPath + "*.sboard";
-	DBG(Debug::DBG_DEBUG, "sboardFile [%s]", sboardFile.c_str());
 	hFind = FindFirstFile(sboardFile.c_str(), &FindFileData);
 	if (INVALID_HANDLE_VALUE == hFind)
 	{
@@ -168,7 +167,6 @@ ReturnCode Game::getSboardFileNameFromDirectory(string filesPath, string& sboard
 	}
 	else
 	{
-		DBG(Debug::DBG_INFO, "The first file found is %s\n", FindFileData.cFileName);
 		sboardFileName = filesPath + FindFileData.cFileName;
 		FindClose(hFind);
 		return RC_SUCCESS;
@@ -197,7 +195,6 @@ ReturnCode Game::getattackFilesNameFromDirectory(string filesPath, vector<string
 		}
 		else
 		{
-			DBG(Debug::DBG_INFO, "The first file found is %s\n", FindFileData.cFileName);
 			attackFilePerPlayer.push_back(filesPath + FindFileData.cFileName);
 			FindClose(hFind);
 		}
@@ -224,28 +221,6 @@ ReturnCode Game::parseBoardFile(string sboardFileName, char** initBoard)
 	}
 	// Read from file 
 	readSBoardFile(sboardFileName, initBoard);
-
-	/**
-	 *DEBUG
-	 */
-	for (int i = 0; i < INIT_BOARD_ROW_SIZE; ++i)
-	{
-		for (int j = 0; j < INIT_BOARD_COL_SIZE; ++j)
-		{
-			if (SPACE == initBoard[i][j])
-			{
-				printf("@");
-			}
-			else
-			{
-				printf("%c", initBoard[i][j]);
-			}
-		}
-		printf("\n");
-	}
-	/**
-	 *
-	 */
 
 	// input validation
 	validateBoard(initBoard);
@@ -403,7 +378,7 @@ ReturnCode Game::initFilesPath(string& filesPath, string& sboardFile, vector<str
  *				players, board etc
  * @Param		filesPath - location of sboard and attack files
  */
-ReturnCode Game::init(std::string filesPath)
+ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
 {
 	string sboardFile, attackAFile, attackBFile;
 	vector<string> attackFilePerPlayer;
@@ -412,6 +387,11 @@ ReturnCode Game::init(std::string filesPath)
 	{
 		return rc;
 	}
+
+	// set printOut parameters
+	m_board.setDelay(delay);
+	m_board.setIsQuiet(isQuiet);
+
 	// init ERRORs data structures
 	initErrorDataStructures();
 
@@ -431,13 +411,26 @@ ReturnCode Game::init(std::string filesPath)
 
 	// now the board is valid lets build our board
 	m_board.buildBoard(initBoard);
+	// initBoard is no longer relevant lets delete it
+	for (int i = 0; i < INIT_BOARD_ROW_SIZE; ++i)
+	{
+		delete[] initBoard[i];
+	}
+	delete[] initBoard;
+
 	/* DEBUG */
-	m_board.dump();
+	m_board.printBoard();
+	m_board.printAttack(5, 5, AttackResult::Hit);
+	m_board.printAttack(5, 6, AttackResult::Miss);
+	m_board.printAttack(5, 7, AttackResult::Sink);
+	m_board.printAttack(5, 8, AttackResult::Hit);
+	m_board.printAttack(4, 2, AttackResult::Miss);
 	/*********/
 
 	// Create players and boards
 	for (size_t i = 0; i < NUM_OF_PLAYERS; i++)
 	{
+		/* Gal change this to push_back it crashes */
 		m_players[i] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
 		//m_boards[m_players[i]] = 
 		m_players[PLAYER_A] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
