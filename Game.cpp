@@ -427,23 +427,19 @@ ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
 	m_board.printAttack(4, 2, AttackResult::Miss);
 	/*********/
 
-	// Create players and boards
-	for (size_t i = 0; i < NUM_OF_PLAYERS; i++)
-	{
-		/* Gal change this to push_back it crashes */
-		m_players[i] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
-		//m_boards[m_players[i]] = 
-		m_players[PLAYER_A] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
-		char** playerABoard = m_board.toCharMat(PLAYER_A);
-		m_players[PLAYER_A]->setBoard(const_cast<const char **>(playerABoard), m_rows, m_cols);
 
-		m_players[PLAYER_B] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
-		char** playerBBoard = m_board.toCharMat(PLAYER_B);
-		m_players[PLAYER_B]->setBoard(const_cast<const char **>(playerBBoard), m_rows, m_cols);
 
-		// TODO: Release matrix 
-	}
+	
+	m_players[PLAYER_A] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
+	char** playerABoard = m_board.toCharMat(PLAYER_A);
+	m_players[PLAYER_A]->setBoard(const_cast<const char **>(playerABoard), m_rows, m_cols);
 
+	m_players[PLAYER_B] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
+	char** playerBBoard = m_board.toCharMat(PLAYER_B);
+	m_players[PLAYER_B]->setBoard(const_cast<const char **>(playerBBoard), m_rows, m_cols);
+
+	// TODO: Release matrix 
+	
 
 	// For more players - add new section
 
@@ -466,13 +462,6 @@ AttackRequestCode Game::requestAttack(pair<int, int> req) const
 
 ReturnCode Game::startGame()
 {
-
-	if (m_players.size() != NUM_OF_PLAYERS)
-	{
-		DBG(Debug::DBG_ERROR, "Wrong number of players - [%d]", m_players.size());
-		return RC_ERROR;
-	}
-
 
 	pair<int, int> attackReq;
 	PlayerAlgo* currentPlayer = m_players[PLAYER_A];
