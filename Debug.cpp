@@ -2,7 +2,7 @@
 #include "Debug.h"
 #include <cstdarg>
 
-Debug::Debug(): m_logFile("game.log"), m_printToLog(true), m_printToStd(true), m_debugLevel(Error){}
+Debug::Debug(): m_logFile("game.log"), m_printToLog(true), m_printToStd(true), m_debugLevel(DBG_ERROR){}
 
 Debug* Debug::instance()
 {

@@ -9,7 +9,8 @@ using std::vector;
 class Board
 {
 private:
-	vector<vector<Cell>> m_boardData;
+	Cell m_boardData[INIT_BOARD_ROW_SIZE][INIT_BOARD_COL_SIZE];
+	//vector<vector<Cell>> m_boardData;
 	int m_rows;
 	int m_cols;
 
@@ -18,6 +19,7 @@ public:
 	~Board() = default;
 	Board(const Board &) = default;
 
+	void dump();
 	Cell get(int r, int c) { return  m_boardData[r][c]; }
 	Cell get(pair<int, int> i);
 	void put(int r, int c);

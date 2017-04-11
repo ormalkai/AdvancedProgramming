@@ -7,6 +7,7 @@
 #include "Game.h"
 #include "Utils.h"
 #include "Debug.h"
+#include "Board.h"
 
 #define SHIPS_PER_PLAYER (5)
 
@@ -429,7 +430,10 @@ ReturnCode Game::init(std::string filesPath)
 	}
 
 	// now the board is valid lets build our board
-	//buildBoard(initBoard);
+	m_board.buildBoard(initBoard);
+	/* DEBUG */
+	m_board.dump();
+	/*********/
 
 	// Create players and boards
 	for (size_t i = 0; i < NUM_OF_PLAYERS; i++)
@@ -502,69 +506,69 @@ AttackRequestCode Game::requestAttack(pair<int, int> req)
 
 ReturnCode Game::startGame()
 {
-	vector<IBattleshipGameAlgo*>::iterator iter = m_players.begin();
-	pair<int, int> attackReq;
-	IBattleshipGameAlgo* currentPlayer;
 	//vector<IBattleshipGameAlgo*>::iterator iter = m_players.begin();
-	
-	// Just for Ex1 
-	if (m_players.size() != NUM_OF_PLAYERS)
-	{
-		DBG(Debug::DBG_ERROR, "Wrong number of players - [%d]", m_players.size());
-		return RC_ERROR;
-	}
+	//pair<int, int> attackReq;
+	//IBattleshipGameAlgo* currentPlayer;
+	////vector<IBattleshipGameAlgo*>::iterator iter = m_players.begin();
+	//
+	//// Just for Ex1 
+	//if (m_players.size() != NUM_OF_PLAYERS)
+	//{
+	//	DBG(Debug::DBG_ERROR, "Wrong number of players - [%d]", m_players.size());
+	//	return RC_ERROR;
+	//}
 
 
-	pair<int, int> attackReq;
-	PlayerAlgo* currentPlayer = m_players[PLAYER_A];
-	int currentPlayerIndex = PLAYER_A;
-	
-	while (true)
-	{
-		currentPlayer = (*iter);
-		currentPlayer = m_players[currentPlayerIndex];
-		attackReq = currentPlayer->attack();
+	//pair<int, int> attackReq;
+	//PlayerAlgo* currentPlayer = m_players[PLAYER_A];
+	//int currentPlayerIndex = PLAYER_A;
+	//
+	//while (true)
+	//{
+	//	currentPlayer = (*iter);
+	//	currentPlayer = m_players[currentPlayerIndex];
+	//	attackReq = currentPlayer->attack();
 
-		AttackRequestCode arc = requestAttack(attackReq);
-		switch (arc)
-		{
-		case ARC_NO_REQ:
-			// TODO: Maybe print info
-			break;
-		case ARC_ERROR:
-			DBG(Debug::DBG_ERROR, "Attack failed ! values: %d-%d. Skipping.. arc[%d]", attackReq.first, attackReq.second, arc);
-			break;
-		default:
-			break;
-		}
-		
+	//	AttackRequestCode arc = requestAttack(attackReq);
+	//	switch (arc)
+	//	{
+	//	case ARC_NO_REQ:
+	//		// TODO: Maybe print info
+	//		break;
+	//	case ARC_ERROR:
+	//		DBG(Debug::DBG_ERROR, "Attack failed ! values: %d-%d. Skipping.. arc[%d]", attackReq.first, attackReq.second, arc);
+	//		break;
+	//	default:
+	//		break;
+	//	}
+	//	
 
-		Cell attackedCell = m_board.get(attackReq);
-		AttackResult ar;
+	//	Cell attackedCell = m_board.get(attackReq);
+	//	AttackResult ar;
 
-		if (Cell::DEAD == attackedCell.getStatus())
-		{
-			DBG(Debug::DBG_INFO, "This cell already attacked, go to sleep...");
-			// TODO: ar = ?
-		}
-		else
-		{
-			if (attackedCell.getSign())
-			{
-				
-			}
-			
-		}
+	//	if (Cell::DEAD == attackedCell.getStatus())
+	//	{
+	//		DBG(Debug::DBG_INFO, "This cell already attacked, go to sleep...");
+	//		// TODO: ar = ?
+	//	}
+	//	else
+	//	{
+	//		if (attackedCell.getSign())
+	//		{
+	//			
+	//		}
+	//		
+	//	}
 
-		// Check attack status (hit,miss)
-		// Notify for all players
-		// If game over break
+	//	// Check attack status (hit,miss)
+	//	// Notify for all players
+	//	// If game over break
 
-		// If attack failed - iter.next
-		// If iter == last do iter = begin
-	}
+	//	// If attack failed - iter.next
+	//	// If iter == last do iter = begin
+	//}
 
-	// Notify winner
+	//// Notify winner
 
 	return ReturnCode::RC_SUCCESS;
 }

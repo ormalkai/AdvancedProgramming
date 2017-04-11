@@ -18,8 +18,8 @@ private:
 	vector<Cell*> m_cellList;
 
 public:
-	Ship();
-	~Ship();
+	Ship() = default;
+	~Ship() = default;
 	int getLength() { return m_length; }
 	int getValue() { return m_value; }
 	char getSign() { return m_sign; }

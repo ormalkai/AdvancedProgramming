@@ -18,7 +18,7 @@ void Board::buildBoard(char ** initBoard)
 			// initalize index of Cell
 			m_boardData[i][j].setIndex(i, j);
 			// check if the is the start of ship
-			if (SPACE == initBoard[i - 1][j] && SPACE == initBoard[i][j - 1])
+			if (SPACE != initBoard[i][j] && SPACE == initBoard[i - 1][j] && SPACE == initBoard[i][j - 1])
 			{
 				// create the ship
 				Ship* ship = ShipFactory::instance()->create(i, j, initBoard);
@@ -29,7 +29,7 @@ void Board::buildBoard(char ** initBoard)
 				for (int k = 0; k < shipLen; k++)
 				{
 					int row = INC_ROW(isVertical, i, k);
-					int col = INC_COL(isVertical, i, k);
+					int col = INC_COL(isVertical, j, k);
 					m_boardData[row][col].setShip(ship);
 					m_boardData[row][col].setStatus(Cell::ALIVE);
 					ship->addCell(&(m_boardData[row][col]));
@@ -37,8 +37,6 @@ void Board::buildBoard(char ** initBoard)
 			}
 		}
 	}
-
-
 }
 
 
@@ -97,4 +95,24 @@ Cell Board::get(pair<int, int> i)
 char Board::getSign(int r, int c)
 {
 	return get(r, c).getSign();
+}
+
+void Board::dump()
+{
+	printf("Dumping Board\n");
+	for (int i = 0; i < INIT_BOARD_ROW_SIZE; ++i)
+	{
+		for (int j = 0; j < INIT_BOARD_COL_SIZE; ++j)
+		{
+			if (SPACE == m_boardData[i][j].getSign())
+			{
+				printf("@");
+			}
+			else
+			{
+				printf("%c", m_boardData[i][j].getSign());
+			}
+		}
+		printf("\n");
+	}
 }
