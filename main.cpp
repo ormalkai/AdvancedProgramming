@@ -8,7 +8,6 @@ void parseArgs(int argc, char* argv[], string& filesLocation, bool& isQuiet, int
 {
 	bool isPathInitialized = false;
 	bool isDelayInitialized = false;
-	bool isQuietInitialized = false;
 
 	// set defaults
 	filesLocation = "./";
@@ -18,9 +17,9 @@ void parseArgs(int argc, char* argv[], string& filesLocation, bool& isQuiet, int
 	for (int i = 1; i < argc; i++)
 	{
 		string arg(argv[i]);
-		if (false == isQuietInitialized && "-quiet" == arg)
+		if (false == isQuiet && "-quiet" == arg)
 		{
-			isQuietInitialized = true;
+			isQuiet = true;
 		}
 		else if (false == isDelayInitialized && "-delay" == arg)
 		{
