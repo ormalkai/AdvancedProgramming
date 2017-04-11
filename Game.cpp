@@ -424,11 +424,21 @@ ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
 	(dynamic_cast<BattleshipAlgoFromFile*>(m_players[PLAYER_A]))->AttackFileParser(attackFilePerPlayer[PLAYER_A]);
 	char** playerABoard = m_board.toCharMat(PLAYER_A);
 	m_players[PLAYER_A]->setBoard(const_cast<const char **>(playerABoard), m_rows, m_cols);
-
+	
 	m_players[PLAYER_B] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
 	(dynamic_cast<BattleshipAlgoFromFile*>(m_players[PLAYER_B]))->AttackFileParser(attackFilePerPlayer[PLAYER_A]);
 	char** playerBBoard = m_board.toCharMat(PLAYER_B);
 	m_players[PLAYER_B]->setBoard(const_cast<const char **>(playerBBoard), m_rows, m_cols);
+
+	for (int i = 0; i < m_row; i++)
+	{
+		delete[] playerABoard[i];
+		delete[] playerBBoard[i];
+	}
+	
+	delete[] playerABoard;
+	delete[] playerBBoard;
+
 
 	// For more players - add new section
 
