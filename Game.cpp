@@ -496,11 +496,14 @@ ReturnCode Game::startGame()
 	pair<int, int> attackReq;
 	PlayerAlgo* currentPlayer = m_players[PLAYER_A];
 	m_currentPlayerIndex = PLAYER_A;
+	m_otherPlayerIndex = PLAYER_B;
+	bool gameOver = false;
 
 	// Game loop
-	while (true)
+	while (!gameOver)
 	{
 		currentPlayer = m_players[m_currentPlayerIndex];
+		
 		attackReq = currentPlayer->attack();
 
 		// Check attack request 
@@ -536,6 +539,15 @@ ReturnCode Game::startGame()
 			Ship* pShip = attackedCell.getShip();
 			pShip->executeAttack();
 
+			if (pShip->isShipAlive())
+			{
+				attackResult = AttackResult::Hit;
+			}
+			else
+			{
+				attackResult = AttackResult::Sink;
+				m_numOfShipsPerPlayer[m_otherPlayerIndex]--;
+			}
 			attackResult = pShip->isShipAlive() ? AttackResult::Hit : AttackResult::Sink;
 		}
 		break;
@@ -554,6 +566,8 @@ ReturnCode Game::startGame()
 		default:
 			attackResult = AttackResult::Miss;
 		}
+		
+		m_board.printAttack(attackReq.first, attackReq.second, attackResult);
 
 		// Notify for all players
 		for (int i = 0; i < NUM_OF_PLAYERS; i++)
@@ -562,7 +576,10 @@ ReturnCode Game::startGame()
 		}
 
 		// If game over break
-
+		if (Utils::instance().isExistInVec(m_numOfShipsPerPlayer, 0))
+		{
+			gameOver = true;
+		}
 		// If attack failed - iter.next
 		// If iter == last do iter = begin
 
@@ -575,6 +592,14 @@ ReturnCode Game::startGame()
 	}
 
 	// Notify winner
+	if (m_numOfShipsPerPlayer[PLAYER_A] == 0)
+	{
+		// Notify Player B is the man
+	}
+	else /*(m_numOfShipsPerPlayer[PLAYER_B] == 0)*/
+	{
+		// Notify Player B is the man
+	}
 
 	return ReturnCode::RC_SUCCESS;
 }

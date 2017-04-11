@@ -22,7 +22,6 @@ public:
 	~Board();
 	Board(const Board &) = default;
 
-	void dump() const;
 	Cell& get(int r, int c) { return  m_boardData[r][c]; }
 	Cell& get(pair<int, int> i) { return get(i.first, i.second); }
 

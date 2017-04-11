@@ -31,6 +31,7 @@ private:
 
 	Board m_board;
 	int m_currentPlayerIndex;
+	int m_otherPlayerIndex;
 
 	vector<PlayerAlgo*> m_players;
 	//map<PlayerAlgo*, Board> m_boards;
@@ -72,7 +73,7 @@ private:
 	int getShipLengthHorizontal(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction);
 	int getShipLengthVertical(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction);
 	bool isAdjacencyValid(char** initBoard, int i/*row*/, int j/*col*/);
-	void proceedToNextPlayer() { (++m_currentPlayerIndex) % MAX_PLAYER; }
+	void proceedToNextPlayer() { (++m_currentPlayerIndex) % MAX_PLAYER;  (++m_otherPlayerIndex) % MAX_PLAYER; }
 public:
 
 	Game(const Game&) = delete;
