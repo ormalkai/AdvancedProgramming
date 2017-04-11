@@ -114,6 +114,9 @@ public:
 	string getAttackFileByPlayer(int player);
 
 	std::istream& safeGetline(std::istream& is, std::string& t);
+	void gotoxy(int x, int y);
+	void setTextColor(WORD color);
+
 
 	template<class T>
 	bool isExistInVec(vector<T> vec, T val)

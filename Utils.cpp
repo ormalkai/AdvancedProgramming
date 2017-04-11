@@ -164,3 +164,16 @@ std::istream& Utils::safeGetline(std::istream& is, std::string& t)
 	}
 }
 
+void Utils::gotoxy(int x, int y)
+{
+	COORD coord;
+	coord.X = x;
+	coord.Y = y;
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+}
+
+void Utils::setTextColor(_In_ WORD color)
+{
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);  // Get handle to standard output
+	SetConsoleTextAttribute(hConsole, color);
+}

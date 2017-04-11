@@ -11,20 +11,6 @@
 #define INC_COL(IS_VERTICAL, COL, OFFSET) (((false) == (IS_VERTICAL)) ? ((COL) + (OFFSET)) : (COL))
 
 
-void gotoxy(int x, int y)
-{
-	COORD coord;
-	coord.X = x;
-	coord.Y = y;
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
-}
-
-void setTextColor(_In_ WORD color)
-{
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);  // Get handle to standard output
-	SetConsoleTextAttribute(hConsole, color);
-}
-
 void Board::buildBoard(char ** initBoard)
 {
 	// scan from top left to right and bottom
@@ -121,15 +107,15 @@ void Board::printBoard()
 	{
 		for (int j = 0; j < INIT_BOARD_COL_SIZE; ++j)
 		{
-			gotoxy(i, j);
+			Utils::instance().gotoxy(i, j);
 			if (SPACE == m_boardData[i][j].getSign())
 			{
-				setTextColor(BACKGROUND_BLUE | BACKGROUND_RED | BACKGROUND_GREEN);
+				Utils::instance().setTextColor(BACKGROUND_BLUE | BACKGROUND_RED | BACKGROUND_GREEN);
 				cout << " ";
 			}
 			else
 			{
-				setTextColor(m_boardData[i][j].getShip()->getColor());
+				Utils::instance().setTextColor(m_boardData[i][j].getShip()->getColor());
 				cout << m_boardData[i][j].getSign();
 			}
 		}
@@ -144,12 +130,12 @@ void Board::printAttack(int i, int j, AttackResult attackResult)
 		return;
 	}
 
-	for (int k = 0; k < 5; k++)
+	for (int k = 0; k < 3; k++)
 	{
-		gotoxy(i, j);
+		Utils::instance().gotoxy(i, j);
 		cout << "@";
 		Sleep(100);
-		gotoxy(i, j);
+		Utils::instance().gotoxy(i, j);
 		cout << m_boardData[i][j].getSign();
 		Sleep(100);
 	}
@@ -157,11 +143,11 @@ void Board::printAttack(int i, int j, AttackResult attackResult)
 	{
 	case (AttackResult::Hit):
 	case (AttackResult::Sink):
-		gotoxy(i, j);
+		Utils::instance().gotoxy(i, j);
 		cout << "*";
 		break;
 	case (AttackResult::Miss):
-		gotoxy(i, j);
+		Utils::instance().gotoxy(i, j);
 		cout << SPACE;
 		break;
 	}

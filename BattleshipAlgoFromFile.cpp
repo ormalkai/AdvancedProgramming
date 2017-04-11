@@ -38,7 +38,6 @@ void BattleshipAlgoFromFile::setBoard(const char** board, int numRows, int numCo
 
 std::pair<int, int> BattleshipAlgoFromFile::attack()
 {
-	// TODO what if empty
 	if (0 == m_attackQueue.size())
 	{
 		return std::pair<int, int>(-1, -1);
