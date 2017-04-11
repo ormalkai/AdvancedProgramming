@@ -33,11 +33,16 @@ BattleshipAlgoFromFile::BattleshipAlgoFromFile(int id)
 
 void BattleshipAlgoFromFile::setBoard(const char** board, int numRows, int numCols)
 {
+	// noting to do in player algo from file
 }
 
 std::pair<int, int> BattleshipAlgoFromFile::attack()
 {
 	// TODO what if empty
+	if (0 == m_attackQueue.size())
+	{
+		return std::pair<int, int>(-1, -1);
+	}
 	std::pair<int, int> attack = m_attackQueue[m_attackQueue.size() - 1];
 	m_attackQueue.pop_back();
 	return attack;
