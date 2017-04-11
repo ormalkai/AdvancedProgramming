@@ -79,8 +79,7 @@ public:
 	/*
 		Parse board file and build board matrix
 	*/
-
-	ReturnCode init(string boardPathFile);
+	ReturnCode init(string filesPath, bool isQuiet, int delay);
 	
 	ReturnCode startGame();
 

@@ -12,6 +12,15 @@ Utils::Utils()
 	m_shipToValue[PLAYER_A_ROCKET_SHIP] = m_shipToValue[PLAYER_B_ROCKET_SHIP] = 3;
 	m_shipToValue[PLAYER_A_SUBMARINE] = m_shipToValue[PLAYER_B_SUBMARINE] = 7;
 	m_shipToValue[PLAYER_A_DESTROYER] = m_shipToValue[PLAYER_B_DESTROYER] = 8;
+
+	m_shipToColor[PLAYER_A_RUBBER_SHIP] = FOREGROUND_BLUE;
+	m_shipToColor[PLAYER_B_RUBBER_SHIP] = FOREGROUND_BLUE | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED;
+	m_shipToColor[PLAYER_A_ROCKET_SHIP] = FOREGROUND_GREEN;
+	m_shipToColor[PLAYER_B_ROCKET_SHIP] = FOREGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED;
+	m_shipToColor[PLAYER_A_SUBMARINE] = FOREGROUND_BLUE | FOREGROUND_GREEN;
+	m_shipToColor[PLAYER_B_SUBMARINE] = FOREGROUND_BLUE | FOREGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED;
+	m_shipToColor[PLAYER_A_DESTROYER] = FOREGROUND_RED;
+	m_shipToColor[PLAYER_B_DESTROYER] = FOREGROUND_RED | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED;
 }
 
 Utils& Utils::instance()
@@ -70,6 +79,12 @@ int Utils::getShipValue(char c)
 {
 	return m_shipToValue[c];
 }
+
+_In_ WORD Utils::getShipColor(char c)
+{
+	return m_shipToColor[c];
+}
+
 int Utils::getShipByIndexAndPlayer(int ship, int player)
 {
 	if (MAX_SHIP < ship || 0 > ship)

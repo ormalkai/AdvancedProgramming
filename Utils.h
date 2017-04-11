@@ -1,4 +1,7 @@
 #pragma once
+#include <vector>
+#include <map>
+#include <windows.h>
 
 #define NUM_OF_PLAYERS (2)
 #define BOARD_ROW_SIZE (10)
@@ -20,8 +23,6 @@
 #define PLAYER_B_ATTACK_FILE "*.attack-b"
 #define NO_ATTACK_FILE ""
 
-#include <vector>
-#include <map>
 using namespace std;
 
 typedef enum ReturnCode
@@ -62,6 +63,7 @@ private:
 	Utils();
 	map<char, int> m_shipToLen; // conversion map between ship type to expected length
 	map<char, int> m_shipToValue; // conversion map between ship type to expected value
+	map<char, _In_ WORD> m_shipToColor;// conversion between ship and its color
 	vector<char> m_playerIndexToChar
 	{
 		PLAYER_A_CHAR,
@@ -106,6 +108,7 @@ public:
 	int getIndexByShip(char c);
 	int getShipLen(char c);
 	int getShipValue(char c);
+	_In_ WORD getShipColor(char c);
 	int getShipByIndexAndPlayer(int ship, int player);
 	char getPlayerCharByIndex(int player);
 	string getAttackFileByPlayer(int player);
