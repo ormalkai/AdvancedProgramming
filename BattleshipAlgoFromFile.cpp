@@ -73,45 +73,24 @@ void BattleshipAlgoFromFile::AttackFileParser(string& attackPath) {
 		tokens = split(line, ',');
 		if (tokens.size() != 2)
 		{
+			// skip bad lines
 			return;
 		}
 		trim(tokens[0]);
 		i = stoi(tokens[0]);
 		trim(tokens[1]);
 		j = stoi(tokens[1]);
+
+		// input validation
+		if (i < 1 || j < 1 || i > 10 || j > 10)
+		{
+			return;
+		}
+
 		pair<int, int> aPair(i, j);
 		m_attackQueue.push_back(aPair);
 	}
-
-
 }
 
-//int BattleshipAlgoFromFile::checkLine(string str, int k) {
-//
-//	int i;
-//	if (k == 1) {
-//		i = stoi(str);
-//	}
-//
-//	if (k == 2) {
-//		i = cleanSpace();
-//		i = stoi(str[i]);
-//	}
-//	if (i >= 1 && i <= 10) {
-//		if (cleanSpace() == str.length())
-//			return i;
-//	}
-//	return -1;
-//
-//}
-//
-//int BattleshipAlgoFromFile::cleanSpace(string str, int index) {
-//
-//	while (SPACE == index<str.length() && str[index])
-//	{
-//		index++;
-//	}
-//	return index;
-//}
 
 
