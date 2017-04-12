@@ -13,9 +13,9 @@ ShipFactory* ShipFactory::instance()
 Ship* ShipFactory::create(int i, int j, char ** initBoard)
 {
 	char ship = initBoard[i][j];
-	int shipLen = Utils::instance().getShipLen(ship);
-	int shipValue = Utils::instance().getShipValue(ship);
-	_In_ WORD shipColor = Utils::instance().getShipColor(ship);
+	int shipLen = Utils::getShipLen(ship);
+	int shipValue = Utils::getShipValue(ship);
+	_In_ WORD shipColor = Utils::getShipColor(ship);
 	Ship* result;
 	switch (ship) {
 	case 'b':

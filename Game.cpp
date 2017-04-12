@@ -19,12 +19,12 @@ bool Game::checkWrongSizeOrShape() const
 	bool result = true;
 	for (int i = 0; i < PlayerIndex::MAX_PLAYER; i++)
 	{
-		char player = Utils::instance().getPlayerCharByIndex(i);
+		char player = Utils::getPlayerCharByIndex(i);
 		for (int j = 0; j < ShipType::MAX_SHIP; j++)
 		{
 			if (true == m_wrongSizeOrShapePerPlayer[i][j])
 			{
-				char ship = Utils::instance().getShipByIndexAndPlayer(j, i);
+				char ship = Utils::getShipByIndexAndPlayer(j, i);
 				cout << "Wrong size or shape for ship " << ship << " for player " << player << endl;
 				result = false;
 			}
@@ -38,7 +38,7 @@ bool Game::checkNumberOfShips() const
 	bool result = true;
 	for (int i = 0; i < PlayerIndex::MAX_PLAYER; i++)
 	{
-		char player = Utils::instance().getPlayerCharByIndex(i);
+		char player = Utils::getPlayerCharByIndex(i);
 		if (SHIPS_PER_PLAYER < m_numOfShipsPerPlayer[i])
 		{
 			cout << "Too many ships for player " << player << endl;
@@ -94,10 +94,10 @@ void Game::validateBoard(char** initBoard)
 			char currentShip = initBoard[i][j];
 			int horizontalShipLen = getShipLength(initBoard, currentShip, i, j, ShipLengthDirection::HORIZONTAL);
 			int verticalShipLen = getShipLength(initBoard, currentShip, i, j, ShipLengthDirection::VERTICAL);
-			int expectedLen = Utils::instance().getShipLen(currentShip);
+			int expectedLen = Utils::getShipLen(currentShip);
 
-			PlayerIndex playerIndex = Utils::instance().getPlayerIdByShip(currentShip);
-			int shipIndex = Utils::instance().getIndexByShip(currentShip);
+			PlayerIndex playerIndex = Utils::getPlayerIdByShip(currentShip);
+			int shipIndex = Utils::getIndexByShip(currentShip);
 			if (((expectedLen != horizontalShipLen) || (expectedLen == horizontalShipLen && 1 != verticalShipLen)) &&
 				((expectedLen != verticalShipLen)   || (expectedLen == verticalShipLen && 1 != horizontalShipLen)))
 			{
@@ -133,14 +133,14 @@ void Game::readSBoardFile(std::string filePath, char** initBoard)
 	string line;
 	int rowIndex = 1;
 	// Line by line up to 10 line and up to 10 chars per line
-	while (Utils::instance().safeGetline(sboard, line) && rowIndex <= BOARD_ROW_SIZE)
+	while (Utils::safeGetline(sboard, line) && rowIndex <= BOARD_ROW_SIZE)
 	{
 		int colIndex = 1;
 		for (std::string::size_type i = 0; i < line.size() && colIndex <= 10; i++)
 		{
 			char c = line[i];
 			// If not allowed chars skip, otherwise insert it to board
-			if (PlayerIndex::MAX_PLAYER != Utils::instance().getPlayerIdByShip(c))
+			if (PlayerIndex::MAX_PLAYER != Utils::getPlayerIdByShip(c))
 			{
 				initBoard[rowIndex][colIndex] = c;
 			}
@@ -181,7 +181,7 @@ ReturnCode Game::getattackFilesNameFromDirectory(string filesPath, vector<string
 	ReturnCode rc = RC_SUCCESS;
 	for (int i = PLAYER_A; i < PlayerIndex::MAX_PLAYER; i++)
 	{
-		string attackFileExtensionPerPlayer = Utils::instance().getAttackFileByPlayer(i);
+		string attackFileExtensionPerPlayer = Utils::getAttackFileByPlayer(i);
 		if (NO_ATTACK_FILE == attackFileExtensionPerPlayer)
 		{
 			attackFilePerPlayer.push_back(NO_ATTACK_FILE);
@@ -191,7 +191,7 @@ ReturnCode Game::getattackFilesNameFromDirectory(string filesPath, vector<string
 		hFind = FindFirstFile(attackFile.c_str(), &FindFileData);
 		if (INVALID_HANDLE_VALUE == hFind)
 		{
-			cout << "Missing attack file for player " << Utils::instance().getPlayerCharByIndex(i) << " looking in path: " << filesPath << endl;
+			cout << "Missing attack file for player " << Utils::getPlayerCharByIndex(i) << " looking in path: " << filesPath << endl;
 			rc = RC_ERROR;
 		}
 		else
@@ -558,7 +558,7 @@ void Game::startGame()
 		}
 
 		// If game over break
-		if (Utils::instance().isExistInVec(m_numOfShipsPerPlayer, 0))
+		if (Utils::isExistInVec(m_numOfShipsPerPlayer, 0))
 		{
 			gameOver = true;
 			DBG(Debug::DBG_DEBUG, "Game over - 0 ships remaining");
@@ -582,7 +582,7 @@ void Game::printSummary() const
 {
 	if (false == m_isQuiet)
 	{
-		Utils::instance().gotoxy(13, 0);
+		Utils::gotoxy(13, 0);
 	}
 
 	int maxScore = -1;
@@ -598,12 +598,12 @@ void Game::printSummary() const
 		}
 	}
 
-	cout << "Player " << Utils::instance().getPlayerCharByIndex(winner) << " Won" << endl;
+	cout << "Player " << Utils::getPlayerCharByIndex(winner) << " Won" << endl;
 
 	// Print points
 	cout << "Points:" << endl;
 	for (int i = 0; i < NUM_OF_PLAYERS; i++)
 	{
-		cout << "Player " << Utils::instance().getPlayerCharByIndex(i) << ": " << m_players[i]->getScore() << endl;
+		cout << "Player " << Utils::getPlayerCharByIndex(i) << ": " << m_players[i]->getScore() << endl;
 	}
 }

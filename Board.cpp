@@ -28,7 +28,7 @@ void Board::buildBoard(char ** initBoard)
 				Ship* ship = ShipFactory::instance()->create(i, j, initBoard);
 				m_shipsOnBoard.push_back(ship);
 				// init ship in relevant cells and cells in the ship
-				int shipLen = Utils::instance().getShipLen(initBoard[i][j]);
+				int shipLen = Utils::getShipLen(initBoard[i][j]);
 				bool isVertical = initBoard[i][j] == initBoard[i + 1][j];
 				for (int k = 0; k < shipLen; k++)
 				{
@@ -74,7 +74,7 @@ char** Board::toCharMat(PlayerIndex playerId)
 		for (int j = 0; j < m_cols; j++)
 		{
 			char c = m_boardData[i][j].getSign();
-			if (SPACE != c && (Utils::instance().getPlayerIdByShip(c) != playerId))
+			if (SPACE != c && (Utils::getPlayerIdByShip(c) != playerId))
 				c = SPACE;
 
 			ret[i][j] = c;
@@ -107,15 +107,15 @@ void Board::printBoard()
 	{
 		for (int j = 0; j < INIT_BOARD_COL_SIZE; ++j)
 		{
-			Utils::instance().gotoxy(i, j);
+			Utils::gotoxy(i, j);
 			if (SPACE == m_boardData[i][j].getSign())
 			{
-				Utils::instance().setTextColor(BACKGROUND_BLUE | BACKGROUND_RED | BACKGROUND_GREEN);
+				Utils::setTextColor(BACKGROUND_BLUE | BACKGROUND_RED | BACKGROUND_GREEN);
 				cout << " ";
 			}
 			else
 			{
-				Utils::instance().setTextColor(m_boardData[i][j].getShip()->getColor());
+				Utils::setTextColor(m_boardData[i][j].getShip()->getColor());
 				cout << m_boardData[i][j].getSign();
 			}
 		}
@@ -132,10 +132,10 @@ void Board::printAttack(int i, int j, AttackResult attackResult)
 
 	//for (int k = 0; k < 3; k++)
 	//{
-	//	Utils::instance().gotoxy(i, j);
+	//	Utils::gotoxy(i, j);
 	//	cout << "@";
 	//	Sleep(100);
-	//	Utils::instance().gotoxy(i, j);
+	//	Utils::gotoxy(i, j);
 	//	cout << m_boardData[i][j].getSign();
 	//	Sleep(100);
 	//}
@@ -143,11 +143,11 @@ void Board::printAttack(int i, int j, AttackResult attackResult)
 	{
 	case (AttackResult::Hit):
 	case (AttackResult::Sink):
-		Utils::instance().gotoxy(i, j);
+		Utils::gotoxy(i, j);
 		cout << "*";
 		break;
 	case (AttackResult::Miss):
-		Utils::instance().gotoxy(i, j);
+		Utils::gotoxy(i, j);
 		cout << SPACE;
 		break;
 	}

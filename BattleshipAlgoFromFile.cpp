@@ -77,7 +77,7 @@ void BattleshipAlgoFromFile::AttackFileParser(string& attackPath) {
 	int i, j;
 	ifstream fin(attackPath);
 	string line;
-	while (Utils::instance().safeGetline(fin, line))
+	while (Utils::safeGetline(fin, line))
 	{
 		tokens = split(line, ',');
 		if (tokens.size() != 2)

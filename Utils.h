@@ -74,7 +74,7 @@ private:
 	static const vector<string> m_expectedAttackFilePerPlayer;
 
 public:
-	static Utils& instance();
+	//static Utils& instance();
 
 	/**
 	 * @Details		receives char and returns for which player the ship belongs to

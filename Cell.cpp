@@ -13,5 +13,5 @@ Cell::~Cell()
 
 void Cell::setShip(Ship* ship) {
 	m_pShip = ship; 
-	m_playerIndexOwner = Utils::instance().getPlayerIdByShip(ship->getSign());
+	m_playerIndexOwner = Utils::getPlayerIdByShip(ship->getSign());
 }

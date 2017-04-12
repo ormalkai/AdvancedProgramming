@@ -67,13 +67,6 @@ const vector<string>  Utils::m_expectedAttackFilePerPlayer =
 	PLAYER_B_ATTACK_FILE
 };
 
-
-Utils& Utils::instance()
-{
-	static Utils utils;
-	return utils;
-}
-
 /**
 * @Details		receives char and returns for which player the ship belongs to
 * @Param		c - query ship
