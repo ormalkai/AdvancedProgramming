@@ -2,27 +2,71 @@
 #include "Utils.h"
 #include <istream>
 
-Utils::Utils()
+
+map<char, int> Utils::m_shipToLen = {
+	{ PLAYER_A_RUBBER_SHIP, 1 },
+	{ PLAYER_A_ROCKET_SHIP, 2 },
+	{ PLAYER_A_SUBMARINE, 3 },
+	{ PLAYER_A_DESTROYER, 4 },
+	{ PLAYER_B_RUBBER_SHIP, 1 },
+	{ PLAYER_B_ROCKET_SHIP, 2 },
+	{ PLAYER_B_SUBMARINE, 3 },
+	{ PLAYER_B_DESTROYER, 4 }
+};
+
+
+map<char, int> Utils::m_shipToValue = {
+{PLAYER_A_RUBBER_SHIP, 2 },
+{PLAYER_A_ROCKET_SHIP, 3},
+{PLAYER_A_SUBMARINE, 7},
+{PLAYER_A_DESTROYER, 8},
+{PLAYER_B_RUBBER_SHIP, 2},
+{PLAYER_B_ROCKET_SHIP, 3},
+{PLAYER_B_SUBMARINE, 7},
+{PLAYER_B_DESTROYER, 8}
+};
+
+map<char, _In_ WORD>  Utils::m_shipToColor = {
+{ PLAYER_A_RUBBER_SHIP , FOREGROUND_BLUE },
+{ PLAYER_B_RUBBER_SHIP, FOREGROUND_BLUE | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED },
+{ PLAYER_A_ROCKET_SHIP, FOREGROUND_GREEN },
+{ PLAYER_B_ROCKET_SHIP, FOREGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED },
+{ PLAYER_A_SUBMARINE, FOREGROUND_BLUE | FOREGROUND_GREEN },
+{ PLAYER_B_SUBMARINE, FOREGROUND_BLUE | FOREGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED },
+{ PLAYER_A_DESTROYER, FOREGROUND_RED },
+{ PLAYER_B_DESTROYER, FOREGROUND_RED | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED }
+};
+
+
+const vector<char> Utils::m_playerIndexToChar
 {
-	m_shipToLen[PLAYER_A_RUBBER_SHIP] = m_shipToLen[PLAYER_B_RUBBER_SHIP] = 1;
-	m_shipToLen[PLAYER_A_ROCKET_SHIP] = m_shipToLen[PLAYER_B_ROCKET_SHIP] = 2;
-	m_shipToLen[PLAYER_A_SUBMARINE]   = m_shipToLen[PLAYER_B_SUBMARINE] = 3;
-	m_shipToLen[PLAYER_A_DESTROYER]   = m_shipToLen[PLAYER_B_DESTROYER] = 4;
+	PLAYER_A_CHAR,
+	PLAYER_B_CHAR
+};
 
-	m_shipToValue[PLAYER_A_RUBBER_SHIP] = m_shipToValue[PLAYER_B_RUBBER_SHIP] = 2;
-	m_shipToValue[PLAYER_A_ROCKET_SHIP] = m_shipToValue[PLAYER_B_ROCKET_SHIP] = 3;
-	m_shipToValue[PLAYER_A_SUBMARINE] = m_shipToValue[PLAYER_B_SUBMARINE] = 7;
-	m_shipToValue[PLAYER_A_DESTROYER] = m_shipToValue[PLAYER_B_DESTROYER] = 8;
+const vector<char>  Utils::m_playerALegalSign =
+{
+	PLAYER_A_RUBBER_SHIP,
+	PLAYER_A_ROCKET_SHIP,
+	PLAYER_A_SUBMARINE,
+	PLAYER_A_DESTROYER
+};
 
-	m_shipToColor[PLAYER_A_RUBBER_SHIP] = FOREGROUND_BLUE;
-	m_shipToColor[PLAYER_B_RUBBER_SHIP] = FOREGROUND_BLUE | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED;
-	m_shipToColor[PLAYER_A_ROCKET_SHIP] = FOREGROUND_GREEN;
-	m_shipToColor[PLAYER_B_ROCKET_SHIP] = FOREGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED;
-	m_shipToColor[PLAYER_A_SUBMARINE] = FOREGROUND_BLUE | FOREGROUND_GREEN;
-	m_shipToColor[PLAYER_B_SUBMARINE] = FOREGROUND_BLUE | FOREGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED;
-	m_shipToColor[PLAYER_A_DESTROYER] = FOREGROUND_RED;
-	m_shipToColor[PLAYER_B_DESTROYER] = FOREGROUND_RED | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED;
-}
+const vector<char>  Utils::m_playerBLegalSign =
+{
+	PLAYER_B_RUBBER_SHIP,
+	PLAYER_B_ROCKET_SHIP,
+	PLAYER_B_SUBMARINE,
+	PLAYER_B_DESTROYER
+};
+
+const vector<string>  Utils::m_expectedAttackFilePerPlayer =
+{
+	// if no attack file - empty string
+	PLAYER_A_ATTACK_FILE,
+	PLAYER_B_ATTACK_FILE
+};
+
 
 Utils& Utils::instance()
 {
@@ -51,6 +95,11 @@ Utils& Utils::instance()
 	return PlayerIndex::MAX_PLAYER;
 }
 
+ /*
+ * @Details		receives char and returns the ship is represented by the char
+ * @Param		c - query ship
+ * @Return		Ship's index or ERROR [-1] for unknown char
+ */
 int Utils::getIndexByShip(char c)
 {
 	switch (c) {
@@ -71,21 +120,42 @@ int Utils::getIndexByShip(char c)
 	}
 }
 
+/*
+* @Details		receives char and returns the length of the ship is represented by the char
+* @Param		c - query ship
+* @Return		Ship's length
+*/
 int Utils::getShipLen(char c)
 {
 	return m_shipToLen[c];
 }
 
+/*
+* @Details		receives char and returns the score of the ship is represented by the char
+* @Param		c - query ship
+* @Return		Ship's value
+*/
 int Utils::getShipValue(char c)
 {
 	return m_shipToValue[c];
 }
 
+/*
+* @Details		receives char and returns the color of the ship is represented by the char
+* @Param		c - query ship
+* @Return		Ship's color
+*/
 _In_ WORD Utils::getShipColor(char c)
 {
 	return m_shipToColor[c];
 }
 
+/*
+* @Details		receives ship index and plyaer index and returns the value of char reperesents the ship
+* @Param		ship - ship index
+* @Param		player - player index
+* @Return		Ship's sign value
+*/
 int Utils::getShipByIndexAndPlayer(int ship, int player)
 {
 	if (MAX_SHIP < ship || 0 > ship)
@@ -108,6 +178,11 @@ int Utils::getShipByIndexAndPlayer(int ship, int player)
 	}
 }
 
+/*
+* @Details		receives plyaer index and returns the sign (character) of the player [For ex A for 0, B for 1]
+* @Param		player - player index
+* @Return		player's char
+*/
 char Utils::getPlayerCharByIndex(int player)
 {
 	if (MAX_PLAYER < player || 0 > player)
@@ -118,6 +193,11 @@ char Utils::getPlayerCharByIndex(int player)
 	return m_playerIndexToChar[player];
 }
 
+/*
+* @Details		receives plyaer index and returns the attack file name regex
+* @Param		player - player index
+* @Return		attack filename regex
+*/
 string Utils::getAttackFileByPlayer(int player)
 {
 	if (player < 0 || player > MAX_PLAYER)
@@ -164,6 +244,11 @@ std::istream& Utils::safeGetline(std::istream& is, std::string& t)
 	}
 }
 
+/*
+* @Details		receives coordinates and move the cursor to the position
+* @Param		row - row index
+* @Param		col - col index
+*/
 void Utils::gotoxy(int row, int col)
 {
 	COORD coord;
@@ -172,6 +257,10 @@ void Utils::gotoxy(int row, int col)
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
 
+/*
+* @Details		receives color and change text's color 
+* @Param		color
+*/
 void Utils::setTextColor(_In_ WORD color)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);  // Get handle to standard output

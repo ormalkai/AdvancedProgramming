@@ -60,38 +60,18 @@ typedef enum AttackRequestCode
 class Utils
 {
 private:
-	Utils();
-	map<char, int> m_shipToLen; // conversion map between ship type to expected length
-	map<char, int> m_shipToValue; // conversion map between ship type to expected value
-	map<char, _In_ WORD> m_shipToColor;// conversion between ship and its color
-	vector<char> m_playerIndexToChar
-	{
-		PLAYER_A_CHAR,
-		PLAYER_B_CHAR
-	};
+	Utils() = default;
+	static map<char, int> m_shipToLen; // conversion map between ship type to expected length
+	static map<char, int> m_shipToValue; // conversion map between ship type to expected value
+	static map<char, _In_ WORD> m_shipToColor;// conversion between ship and its color
+	static const vector<char> m_playerIndexToChar;
+	
 
-	vector<char> m_playerALegalSign = 
-	{ 
-		PLAYER_A_RUBBER_SHIP, 
-		PLAYER_A_ROCKET_SHIP,
-		PLAYER_A_SUBMARINE, 
-		PLAYER_A_DESTROYER 
-	};
+	static const vector<char> m_playerALegalSign;
 
-	vector<char> m_playerBLegalSign = 
-	{ 
-		PLAYER_B_RUBBER_SHIP, 
-		PLAYER_B_ROCKET_SHIP, 
-		PLAYER_B_SUBMARINE, 
-		PLAYER_B_DESTROYER 
-	};
+	static const vector<char> m_playerBLegalSign;
 
-	vector<string> m_expectedAttackFilePerPlayer = 
-	{
-		// if no attack file - empty string
-		PLAYER_A_ATTACK_FILE,
-		PLAYER_B_ATTACK_FILE
-	};
+	static const vector<string> m_expectedAttackFilePerPlayer;
 
 public:
 	static Utils& instance();
@@ -103,23 +83,23 @@ public:
 	 *				PlayerIndex::PLAYER_B if c belongs to m_playerBLegalSign,
 	 *				PlayerIndex::MAX_PLAYER otherwise
 	 */
-	PlayerIndex getPlayerIdByShip(char c);
+	static PlayerIndex getPlayerIdByShip(char c);
 
-	int getIndexByShip(char c);
-	int getShipLen(char c);
-	int getShipValue(char c);
-	_In_ WORD getShipColor(char c);
-	int getShipByIndexAndPlayer(int ship, int player);
-	char getPlayerCharByIndex(int player);
-	string getAttackFileByPlayer(int player);
+	static int getIndexByShip(char c);
+	static int getShipLen(char c);
+	static int getShipValue(char c);
+	static _In_ WORD getShipColor(char c);
+	static int getShipByIndexAndPlayer(int ship, int player);
+	static char getPlayerCharByIndex(int player);
+	static string getAttackFileByPlayer(int player);
 
-	std::istream& safeGetline(std::istream& is, std::string& t);
-	void gotoxy(int row, int col);
-	void setTextColor(WORD color);
+	static std::istream& safeGetline(std::istream& is, std::string& t);
+	static void gotoxy(int row, int col);
+	static void setTextColor(WORD color);
 
 
 	template<class T>
-	bool isExistInVec(vector<T> vec, T val)
+	static bool isExistInVec(vector<T> vec, T val)
 	{
 		if (find(vec.begin(), vec.end(), val) != vec.end()) {
 			return true;

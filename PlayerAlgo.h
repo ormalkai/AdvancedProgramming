@@ -13,7 +13,7 @@ private:
 public:
 	~PlayerAlgo() = default;
 
-	ReturnCode init();
+
 	int getId() const { return m_id; }
 	void setId(int id) { m_id = id; }
 	int getScore() const { return m_score; }
