@@ -20,7 +20,8 @@ void Board::buildBoard(char ** initBoard)
 		for (int j = 1; j <= BOARD_COL_SIZE; j++)
 		{
 			// initalize index of Cell
-			m_boardData[i][j].setIndex(i, j);
+			//m_boardData[i][j].setIndex(i, j);
+
 			// check if the is the start of ship
 			if (SPACE != initBoard[i][j] && SPACE == initBoard[i - 1][j] && SPACE == initBoard[i][j - 1])
 			{
@@ -45,7 +46,7 @@ void Board::buildBoard(char ** initBoard)
 
 
 
-char** Board::toCharMat()
+char** Board::toCharMat() const
 {
 	char** ret = new char*[m_rows];
 
@@ -63,7 +64,7 @@ char** Board::toCharMat()
 }
 
 
-char** Board::toCharMat(PlayerIndex playerId)
+char** Board::toCharMat(PlayerIndex playerId) const
 {
 	char** ret = new char*[m_rows];
 
@@ -97,7 +98,7 @@ Board::~Board()
 	}
 }
 
-void Board::printBoard()
+void Board::printBoard() const
 {
 	if (true == m_isQuiet)
 	{
@@ -123,7 +124,7 @@ void Board::printBoard()
 	}
 }
 
-void Board::printAttack(int i, int j, AttackResult attackResult)
+void Board::printAttack(int i, int j, AttackResult attackResult) const
 {
 	if (true == m_isQuiet)
 	{

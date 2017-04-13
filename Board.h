@@ -28,15 +28,15 @@ public:
 
 	int rows() const { return m_rows; }
 	int cols() const { return m_cols; }
-	void printBoard();
-	void printAttack(int i, int j, AttackResult attackResult);
+	void printBoard() const;
+	void printAttack(int i, int j, AttackResult attackResult) const;
 	void setIsQuiet(bool isQuiet) { m_isQuiet = isQuiet; }
 	void setDelay(int delay) { m_delay = delay; }
 
 	void put(int r, int c);
 
-	char** Board::toCharMat();
-	char** Board::toCharMat(PlayerIndex playerId);
+	char** Board::toCharMat() const;
+	char** Board::toCharMat(PlayerIndex playerId) const;
 	void buildBoard(char ** initBoard);
 	char getSign(int r, int c);
 	inline void clearCell(int r, int c)

@@ -85,19 +85,78 @@ public:
 	 */
 	static PlayerIndex getPlayerIdByShip(char c);
 
+	/*
+	* @Details		receives char and returns the ship is represented by the char
+	* @Param		c - query ship
+	* @Return		Ship's index or ERROR [-1] for unknown char
+	*/
 	static int getIndexByShip(char c);
+
+	/*
+	* @Details		receives char and returns the length of the ship is represented by the char
+	* @Param		c - query ship
+	* @Return		Ship's length
+	*/
 	static int getShipLen(char c);
+
+	/*
+	* @Details		receives char and returns the score of the ship is represented by the char
+	* @Param		c - query ship
+	* @Return		Ship's value
+	*/
 	static int getShipValue(char c);
+
+	/*
+	* @Details		receives char and returns the color of the ship is represented by the char
+	* @Param		c - query ship
+	* @Return		Ship's color
+	*/
 	static _In_ WORD getShipColor(char c);
+
+	/*
+	* @Details		receives ship index and plyaer index and returns the value of char reperesents the ship
+	* @Param		ship - ship index
+	* @Param		player - player index
+	* @Return		Ship's sign value
+	*/
 	static int getShipByIndexAndPlayer(int ship, int player);
+
+	/*
+	* @Details		receives plyaer index and returns the sign (character) of the player [For ex A for 0, B for 1]
+	* @Param		player - player index
+	* @Return		player's char
+	*/
 	static char getPlayerCharByIndex(int player);
+
+	/*
+	* @Details		receives plyaer index and returns the attack file name regex
+	* @Param		player - player index
+	* @Return		attack filename regex
+	*/
 	static string getAttackFileByPlayer(int player);
 
+
 	static std::istream& safeGetline(std::istream& is, std::string& t);
+	
+	/*
+	* @Details		receives coordinates and move the cursor to the position
+	* @Param		row - row index
+	* @Param		col - col index
+	*/
 	static void gotoxy(int row, int col);
+
+	/*
+	* @Details		receives color and change text's color
+	* @Param		color
+	*/
 	static void setTextColor(WORD color);
 
-
+	/*
+	* @Details		receives vector of type T and element of type T and return true if the element exists in the vector, otherwise fales
+	* @Param		vec - vector of T elements
+	* @Param		val - element
+	* @return		true if elem exist otherwise false
+	*/
 	template<class T>
 	static bool isExistInVec(vector<T> vec, T val)
 	{
@@ -106,6 +165,5 @@ public:
 		}
 		return false;
 	}
-
 };
 

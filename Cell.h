@@ -15,28 +15,61 @@ public:
 private:
 	CellStatus m_status;
 	Ship* m_pShip;
-	int m_rIndex, m_cIndex;
 	PlayerIndex m_playerIndexOwner;
 
 
 public:
 	Cell();
 	~Cell();
-
+	
+	/**
+	* @Details		returns cell's status
+	* @Return		CellStatus::ALIVE if cell is part of ship and cell wasn't hitted,
+	*				CellStatus::FREE if cell isn't part of ship and cell wasn't hitted,
+	*				CellStatus::DEAD if cell was hitted
+	*/
 	CellStatus getStatus() const { return  m_status; }
-	char getSign() const
-	{
+
+	/**
+	* @Details		returns cell's sign
+	* @Return		If cell is part of ship returns ship's sign otherwise SPACE
+	*/
+	char getSign() const {
 		return nullptr != m_pShip ? m_pShip->getSign() : SPACE;
 	}
-	int row() const { return m_rIndex; }
-	int col() const { return m_cIndex; }
-	Ship* getShip() const { return m_pShip; }
-	void setShip(Ship* ship);
-	void setStatus(CellStatus status) { m_status = status; }
-	void setIndex(int i, int j) { m_rIndex = i; m_cIndex = j; }
-	bool isEmpty() const { return  nullptr == m_pShip; }
-	PlayerIndex getPlayerIndexOwner() const { return m_playerIndexOwner; }	
-	void clear() { m_status = FREE; m_pShip = nullptr; m_playerIndexOwner = MAX_PLAYER; }
-	void executeAttack() { setStatus(DEAD); }
 
+	/**
+	* @Details		returns cell's ship pointer
+	* @Return		If cell is part of ship returns ship's pointer otherwise nullptr
+	*/
+	Ship* getShip() const { return m_pShip; }
+
+	/**
+	* @Details		receives ship pointer and update cell's ship 
+  	* @param		ship - pointer to ship
+	*/
+	void setShip(Ship* ship);
+	
+	/**
+	* @Details		receives cell status and update cell's status
+	* @param		status - cell's new status 
+	*/
+	void setStatus(CellStatus status) { m_status = status; }
+	
+	/**
+	* @Details		Check cell's status
+	* @return		If cell is part of ship return true, otherwise false
+	*/
+	bool isEmpty() const { return  nullptr == m_pShip; }
+	
+	/**
+	* @Details		returns player index of the cell
+	* @return		player index of cell's owner
+	*/
+	PlayerIndex getPlayerIndexOwner() const { return m_playerIndexOwner; }	
+
+	/**
+	* @Details		initialize the cell: status-FREE, ship's ptr - null, owner - MAX_PLAYER
+	*/
+	void clear() { m_status = FREE; m_pShip = nullptr; m_playerIndexOwner = MAX_PLAYER; }
 };

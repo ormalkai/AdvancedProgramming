@@ -67,13 +67,7 @@ const vector<string>  Utils::m_expectedAttackFilePerPlayer =
 	PLAYER_B_ATTACK_FILE
 };
 
-/**
-* @Details		receives char and returns for which player the ship belongs to
-* @Param		c - query ship
-* @Return		PlayerIndex::PLAYER_A if c belongs to m_playerALegalSign,
-*				PlayerIndex::PLAYER_B if c belongs to m_playerBLegalSign,
-*				PlayerIndex::MAX_PLAYER otherwise
-*/
+
  PlayerIndex Utils::getPlayerIdByShip(char c)
 {
 
@@ -88,11 +82,7 @@ const vector<string>  Utils::m_expectedAttackFilePerPlayer =
 	return PlayerIndex::MAX_PLAYER;
 }
 
- /*
- * @Details		receives char and returns the ship is represented by the char
- * @Param		c - query ship
- * @Return		Ship's index or ERROR [-1] for unknown char
- */
+
 int Utils::getIndexByShip(char c)
 {
 	switch (c) {
@@ -113,42 +103,25 @@ int Utils::getIndexByShip(char c)
 	}
 }
 
-/*
-* @Details		receives char and returns the length of the ship is represented by the char
-* @Param		c - query ship
-* @Return		Ship's length
-*/
+
 int Utils::getShipLen(char c)
 {
 	return m_shipToLen[c];
 }
 
-/*
-* @Details		receives char and returns the score of the ship is represented by the char
-* @Param		c - query ship
-* @Return		Ship's value
-*/
+
 int Utils::getShipValue(char c)
 {
 	return m_shipToValue[c];
 }
 
-/*
-* @Details		receives char and returns the color of the ship is represented by the char
-* @Param		c - query ship
-* @Return		Ship's color
-*/
+
 _In_ WORD Utils::getShipColor(char c)
 {
 	return m_shipToColor[c];
 }
 
-/*
-* @Details		receives ship index and plyaer index and returns the value of char reperesents the ship
-* @Param		ship - ship index
-* @Param		player - player index
-* @Return		Ship's sign value
-*/
+
 int Utils::getShipByIndexAndPlayer(int ship, int player)
 {
 	if (MAX_SHIP < ship || 0 > ship)
@@ -171,11 +144,7 @@ int Utils::getShipByIndexAndPlayer(int ship, int player)
 	}
 }
 
-/*
-* @Details		receives plyaer index and returns the sign (character) of the player [For ex A for 0, B for 1]
-* @Param		player - player index
-* @Return		player's char
-*/
+
 char Utils::getPlayerCharByIndex(int player)
 {
 	if (MAX_PLAYER < player || 0 > player)
@@ -186,11 +155,7 @@ char Utils::getPlayerCharByIndex(int player)
 	return m_playerIndexToChar[player];
 }
 
-/*
-* @Details		receives plyaer index and returns the attack file name regex
-* @Param		player - player index
-* @Return		attack filename regex
-*/
+
 string Utils::getAttackFileByPlayer(int player)
 {
 	if (player < 0 || player > MAX_PLAYER)
@@ -237,11 +202,6 @@ std::istream& Utils::safeGetline(std::istream& is, std::string& t)
 	}
 }
 
-/*
-* @Details		receives coordinates and move the cursor to the position
-* @Param		row - row index
-* @Param		col - col index
-*/
 void Utils::gotoxy(int row, int col)
 {
 	COORD coord;
@@ -250,10 +210,7 @@ void Utils::gotoxy(int row, int col)
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
 
-/*
-* @Details		receives color and change text's color 
-* @Param		color
-*/
+
 void Utils::setTextColor(_In_ WORD color)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);  // Get handle to standard output
