@@ -1,52 +1,51 @@
 #pragma once
 
 #include "PlayerAlgo.h"
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <vector>
 #include <queue>
 
 using namespace std;
 
 class BattleshipAlgoFromFile : public PlayerAlgo {
+
 private:
 	char** m_board;
 	int m_rows;
 	int m_cols;
 	queue<pair<int, int>> m_attackQueue;
-
-	int checkLine(string str, int k);
-	int cleanSpace(string str, int index);
-
-
-
+	
 public:
 	BattleshipAlgoFromFile(int id);
 	~BattleshipAlgoFromFile() = default;
 
-	/*
-	Initialize attack queue
+	/**
+	* @Details		receives path of attack file and build attack queue
+	* @Param		attackPath - path of attack file
 	*/
-	int parseAttackFile();
 	void AttackFileParser(string & attackPath);
-	/*
-	Initialize data members
+	
+	
+	/**
+	* @Details		Receive board matrix and matrix's size, and notify player on his board
+	* @Param		board - player's board
+	* @Param		board - num of rows in board
+	* @Param		board - num of cols in board
 	*/
-	void setBoard(const char** board, int numRows, int numCols);
+	void setBoard(const char** board, int numRows, int numCols) override;
 
-	/*
-	Simulate attack- pop attack from attack queue
+	/**
+	* @Details		Return next attack request
+	* @retrun		pair of coordinates - requested attack.
+	*				in case the queue is empty returns the pair (-1,-1)
 	*/
-	std::pair<int, int> attack();
+	std::pair<int, int> attack() override;
 
-	/*
-	Empty implementation
+	/**
+	* @Details		notify player on last move result
+	* @Param		player - player's index
+	* @Param		row - attacked cell's row index
+	* @Param		col - attacked cell's col index
+	* @Param		result - attack's result (hit, miss, sink)
 	*/
-	void notifyOnAttackResult(int player, int row, int col, AttackResult result);
-
-
-
-
+	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override {};
 
 };

@@ -1,7 +1,6 @@
 #include "Game.h"
 #include "Debug.h"
 #include <iostream>
-#include <algorithm>
 #include <locale>
 
 void parseArgs(int argc, char* argv[], string& filesLocation, bool& isQuiet, int& delay)
@@ -11,8 +10,8 @@ void parseArgs(int argc, char* argv[], string& filesLocation, bool& isQuiet, int
 
 	// set defaults
 	filesLocation = "./";
-	isQuiet = false;
-	delay = 2000;
+	isQuiet = DEFAULT_IS_QUIET_MODE;
+	delay = DEFAULT_DELAY_ATTACK;
 
 	for (int i = 1; i < argc; i++)
 	{

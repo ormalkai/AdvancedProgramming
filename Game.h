@@ -1,11 +1,10 @@
 #pragma once
 
 #include <list>
-#include "Cell.h"
+#include <vector>
 #include "IBattleshipGameAlgo.h"
 #include "Utils.h"
 #include "PlayerAlgoFactory.h"
-#include <vector>
 #include "Board.h"
 #include "PlayerAlgo.h"
 
@@ -56,15 +55,64 @@ private:
 	{
 	}
 
-	bool hasAliveCells() const { return (BOARD_ROW_SIZE * BOARD_COL_SIZE) == m_numOfAliveCellsOnBoard; }
+	/**
+	* @Details		check if there is a ship with inappropriate size
+	* @return		true if at least one ship found, o/w false
+	*/
 	bool checkWrongSizeOrShape() const;
+
+	/**
+	* @Details		check each player has exactly number of ship as expected
+	* @return		false if at least one player has a unexpected ships amount, o/w true
+	*/
 	bool checkNumberOfShips() const;
+	
+	/**
+	* @Details		check if there is adjacent ships [ships w/o space cell between them]
+	* @return		true if at least two ships are neighboring, o/w false
+	*/
 	bool checkAdjacentShips() const;
+	
+	/**
+	* @Details		check if all ships in appropriate size, shape not adjacent, and the amount ships of each player is as expected
+	* @return		true if all the condtions are accepted, o/w false
+	*/
 	bool checkErrors() const;
+	
+	
+	/**
+	* @Details		check the board by given constaints: ship size, shape, neighbors
+	*				and fill error data structure.
+	* @param		initBoard - input board to verify
+	*/
 	void validateBoard(char** initBoard);
+
+	/**
+	* @Details		read board from file and fill initBoard
+	* @param		filePath - board file path
+	* @param		initBoard - matrix for output
+	*/
 	void readSBoardFile(string filePath, char** initBoard);
+
+	/**
+	* @Details		find sboard file by given directory, search first file with extension *.sboard
+	* @param		filesPath - input directory
+	* @param		sboardFileName - reference for valid input file (if return code is success)
+	* @return		ReturnCode::RC_ERROR - in case file not found
+	*				ReturnCode::RC_SUCCESS - return in sboardFileName the file path
+	*/
 	ReturnCode getSboardFileNameFromDirectory(string filesPath, string& sboardFileName);
+
+	/**
+	* @Details		find attack files by given directory, search files with extension *.attack-a and *.attack-b
+	* @param		filesPath - input directory
+	* @param		attackFilePerPlayer - reference for vector of valid input file (if return code is success)
+	* @return		ReturnCode::RC_ERROR - in case file not found
+	*				ReturnCode::RC_SUCCESS - return in attackFilePerPlayer the vector of files paths
+	*/
 	ReturnCode getattackFilesNameFromDirectory(string filesPath, vector<string>& attackFilePerPlayer);
+	
+	
 	ReturnCode initFilesPath(string& filesPath, string& sboardFile, vector<string>& attackFilePerPlayer);
 	ReturnCode parseBoardFile(string sboardFileName, char** initBoard);
 	ReturnCode initListPlayers();

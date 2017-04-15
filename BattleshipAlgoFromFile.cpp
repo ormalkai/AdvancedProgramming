@@ -52,9 +52,6 @@ std::pair<int, int> BattleshipAlgoFromFile::attack()
 	return attack;
 }
 
-void BattleshipAlgoFromFile::notifyOnAttackResult(int player, int row, int col, AttackResult result)
-{
-}
 
 //splits string s to a vector
 static std::vector<std::string> split(const std::string &s, char delim)
@@ -93,7 +90,8 @@ void BattleshipAlgoFromFile::AttackFileParser(string& attackPath) {
 		// input validation
 		if (i < 1 || j < 1 || i > BOARD_ROW_SIZE || j > BOARD_COL_SIZE)
 		{
-			return;
+			DBG(Debug::DBG_INFO, "Failed to parse atteck requet: line: [%s]", line);
+			continue;;
 		}
 
 		pair<int, int> aPair(i, j);

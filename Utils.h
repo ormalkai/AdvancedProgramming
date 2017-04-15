@@ -22,6 +22,9 @@
 #define PLAYER_A_ATTACK_FILE "*.attack-a"
 #define PLAYER_B_ATTACK_FILE "*.attack-b"
 #define NO_ATTACK_FILE ""
+#define DEFAULT_IS_QUIET_MODE (false)
+#define DEFAULT_DELAY_ATTACK (2000)
+
 
 using namespace std;
 
@@ -74,8 +77,7 @@ private:
 	static const vector<string> m_expectedAttackFilePerPlayer;
 
 public:
-	//static Utils& instance();
-
+	
 	/**
 	 * @Details		receives char and returns for which player the ship belongs to
 	 * @Param		c - query ship
