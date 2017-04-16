@@ -5,7 +5,6 @@
 
 void parseArgs(int argc, char* argv[], string& filesLocation, bool& isQuiet, int& delay)
 {
-	bool isPathInitialized = false;
 	bool isDelayInitialized = false;
 
 	// set defaults
