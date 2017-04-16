@@ -73,8 +73,10 @@ private:
 	 */
 	Debug();
 
+	~Debug();
+
 	/**
-	 * @Details		Deleted copt constructor
+	 * @Details		Deleted copy constructor
 	 */
 	Debug(const Debug&) = delete;
 
@@ -87,6 +89,8 @@ private:
 	bool			m_printToLog;	// print to log file or not
 	bool			m_printToStd;	// print to std or not
 	DebugLevel		m_debugLevel;	// minimum debug level
+	FILE *			m_pFile;
+	
 
 	/**
 	 * @Details		assistent prin function

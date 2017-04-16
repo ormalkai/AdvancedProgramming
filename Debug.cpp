@@ -2,7 +2,15 @@
 #include "Debug.h"
 #include <cstdarg>
 
-Debug::Debug(): m_logFile("game.log"), m_printToLog(true), m_printToStd(true), m_debugLevel(DBG_ERROR){}
+Debug::Debug(): m_logFile("game.log"), m_printToLog(true), m_printToStd(true), m_debugLevel(DBG_ERROR), m_pFile(nullptr){}
+
+Debug::~Debug()
+{
+	if (nullptr != m_pFile)
+	{
+		fclose(m_pFile);
+	}
+}
 
 Debug& Debug::instance()
 {
@@ -16,6 +24,14 @@ void Debug::init(string logFile, bool printToLog, bool printToStd, DebugLevel de
 	m_printToLog = printToLog;
 	m_printToStd = printToStd;
 	m_debugLevel = debugLevel;
+	if (true == m_printToLog)
+	{
+		int rc = fopen_s(&m_pFile, m_logFile.c_str(), "w");
+		if (0 != rc)
+		{
+			m_printToLog = false;
+		}
+	}
 }
 
 void Debug::print(DebugLevel debugLevel, const char* fmt, ...)
@@ -43,15 +59,14 @@ void Debug::vprint(const char *fmt, va_list ap)
 	}
 	if (true == m_printToLog)
 	{
-		FILE * pFile;
-		int rc = fopen_s(&pFile, m_logFile.c_str(), "w");
+		/*FILE * m_pFile;
+		int rc = fopen_s(&m_pFile, m_logFile.c_str(), "w");*/
 		// TODO handle error
-		int nWritten = vfprintf(pFile, fmt, ap);
+		int nWritten = vfprintf(m_pFile, fmt, ap);
 		if (nWritten >= 0)
 		{
-			fprintf(pFile, "\n");
+			fprintf(m_pFile, "\n");
 		}
-		fflush(pFile);
-		fclose(pFile);
+		fflush(m_pFile);
 	}
 }

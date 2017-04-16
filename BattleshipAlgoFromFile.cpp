@@ -80,7 +80,7 @@ void BattleshipAlgoFromFile::AttackFileParser(string& attackPath) {
 		if (tokens.size() != 2)
 		{
 			// skip bad lines
-			DBG(Debug::DBG_WARNING, "Ignore invalid line [%s]\n", line.c_str());
+			DBG(Debug::DBG_WARNING, "Ignore invalid line [%s]", line.c_str());
 			continue;
 		}
 		trim(tokens[0]);
@@ -92,7 +92,7 @@ void BattleshipAlgoFromFile::AttackFileParser(string& attackPath) {
 		}
 		catch (const std::exception& e)
 		{
-			DBG(Debug::DBG_WARNING, "Ignore invalid line [%s]\n", line.c_str());
+			DBG(Debug::DBG_WARNING, "Ignore invalid line [%s]", line.c_str());
 			continue;
 		}
 
