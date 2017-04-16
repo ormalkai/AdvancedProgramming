@@ -43,7 +43,7 @@ std::pair<int, int> BattleshipAlgoFromFile::attack()
 		static bool isFirst = true;
 		if (true == isFirst)
 		{
-			DBG(Debug::DBG_DEBUG, "Attacks of player %c done", getId());
+			DBG(Debug::DBG_DEBUG, "Attacks of player %c done", Utils::getPlayerCharByIndex(getId()));
 		}
 		return std::pair<int, int>(-1, -1);
 	}
@@ -74,13 +74,16 @@ void BattleshipAlgoFromFile::AttackFileParser(string& attackPath) {
 	int i, j;
 	ifstream fin(attackPath);
 	string line;
+	DBG(Debug::DBG_INFO, "Parsing file [%s]", attackPath.c_str());
+	int lineNumber = 0;
 	while (Utils::safeGetline(fin, line))
 	{
+		++lineNumber;
 		tokens = split(line, ',');
 		if (tokens.size() != 2)
 		{
 			// skip bad lines
-			DBG(Debug::DBG_WARNING, "Ignore invalid line [%s]", line.c_str());
+			DBG(Debug::DBG_WARNING, "Ignore invalid line[%d] [%s]", lineNumber, line.c_str());
 			continue;
 		}
 		trim(tokens[0]);
@@ -92,14 +95,14 @@ void BattleshipAlgoFromFile::AttackFileParser(string& attackPath) {
 		}
 		catch (const std::exception& e)
 		{
-			DBG(Debug::DBG_WARNING, "Ignore invalid line [%s]", line.c_str());
+			DBG(Debug::DBG_WARNING, "Ignore invalid line[%d] [%s]", lineNumber, line.c_str());
 			continue;
 		}
 
 		// input validation
 		if (i < 1 || j < 1 || i > BOARD_ROW_SIZE || j > BOARD_COL_SIZE)
 		{
-			DBG(Debug::DBG_INFO, "Failed to parse atteck requet: line: [%s]", line);
+			DBG(Debug::DBG_WARNING, "Failed to parse attack requet: line[%d] [%s]", lineNumber, line.c_str());
 			continue;;
 		}
 
