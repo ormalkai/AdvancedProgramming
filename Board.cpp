@@ -26,7 +26,7 @@ void Board::buildBoard(char ** initBoard)
 			if (SPACE != initBoard[i][j] && SPACE == initBoard[i - 1][j] && SPACE == initBoard[i][j - 1])
 			{
 				// create the ship
-				Ship* ship = ShipFactory::instance()->create(i, j, initBoard);
+				Ship* ship = ShipFactory::instance().create(i, j, initBoard);
 				m_shipsOnBoard.push_back(ship);
 				// init ship in relevant cells and cells in the ship
 				int shipLen = Utils::getShipLen(initBoard[i][j]);

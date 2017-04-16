@@ -80,12 +80,21 @@ void BattleshipAlgoFromFile::AttackFileParser(string& attackPath) {
 		if (tokens.size() != 2)
 		{
 			// skip bad lines
-			return;
+			DBG(Debug::DBG_WARNING, "Ignore invalid line [%s]\n", line.c_str());
+			continue;
 		}
 		trim(tokens[0]);
-		i = stoi(tokens[0]);
 		trim(tokens[1]);
-		j = stoi(tokens[1]);
+		try 
+		{
+			i = stoi(tokens[0]);
+			j = stoi(tokens[1]);
+		}
+		catch (const std::exception& e)
+		{
+			DBG(Debug::DBG_WARNING, "Ignore invalid line [%s]\n", line.c_str());
+			continue;
+		}
 
 		// input validation
 		if (i < 1 || j < 1 || i > BOARD_ROW_SIZE || j > BOARD_COL_SIZE)
