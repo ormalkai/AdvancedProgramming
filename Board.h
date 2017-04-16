@@ -9,17 +9,29 @@ using std::vector;
 class Board
 {
 private:
-	Cell m_boardData[INIT_BOARD_ROW_SIZE][INIT_BOARD_COL_SIZE];
-	//vector<vector<Cell>> m_boardData;
-	vector<Ship*> m_shipsOnBoard;
-	int m_rows;
-	int m_cols;
-	bool m_isQuiet;
-	int m_delay;
+	Cell			m_boardData[INIT_BOARD_ROW_SIZE][INIT_BOARD_COL_SIZE];	// The board is matrix of Cells
+	vector<Ship*>	m_shipsOnBoard;											// Pointer to every ship on the board
+	int				m_rows;													// Number of rows in the board
+	int				m_cols;													// Number of columns in the board
+	bool			m_isQuiet;												// Is quiet run, for print simulation game
+	int				m_delay;												// delay between every attack in game simulation
 
 public:
-	Board(int rows = BOARD_ROW_SIZE, int cols = BOARD_COL_SIZE) : m_rows(rows), m_cols(cols) {};
+	/**
+	 * @Details		Constructor of board
+	 * @param		rows - number of rows in the board, default BOARD_ROW_SIZE (for future purposes)
+	 * @param		cols - number of Columns in the board, default BOARD_COL_SIZE (for future purposes)
+	 */
+	Board(int rows = BOARD_ROW_SIZE, int cols = BOARD_COL_SIZE) : m_rows(rows), m_cols(cols) , m_isQuiet(false), m_delay(2000) {};
+
+	/**
+	 * @Details		Destructor of board, releases all related memory (i.e ships on board)
+	 */
 	~Board();
+
+	/**
+	 * @Details		Copy constructor, default.
+	 */
 	Board(const Board &) = default;
 
 	/**

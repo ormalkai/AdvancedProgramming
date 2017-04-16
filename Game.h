@@ -10,15 +10,21 @@
 
 using namespace std;
 
-// enum for players
 class Game
 {
 private:
+	/**
+	 * @Details		Assistent enum for recursive funtions of analayzing input board 
+	 */
 	enum class ShipLengthDirection
 	{
 		VERTICAL, 
 		HORIZONTAL
 	};
+
+	/**
+	* @Details		Assistent enum for recursive funtions of analayzing input board
+	*/
 	enum class ShipLengthSecondDirection
 	{
 		FORWARD,
@@ -26,34 +32,36 @@ private:
 	};
 
 
-	static PlayerAlgoFactory m_playerFactory;
-	bool m_isQuiet;
+	bool					m_isQuiet;						// Is quiet run, for print simulation game
+	Board					m_board;						// current board of the game
+	int						m_rows;							// number of rows in the board
+	int						m_cols;							// number of columns in the board
+	int						m_currentPlayerIndex;			// he id of the next player to attack
+	int						m_otherPlayerIndex;				// the id of the other playre to attack
+	PlayerAlgo*				m_players[MAX_PLAYER];			// the players
+	vector<int>				m_numOfShipsPerPlayer;			// how many ships each player has
+	bool					m_foundAdjacentShips;			// need to print Adjacency error per player
+	vector<vector<bool>>	m_wrongSizeOrShapePerPlayer;	// 2 players X 4 ships
 
-	Board m_board;
-	int m_currentPlayerIndex;
-	int m_otherPlayerIndex;
+	/**
+	 * @Details		game constructor
+	 */
+	Game(int rows = BOARD_ROW_SIZE, int cols = BOARD_ROW_SIZE);
 
-	PlayerAlgo* m_players[MAX_PLAYER];
-	//map<PlayerAlgo*, Board> m_boards;
-
-	map<char, int> m_shipToExpectedLen; // conversion map between ship type to expected length
-	vector<int> m_numOfShipsPerPlayer;
-
-	// ERRORS data structures
-	vector<vector<bool>> m_wrongSizeOrShapePerPlayer; // 2 players X 4 ships TODO init in game init
+	/**
+	* @Details		game destructor
+	*/
+	~Game();
 	
-	int m_rows;
-	int m_cols;
-	bool m_foundAdjacentShips; // need to print Adjacency error per player TODO init in game init
-	int m_numOfAliveCellsOnBoard;
-
-	Game(int rows = BOARD_ROW_SIZE, int cols = BOARD_ROW_SIZE) : m_rows(rows), m_cols(cols), m_foundAdjacentShips(false)
-	{
-	}
-
-	~Game()
-	{
-	}
+	/**
+	* @Details		copy constructor is deleted
+	*/
+	Game(const Game&) = delete;
+	
+	/**
+	 * @Details		ignore = operator
+	 */
+	Game &operator=(Game const&) { return *this; }
 
 	/**
 	* @Details		check if there is a ship with inappropriate size
@@ -112,33 +120,102 @@ private:
 	*/
 	ReturnCode getattackFilesNameFromDirectory(string filesPath, vector<string>& attackFilePerPlayer);
 	
-	
+	/**
+	 * @Details		finds the sboard and attack files from given directory
+	 * @param		filesPath - given directory
+	 * @param		sboardFile - will contain the sboard file name
+	 * @param		attackFilePerPlayer - will contain the attack file per player
+	 * @return		RC_ERROR if path is wrong or files are missing, RC_SUCCESS otherwise
+	 */
 	ReturnCode initFilesPath(string& filesPath, string& sboardFile, vector<string>& attackFilePerPlayer);
+
+	/**
+	 * @Details		Parses the sboard file and validates it
+	 * @param		sboardFileName - path to input sboard file
+	 * @param		initBoard - the parsed board will be filled in initBoard for validations
+	 * @return		RC_ERROR if one of the valdiations according to Spec failed, RC_SUCCESS otherwise
+	 */
 	ReturnCode parseBoardFile(string sboardFileName, char** initBoard);
-	ReturnCode initListPlayers();
+
+	/**
+	 * @Details		Init errors dataStructures - no errors
+	 */
 	void initErrorDataStructures();
+
+	/**
+	 * @Details		validates current attack
+	 * @param		req - curren attacks
+	 * @return		ARC_FINISH_REQ if no attack, ARC_ERROR if attack is illegal, ARC_SUCCESS otherwise
+	 */
 	AttackRequestCode requestAttack(pair<int, int> req) const;
+
+	/**
+	 * @Details		Wrapper for recursive function for recieving current ship length in specific cell
+	 * @param		initBoard - the board after parsing
+	 * @param		expectedShip - ship to test
+	 * @param		row - current row to check
+	 * @param		col - current col to check
+	 * @param		direction - in which direction to go in the next recursive call
+	 */
 	int getShipLength(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthDirection direction);
+	
+	/**
+	* @Details		recursive function for recieving current ship length in specific cell
+	* @param		initBoard - the board after parsing
+	* @param		expectedShip - ship to test
+	* @param		row - current row to check
+	* @param		col - current col to check
+	* @param		direction - in which direction to go in the next recursive call
+	*/
 	int getShipLengthHorizontal(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction);
+
+	/**
+	* @Details		Wrapper for recursive function for recieving current ship length in specific cell
+	* @param		initBoard - the board after parsing
+	* @param		expectedShip - ship to test
+	* @param		row - current row to check
+	* @param		col - current col to check
+	* @param		direction - in which direction to go in the next recursive call
+	*/
 	int getShipLengthVertical(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction);
+
+	/**
+	 * @Details		Checks if  adjacency in specific cell is valid
+	 * @param		i - row ro check
+	 * @param		j - col to check
+	 * @return		true if valid, false otherwise
+	 */
 	bool isAdjacencyValid(char** initBoard, int i/*row*/, int j/*col*/);
+
+	/**
+	 * @Details		proceed To Next Player after attack
+	 */
 	void proceedToNextPlayer() { m_currentPlayerIndex = (++m_currentPlayerIndex) % MAX_PLAYER;  m_otherPlayerIndex = (++m_otherPlayerIndex) % MAX_PLAYER; }
+	
+	/**
+	 * @Details		print summary of the current game
+	 */
 	void printSummary() const;
 	
 	
-	public:
-
-	Game(const Game&) = delete;
-	void operator=(Game const&) = delete;
-
-	/*
-		Parse board file and build board matrix
-	*/
+public:
+	/**
+	 * @Details		Parse files and build board matrix
+	 * @param		filesPath - path to search for input files
+	 * @param		isQuiet - print simulation ot not
+	 * @param		delay - delay between attacks in simulations
+	 */
 	ReturnCode init(string filesPath, bool isQuiet, int delay);
 	
+	/*
+	 * @Details		dtart current game
+	 */
 	void startGame();
 
-	static Game& getInstance()
+	/**
+	 * @Details		singleton class, get current instance.
+	 */
+	static Game& instance()
 	{
 		static Game gameInstance;
 		return gameInstance;

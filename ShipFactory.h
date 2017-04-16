@@ -1,8 +1,5 @@
 #pragma once
 
-
-#pragma once
-
 #include "Ship.h"
 #include "RocketShip.h"
 #include "RubberShip.h"
@@ -11,15 +8,37 @@
 
 class ShipFactory {
 public:
-	static ShipFactory* instance();
+	/**
+	 * @Details		getter for instance of ship factory
+	 */
+	static ShipFactory& instance();
 
+	/**
+	 * @Details		create ship by char identifier
+	 * @param		i - row in initBoard
+	 * @param		j - column in initBoard
+	 * @param		initBoard - as recievd in input
+	 */
 	Ship* create(int i, int j, char ** initBoard);
 private:
-
+	/**
+	 * @Details		default constructor
+	 */
 	ShipFactory() = default;
-	~ShipFactory() = default;
-	ShipFactory(const ShipFactory&) = default;
-	void operator=(const ShipFactory&);
 
+	/**
+	 * @Details		default destructor
+	 */
+	~ShipFactory() = default;
+
+	/**
+	 * @Details		delete copy constructor
+	 */
+	ShipFactory(const ShipFactory&) = delete;
+
+	/**
+	 * @Details		ignore assignment
+	 */
+	ShipFactory &operator=(const ShipFactory&) { return *this; }
 
 };

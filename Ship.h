@@ -25,6 +25,8 @@ public:
 	* @param		length - ship's length
 	* @param		value - ship' score 
 	* @param		color - ship' color
+	* @Note			The inheritence from Ship is for future use,
+	*				currently there is no additional functunalities
 	*/
 	Ship(char sign, int length, int value, _In_ WORD color);
 	~Ship() = default;

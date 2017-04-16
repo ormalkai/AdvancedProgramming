@@ -6,21 +6,32 @@
 class Cell {
 	
 public:
+
+	/**
+	 * Details		enum CellStatus indicates The status of the ship in it, or whether it is free.
+	 */
 	typedef  enum CellStatus {
-		ALIVE,
-		DEAD,
-		FREE
+		ALIVE,	// Ship has never hitted
+		DEAD,	// Ship was hitted
+		FREE	// No ship is this cell
 	}CellStatus;
 
 private:
-	CellStatus m_status;
-	Ship* m_pShip;
-	PlayerIndex m_playerIndexOwner;
+	CellStatus		m_status;				// The status of the cell according to the enum above
+	Ship*			m_pShip;				// pointer to the ship in this cell, NULL if no ship
+	PlayerIndex		m_playerIndexOwner;		// The unique identifier of the player own the ship
 
 
 public:
+	/**
+	 * @Details		The constructor initiates the members to status FREE, pShip to nullptr and player index to MAX_PLAYER
+	 */
 	Cell();
-	~Cell();
+
+	/*
+	 * @Details		Default destructors
+	 */
+	~Cell() = default;
 	
 	/**
 	* @Details		returns cell's status

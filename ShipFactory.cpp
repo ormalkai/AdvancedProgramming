@@ -4,10 +4,10 @@
 #include "Debug.h"
 #include "Utils.h"
 
-ShipFactory* ShipFactory::instance()
+ShipFactory& ShipFactory::instance()
 {
-	static ShipFactory *Instance = new ShipFactory();
-	return  Instance;
+	static ShipFactory instance;
+	return  instance;
 }
 
 Ship* ShipFactory::create(int i, int j, char ** initBoard)

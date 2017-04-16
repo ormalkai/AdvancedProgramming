@@ -4,9 +4,9 @@
 
 Debug::Debug(): m_logFile("game.log"), m_printToLog(true), m_printToStd(true), m_debugLevel(DBG_ERROR){}
 
-Debug* Debug::instance()
+Debug& Debug::instance()
 {
-	static Debug *Instance = new Debug();
+	static Debug Instance;
 	return  Instance;
 }
 

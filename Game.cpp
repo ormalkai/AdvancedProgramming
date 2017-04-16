@@ -14,6 +14,26 @@
 
 using namespace std;
 
+Game::Game(int rows, int cols) : m_rows(rows), m_cols(cols),
+m_foundAdjacentShips(false), m_isQuiet(false), m_currentPlayerIndex(MAX_PLAYER), m_otherPlayerIndex(MAX_PLAYER)
+{
+	for (int i = 0; i< MAX_PLAYER; i++)
+	{
+		m_players[i] = nullptr;
+	}
+}
+
+Game::~Game()
+{
+	for (int i=0; i< MAX_PLAYER ;i++)
+	{
+		if (nullptr != m_players[i])
+		{
+			delete m_players[i];
+		}
+	}
+}
+
 bool Game::checkWrongSizeOrShape() const
 {
 	bool result = true;
@@ -306,7 +326,6 @@ int Game::getShipLengthVertical(char** initBoard, char expectedShip, int i/*row*
 int Game::getShipLength(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthDirection direction)
 {
 	// sanity
-
 	if (expectedShip != initBoard[i][j])
 	{
 		return 0;
@@ -328,10 +347,6 @@ int Game::getShipLength(char** initBoard, char expectedShip, int i/*row*/, int j
 	}
 }
 
-ReturnCode Game::initListPlayers()
-{
-	return ReturnCode::RC_SUCCESS;
-}
 
 void Game::initErrorDataStructures()
 {

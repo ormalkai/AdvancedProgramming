@@ -1,20 +1,28 @@
 #pragma once
 
-#include "PlayerAlgo.h"
-#include <queue>
+#include "PlayerAlgo.h"	// interface
+#include <queue>		// for attack queue
 
 using namespace std;
 
 class BattleshipAlgoFromFile : public PlayerAlgo {
 
 private:
-	char** m_board;
-	int m_rows;
-	int m_cols;
+	char**	m_board;	// The board of the player (currently not in use, for future prposes)
+	int		m_rows;		// number of rows in the board
+	int		m_cols;		// number of columns in the board
 	queue<pair<int, int>> m_attackQueue;
 	
 public:
+	/**
+	 * @Details		Constructor receives id of the player
+	 * @param		id - Unique identifier of the player
+	 */
 	BattleshipAlgoFromFile(int id);
+	
+	/**
+	 * @Details		Default destructor
+	 */
 	~BattleshipAlgoFromFile() = default;
 
 	/**
