@@ -21,6 +21,9 @@ public:
 	 */
 	virtual ~PlayerAlgo() = default;
 
+	PlayerAlgo(const PlayerAlgo &) = default;
+	PlayerAlgo &operator=(const PlayerAlgo &) = default;
+
 	/**
 	 * @Details		getter for id
 	 */

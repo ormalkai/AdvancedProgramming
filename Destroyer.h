@@ -10,4 +10,6 @@ class Destroyer : public Ship {
 public:
 	Destroyer(char sign, int length, int value, _In_ WORD color);
 	~Destroyer() = default;
+	Destroyer(const Destroyer &) = default;
+	Destroyer &operator=(const Destroyer &) = default;
 };

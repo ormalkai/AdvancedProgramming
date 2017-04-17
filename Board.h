@@ -33,6 +33,7 @@ public:
 	 * @Details		Copy constructor, default.
 	 */
 	Board(const Board &) = default;
+	Board &operator=(const Board &) = default;
 
 	/**
 	* @Details		Receive row and col indexes and returns reference for the cell in the board

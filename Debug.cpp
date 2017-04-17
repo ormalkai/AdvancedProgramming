@@ -61,7 +61,7 @@ void Debug::vprint(const char *fmt, va_list ap)
 	{
 		/*FILE * m_pFile;
 		int rc = fopen_s(&m_pFile, m_logFile.c_str(), "w");*/
-		// TODO handle error
+
 		int nWritten = vfprintf(m_pFile, fmt, ap);
 		if (nWritten >= 0)
 		{
