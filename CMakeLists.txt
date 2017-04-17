@@ -1,9 +1,9 @@
 set(user1 ormalkai)
 set(user2 hilatamam)
-set(user3 )
+set(user3 galsimhi)
 set(id1 "203569264")
 set(id2 "203521638")
-set(id3 "123456789")
+set(id3 "201082708")
 set (SOURCE_FILES
 	BattleshipAlgoFromFile.h
 	BattleshipAlgoFromFile.cpp
