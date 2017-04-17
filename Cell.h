@@ -33,6 +33,9 @@ public:
 	 */
 	~Cell() = default;
 	
+	Cell(const Cell &) = default;
+	Cell &operator=(const Cell &) = default;
+
 	/**
 	* @Details		returns cell's status
 	* @Return		CellStatus::ALIVE if cell is part of ship and cell wasn't hitted,

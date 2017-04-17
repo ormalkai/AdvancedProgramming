@@ -25,6 +25,9 @@ public:
 	 */
 	~BattleshipAlgoFromFile() = default;
 
+	BattleshipAlgoFromFile(const BattleshipAlgoFromFile &) = default;
+	BattleshipAlgoFromFile &operator=(const BattleshipAlgoFromFile &) = default;
+
 	/**
 	* @Details		receives path of attack file and build attack queue
 	* @Param		attackPath - path of attack file

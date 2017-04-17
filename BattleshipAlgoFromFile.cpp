@@ -97,7 +97,7 @@ void BattleshipAlgoFromFile::AttackFileParser(string& attackPath) {
 			i = stoi(tokens[0]);
 			j = stoi(tokens[1]);
 		}
-		catch (const std::exception& e)
+		catch (const std::exception&)
 		{
 			DBG(Debug::DBG_WARNING, "Ignore invalid line[%d] [%s]", lineNumber, line.c_str());
 			continue;
