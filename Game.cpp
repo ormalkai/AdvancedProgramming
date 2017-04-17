@@ -9,6 +9,7 @@
 #include "Debug.h"
 #include "Board.h"
 #include "BattleshipAlgoFromFile.h"
+#include <codecvt>
 
 #define SHIPS_PER_PLAYER (5)
 
@@ -180,7 +181,9 @@ ReturnCode Game::getSboardFileNameFromDirectory(string filesPath, string& sboard
 	HANDLE hFind;
 
 	string sboardFile = filesPath + "*.sboard";
-	hFind = FindFirstFile(sboardFile.c_str(), &FindFileData);
+	std::wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
+	hFind = FindFirstFile(converter.from_bytes(sboardFile).c_str(), &FindFileData);
+	/*hFind = FindFirstFile(sboardFile.c_str(), &FindFileData);*/
 	if (INVALID_HANDLE_VALUE == hFind)
 	{
 		cout << "Missing board file (*.sboard) looking in path: " << filesPath << endl;
@@ -188,7 +191,7 @@ ReturnCode Game::getSboardFileNameFromDirectory(string filesPath, string& sboard
 	}
 	else
 	{
-		sboardFileName = filesPath + FindFileData.cFileName;
+		sboardFileName = filesPath + converter.to_bytes(FindFileData.cFileName);
 		FindClose(hFind);
 		return RC_SUCCESS;
 	}
@@ -199,6 +202,7 @@ ReturnCode Game::getattackFilesNameFromDirectory(string filesPath, vector<string
 	WIN32_FIND_DATA FindFileData;
 	HANDLE hFind;
 	ReturnCode rc = RC_SUCCESS;
+	std::wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
 	for (int i = PLAYER_A; i < PlayerIndex::MAX_PLAYER; i++)
 	{
 		string attackFileExtensionPerPlayer = Utils::getAttackFileByPlayer(i);
@@ -208,7 +212,7 @@ ReturnCode Game::getattackFilesNameFromDirectory(string filesPath, vector<string
 			continue;
 		}
 		string attackFile = filesPath + attackFileExtensionPerPlayer;
-		hFind = FindFirstFile(attackFile.c_str(), &FindFileData);
+		hFind = FindFirstFile(converter.from_bytes(attackFile).c_str(), &FindFileData);
 		if (INVALID_HANDLE_VALUE == hFind)
 		{
 			cout << "Missing attack file for player " << Utils::getPlayerCharByIndex(i) << " looking in path: " << filesPath << endl;
@@ -216,7 +220,7 @@ ReturnCode Game::getattackFilesNameFromDirectory(string filesPath, vector<string
 		}
 		else
 		{
-			attackFilePerPlayer.push_back(filesPath + FindFileData.cFileName);
+			attackFilePerPlayer.push_back(filesPath + converter.to_bytes(FindFileData.cFileName));
 			FindClose(hFind);
 		}
 	}
