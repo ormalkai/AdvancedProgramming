@@ -19,9 +19,6 @@ void Board::buildBoard(char ** initBoard)
 	{
 		for (int j = 1; j <= BOARD_COL_SIZE; j++)
 		{
-			// initalize index of Cell
-			//m_boardData[i][j].setIndex(i, j);
-
 			// check if the is the start of ship
 			if (SPACE != initBoard[i][j] && SPACE == initBoard[i - 1][j] && SPACE == initBoard[i][j - 1])
 			{
@@ -111,7 +108,7 @@ void Board::printAttack(int i, int j, AttackResult attackResult) const
 	{
 		return;
 	}
-
+	// animation of attack
 	for (int k = 0; k < 3; k++)
 	{
 		Utils::gotoxy(i, j);
