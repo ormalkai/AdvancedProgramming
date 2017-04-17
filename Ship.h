@@ -37,6 +37,9 @@ public:
 	*/
 	virtual ~Ship() = 0;
 
+	Ship(const Ship &) = default;
+	Ship &operator=(const Ship &) = default;
+
 	/**
 	* @Details		returns ship's length
 	* @return		ship's length

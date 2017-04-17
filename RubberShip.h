@@ -10,4 +10,6 @@ class RubberShip : public Ship {
 public:
 	RubberShip(char sign, int length, int value, _In_ WORD color);
 	~RubberShip() = default;
+	RubberShip(const RubberShip &) = default;
+	RubberShip &operator=(const RubberShip &) = default;
 };
