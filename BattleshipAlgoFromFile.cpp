@@ -78,7 +78,11 @@ void BattleshipAlgoFromFile::AttackFileParser(string& attackPath) {
 	int lineNumber = 0;
 	while (Utils::safeGetline(fin, line))
 	{
+		if (fin.eof())
+			break;
+
 		++lineNumber;
+			
 		tokens = split(line, ',');
 		if (tokens.size() != 2)
 		{

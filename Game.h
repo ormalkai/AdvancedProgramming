@@ -208,7 +208,7 @@ public:
 	ReturnCode init(string filesPath, bool isQuiet, int delay);
 	
 	/*
-	 * @Details		dtart current game
+	 * @Details		start current game
 	 */
 	void startGame();
 

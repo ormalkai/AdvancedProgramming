@@ -19,7 +19,7 @@ public:
 	/**
 	 * @Details		default destructor
 	 */
-	~PlayerAlgo() = default;
+	virtual ~PlayerAlgo() = default;
 
 	/**
 	 * @Details		getter for id

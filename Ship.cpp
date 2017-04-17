@@ -12,3 +12,5 @@ void Ship::executeAttack() {
 	if (m_numOfAliveCells < 0)
 		DBG(Debug::DBG_ERROR, "Negative value in number of alive cells in ship");
 }
+
+Ship::~Ship() {}

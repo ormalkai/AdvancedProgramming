@@ -29,7 +29,13 @@ public:
 	*				currently there is no additional functunalities
 	*/
 	Ship(char sign, int length, int value, _In_ WORD color);
-	~Ship() = default;
+	
+	/**
+	* @Details		for define Ship as abstract class without pure function - 
+	*				set pure virtual d'tor and implement
+	*				credit - http://www.gotw.ca/gotw/031.htm
+	*/
+	virtual ~Ship() = 0;
 
 	/**
 	* @Details		returns ship's length

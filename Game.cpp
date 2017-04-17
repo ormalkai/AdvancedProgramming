@@ -519,7 +519,7 @@ void Game::startGame()
 			// Notify the user his ridiculous mistake
 			if (attackedCell.getPlayerIndexOwner() == m_currentPlayerIndex)
 			{
-				DBG(Debug::DBG_INFO, "In the cell there is a ship of you, probably u r an idiot...");
+				DBG(Debug::DBG_INFO, "You bombed youself, U R probably an idiot..");
 			}
 
 			Ship* pShip = attackedCell.getShip();
@@ -532,8 +532,6 @@ void Game::startGame()
 			else
 			{
 				attackResult = AttackResult::Sink;
-
-				
 
 				// Hit myself
 				if (attackedCell.getPlayerIndexOwner() == m_currentPlayerIndex)
@@ -555,7 +553,7 @@ void Game::startGame()
 		break;
 		case Cell::DEAD:
 		{
-			DBG(Debug::DBG_INFO, "This cell already attacked, go to sleep bro...");
+			DBG(Debug::DBG_INFO, "This cell was already bombed, go to sleep bro...");
 			attackResult = AttackResult::Hit;
 		}
 		break;
