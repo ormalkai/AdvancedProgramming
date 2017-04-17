@@ -43,11 +43,6 @@ int main(int argc, char* argv[])
 	Debug::instance().init("game.log", true, false, Debug::DBG_MAX);
 
 	Game& game = Game::instance();
-	// add is initialize ?
-	//string filesLocation("C:\\Users\\ormalkai\\Desktop\\AP_tests\\TestFiles\\Good Boards\\good_board_0.sboard");
-	//string filesLocation("C:\\Users\\ormalkai\\Desktop\\AP_tests\\TestFiles\\Bad Boards\\bad_board_1.sboard");
-	//string filesLocation("C:\\Users\\ormalkai\\Desktop\\AP_tests\\TestFiles\\Bad Boards");
-	//string filesLocation("C:/Users/ormalkai/Desktop/AP_tests/TestFiles/Bad Boards/");
 
 	string filesLocation;
 	bool isQuiet;
@@ -59,9 +54,6 @@ int main(int argc, char* argv[])
 		return RC_ERROR;
 
 	game.startGame();
-
-	int number;
-	std::cin >> number;
 
 	return 0;
 }

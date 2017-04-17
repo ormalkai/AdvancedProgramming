@@ -112,15 +112,15 @@ void Board::printAttack(int i, int j, AttackResult attackResult) const
 		return;
 	}
 
-	//for (int k = 0; k < 3; k++)
-	//{
-	//	Utils::gotoxy(i, j);
-	//	cout << "@";
-	//	Sleep(100);
-	//	Utils::gotoxy(i, j);
-	//	cout << m_boardData[i][j].getSign();
-	//	Sleep(100);
-	//}
+	for (int k = 0; k < 3; k++)
+	{
+		Utils::gotoxy(i, j);
+		cout << "@";
+		Sleep(100);
+		Utils::gotoxy(i, j);
+		cout << m_boardData[i][j].getSign();
+		Sleep(100);
+	}
 	switch (attackResult)
 	{
 	case (AttackResult::Hit):
