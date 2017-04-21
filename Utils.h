@@ -24,6 +24,7 @@
 #define NO_ATTACK_FILE ""
 #define DEFAULT_IS_QUIET_MODE (false)
 #define DEFAULT_DELAY_ATTACK (2000)
+#define MAX_SHIP_LEN (4)
 
 
 using namespace std;
@@ -46,7 +47,7 @@ enum ShipType
 {
     RUBBER_SHIP,
     ROCKET_SHIP,
-    SUBMRINE,
+    SUBMARINE,
     DESTROYER,
     MAX_SHIP
 };
@@ -58,16 +59,29 @@ typedef enum AttackRequestCode
 	ARC_FINISH_REQ = -1
 } AttackRequestCode;
 
+enum class ShipDirection
+{
+	VERTICAL,
+	HORIZONTAL
+};
 
+enum class Direction
+{
+	UP,
+	DOWN,
+	RIGHT,
+	LEFT
+};
 
 class Utils
 {
 private:
 	Utils() = default;
-	static map<char, int> m_shipToLen; // conversion map between ship type to expected length
+	static map<char, int> m_shipLenBySign; // conversion map between ship type to expected length
 	static map<char, int> m_shipToValue; // conversion map between ship type to expected value
 	static map<char, _In_ WORD> m_shipToColor;// conversion between ship and its color
 	static const vector<char> m_playerIndexToChar;
+	static const map<ShipType, int> m_shipLenByType;
 	
 
 	static const vector<char> m_playerALegalSign;
@@ -100,6 +114,13 @@ public:
 	* @Return		Ship's length
 	*/
 	static int getShipLen(char c);
+
+	/*
+	* @Details		receives ship type and returns the length of the ship is represented by the char
+	* @Param		s - ship type
+	* @Return		Ship's length
+	*/
+	static int getShipLen(ShipType s);
 
 	/*
 	* @Details		receives char and returns the score of the ship is represented by the char
@@ -167,5 +188,8 @@ public:
 		}
 		return false;
 	}
+
+
+	Direction static getOppositeDirection(Direction d);
 };
 

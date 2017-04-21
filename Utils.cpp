@@ -3,7 +3,7 @@
 #include <istream>
 
 
-map<char, int> Utils::m_shipToLen = {
+map<char, int> Utils::m_shipLenBySign = {
 	{ PLAYER_A_RUBBER_SHIP, 1 },
 	{ PLAYER_A_ROCKET_SHIP, 2 },
 	{ PLAYER_A_SUBMARINE, 3 },
@@ -14,6 +14,13 @@ map<char, int> Utils::m_shipToLen = {
 	{ PLAYER_B_DESTROYER, 4 }
 };
 
+
+const map<ShipType, int> Utils::m_shipLenByType = {
+	{ RUBBER_SHIP, 1 },
+	{ ROCKET_SHIP, 2 },
+	{ SUBMARINE, 3 },
+	{ DESTROYER, 4 }
+};
 
 map<char, int> Utils::m_shipToValue = {
 {PLAYER_A_RUBBER_SHIP, 2 },
@@ -94,7 +101,7 @@ int Utils::getIndexByShip(char c)
 		return ROCKET_SHIP;
 	case 'm':
 	case 'M':
-		return SUBMRINE;
+		return SUBMARINE;
 	case 'd':
 	case 'D':
 		return DESTROYER;
@@ -106,7 +113,12 @@ int Utils::getIndexByShip(char c)
 
 int Utils::getShipLen(char c)
 {
-	return m_shipToLen[c];
+	return m_shipLenBySign[c];
+}
+
+int Utils::getShipLen(ShipType s)
+{
+	return m_shipLenByType[s];
 }
 
 
@@ -215,4 +227,16 @@ void Utils::setTextColor(_In_ WORD color)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);  // Get handle to standard output
 	SetConsoleTextAttribute(hConsole, color);
+}
+
+Direction Utils::getOppositeDirection(Direction d)
+{
+	switch (d)
+	{
+	case Direction::UP: return Direction::DOWN;
+	case Direction::DOWN: return Direction::UP;
+	case Direction::RIGHT: return Direction::LEFT;
+	case Direction::LEFT: return Direction::RIGHT;
+	default: return Direction::DOWN;
+	}
 }

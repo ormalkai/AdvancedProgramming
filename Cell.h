@@ -20,7 +20,9 @@ private:
 	CellStatus		m_status;				// The status of the cell according to the enum above
 	Ship*			m_pShip;				// pointer to the ship in this cell, NULL if no ship
 	PlayerIndex		m_playerIndexOwner;		// The unique identifier of the player own the ship
-
+	int				m_rowIndex;
+	int				m_colIndex;
+	int				m_potentialShips;
 
 public:
 	/**
@@ -86,4 +88,10 @@ public:
 	* @Details		initialize the cell: status-FREE, ship's ptr - null, owner - MAX_PLAYER
 	*/
 	void clear() { m_status = FREE; m_pShip = nullptr; m_playerIndexOwner = MAX_PLAYER; }
+
+
+
+	int row() const { return m_rowIndex; }
+	int col() const { return m_colIndex; }
+
 };

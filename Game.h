@@ -13,14 +13,7 @@ using namespace std;
 class Game
 {
 private:
-	/**
-	 * @Details		Assistent enum for recursive funtions of analayzing input board 
-	 */
-	enum class ShipLengthDirection
-	{
-		VERTICAL, 
-		HORIZONTAL
-	};
+	
 
 	/**
 	* @Details		Assistent enum for recursive funtions of analayzing input board
