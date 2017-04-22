@@ -13,19 +13,23 @@ void BattleshipAlgoSmart::setBoard(int player, const char** board, int numRows, 
 		for (int j = 0; j < m_board.cols(); ++j)
 		{
 			{
-				m_histBoard[i][j] = calcHist(i, j);
+				calcHist(i, j);
 			}
 		}
 
 }
 
-int BattleshipAlgoSmart::calcHist(int i, int j)
+void BattleshipAlgoSmart::calcHist(int i, int j)
 {
 
 	auto& cell = m_board.get(i, j);
 
 	if (!cell.isEmpty())
-		return 0;
+	{
+		cell.setHistValue(0);
+		return;
+	}
+		
 
 
 	auto numOfPotentialShips = 1; //
@@ -85,8 +89,7 @@ int BattleshipAlgoSmart::calcHist(int i, int j)
 	numOfPotentialShips += calcNumOfOptionalShipsInOffset(maxIndexOfValid.at(Direction::UP), maxIndexOfValid.at(Direction::DOWN));
 	numOfPotentialShips += calcNumOfOptionalShipsInOffset(maxIndexOfValid.at(Direction::LEFT), maxIndexOfValid.at(Direction::RIGHT));
 
-	
-	return numOfPotentialShips;
+	cell.setHistValue(numOfPotentialShips);
 }
 
 

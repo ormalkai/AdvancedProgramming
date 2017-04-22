@@ -22,7 +22,8 @@ private:
 	PlayerIndex		m_playerIndexOwner;		// The unique identifier of the player own the ship
 	int				m_rowIndex;
 	int				m_colIndex;
-	int				m_potentialShips;
+	int				m_histValue;
+
 
 public:
 	/**
@@ -93,5 +94,6 @@ public:
 
 	int row() const { return m_rowIndex; }
 	int col() const { return m_colIndex; }
-
+	void setHistValue(int h) { m_histValue = h; }
+	int getHistValue() const { return m_histValue; }
 };

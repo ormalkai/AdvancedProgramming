@@ -6,22 +6,22 @@
 
 class BattleshipAlgoSmart : public PlayerAlgo
 {
-
+	struct cmp
+	{
+		bool operator()(Cell& a, Cell& b)
+		{
+			return a.getHistValue() < b.getHistValue();
+		}
+	};
 private:
 	//char**	m_board;	// The board of the player (currently not in use, for future prposes)
 	Board	m_board;
-	std::priority_queue<std::pair<int,int>, int, cmp> m_histData;
+	priority_queue<pair<int,int>, int, cmp> m_histData;
 	int		m_rows;		// number of rows in the board
 	int		m_cols;		// number of columns in the board
 	queue<pair<int, int>> m_attackQueue;
 
-	struct cmp
-	{
-		bool operator()(int a, int b)
-		{
-			return occurrences[a] < occurrences[b];
-		}
-	};
+	
 
 
 public:
@@ -64,7 +64,7 @@ public:
 	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override {};
 
 	bool init(const std::string& path) override { return false; }
-	int calcHist(int i, int j);
+	void calcHist(int i, int j);
 	bool isOtherNeighborValid(const Cell& cell, Direction d);
 	int calcNumOfOptionalShipsInOffset(int i, int j) const;
 };
