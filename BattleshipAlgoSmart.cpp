@@ -72,10 +72,15 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, int row, int col, Att
 			case AttackResult::Hit: {
 			
 				// Remove all points in other axis
-			
+				// Add the point the same axis
 			
 			} break;
-			case AttackResult::Sink: break;
+			case AttackResult::Sink:
+			{
+			m_currentStatus = TARGET;
+			// Update hist
+			}
+			break;
 			default: ;
 			}
 		} break;
