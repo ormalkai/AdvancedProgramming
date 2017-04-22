@@ -41,7 +41,7 @@ public:
 	* @Param		board - num of rows in board
 	* @Param		board - num of cols in board
 	*/
-	void setBoard(const char** board, int numRows, int numCols) override;
+	void setBoard(int player, const char** board, int numRows, int numCols) override;
 
 	/**
 	* @Details		Return next attack request

@@ -31,7 +31,7 @@ BattleshipAlgoFromFile::BattleshipAlgoFromFile(int id)
 	this->setId(id);
 }
 
-void BattleshipAlgoFromFile::setBoard(const char** board, int numRows, int numCols)
+void BattleshipAlgoFromFile::setBoard(int player, const char** board, int numRows, int numCols)
 {
 	// noting to do in player algo from file
 }
