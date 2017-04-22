@@ -3,25 +3,39 @@
 #include "PlayerAlgo.h"
 #include <queue>
 #include "Board.h"
+#include <set>
 
 class BattleshipAlgoSmart : public PlayerAlgo
 {
+
+	enum SmartAlgoStautus {
+		HUNT,
+		TARGET
+	};
+
 	struct cmp
 	{
-		bool operator()(Cell& a, Cell& b)
+		bool operator()(Cell* a, Cell* b)
 		{
-			return a.getHistValue() < b.getHistValue();
+			return a->getHistValue() < b->getHistValue();
 		}
 	};
 private:
 	//char**	m_board;	// The board of the player (currently not in use, for future prposes)
-	Board	m_board;
-	priority_queue<pair<int,int>, int, cmp> m_histData;
 	int		m_rows;		// number of rows in the board
 	int		m_cols;		// number of columns in the board
-	queue<pair<int, int>> m_attackQueue;
-
+	Board	m_board;
+	priority_queue<Cell*, vector<Cell*>, cmp> m_attackedQueue;
+	set<Cell*> m_targetQueue;
+	SmartAlgoStautus m_currentStatus;
 	
+	Cell* popAttack()
+	{
+		Cell* c = m_attackedQueue.top();
+		m_attackedQueue.pop();
+		return c;
+	}
+
 
 
 public:
@@ -61,9 +75,9 @@ public:
 	* @Param		col - attacked cell's col index
 	* @Param		result - attack's result (hit, miss, sink)
 	*/
-	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override {};
+	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override;
 
-	bool init(const std::string& path) override { return false; }
+	bool init(const std::string& path) override;
 	void calcHist(int i, int j);
 	bool isOtherNeighborValid(const Cell& cell, Direction d);
 	int calcNumOfOptionalShipsInOffset(int i, int j) const;

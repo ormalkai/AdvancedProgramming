@@ -508,7 +508,7 @@ void Game::startGame()
 		switch (arc)
 		{
 		case ARC_FINISH_REQ:
-			if ()
+			// TODO:Fix both players with empty attack queue
 			proceedToNextPlayer();
 			continue;
 		case ARC_ERROR:
