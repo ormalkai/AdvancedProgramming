@@ -5,7 +5,7 @@
 
 class PlayerAlgo : public IBattleshipGameAlgo {
 
-private:
+protected:
 	int m_id;				// unique identifier of the player
 	int m_score;			// The score of the player
 	int m_numOfVictories;	// Number of victories of the player

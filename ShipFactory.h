@@ -19,7 +19,7 @@ public:
 	 * @param		j - column in initBoard
 	 * @param		initBoard - as recievd in input
 	 */
-	Ship* create(int i, int j, char ** initBoard);
+	Ship* create(int i, int j, const char ** initBoard);
 private:
 	/**
 	 * @Details		default constructor

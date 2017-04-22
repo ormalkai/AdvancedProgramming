@@ -76,7 +76,7 @@ public:
 	* @Details		Check cell's status
 	* @return		If cell is part of ship return true, otherwise false
 	*/
-	bool isEmpty() const { return  nullptr == m_pShip; }
+	bool isEmpty() const { return  FREE == m_status; }
 	
 	/**
 	* @Details		returns player index of the cell

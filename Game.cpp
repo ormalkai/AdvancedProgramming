@@ -431,7 +431,7 @@ ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
 	}
 
 	// now the board is valid lets build our board
-	m_board.buildBoard(initBoard);
+	m_board.buildBoard(const_cast<const char**>(initBoard));
 	// initBoard is no longer relevant lets delete it
 	for (int i = 0; i < INIT_BOARD_ROW_SIZE; ++i)
 	{
@@ -508,6 +508,7 @@ void Game::startGame()
 		switch (arc)
 		{
 		case ARC_FINISH_REQ:
+			if ()
 			proceedToNextPlayer();
 			continue;
 		case ARC_ERROR:

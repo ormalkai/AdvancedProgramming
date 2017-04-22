@@ -97,7 +97,7 @@ public:
 	* @Details		build board by given input (matrix of chars)
 	* @Param		initBoard - input board matrix 
 	*/
-	void buildBoard(char ** initBoard);
+	void buildBoard(const char ** initBoard);
 	
 	/**
 	* @Details		receive cell's coords and returns sign of requested cell

@@ -11,7 +11,7 @@
 #define INC_COL(IS_VERTICAL, COL, OFFSET) (((false) == (IS_VERTICAL)) ? ((COL) + (OFFSET)) : (COL))
 
 
-void Board::buildBoard(char ** initBoard)
+void Board::buildBoard(const char ** initBoard)
 {
 	// scan from top left to right and bottom
 	// if my upper and left cells are empty I'm new ship

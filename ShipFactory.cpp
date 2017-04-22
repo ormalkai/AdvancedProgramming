@@ -10,7 +10,7 @@ ShipFactory& ShipFactory::instance()
 	return  instance;
 }
 
-Ship* ShipFactory::create(int i, int j, char ** initBoard)
+Ship* ShipFactory::create(int i, int j, const char ** initBoard)
 {
 	char ship = initBoard[i][j];
 	int shipLen = Utils::getShipLen(ship);

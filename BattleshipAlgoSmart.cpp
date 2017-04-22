@@ -4,6 +4,21 @@
 #include "BattleshipAlgoSmart.h"
 #include "Utils.h"
 
+void BattleshipAlgoSmart::setBoard(int player, const char** board, int numRows, int numCols)
+{
+	m_id = player;
+	m_board.buildBoard(board);
+
+	for (int i = 0; i < m_board.rows(); ++i)
+		for (int j = 0; j < m_board.cols(); ++j)
+		{
+			{
+				m_histBoard[i][j] = calcHist(i, j);
+			}
+		}
+
+}
+
 int BattleshipAlgoSmart::calcHist(int i, int j)
 {
 
@@ -13,7 +28,8 @@ int BattleshipAlgoSmart::calcHist(int i, int j)
 		return 0;
 
 
-	auto numOfPotentialShips = 1;
+	auto numOfPotentialShips = 1; //
+	
 	map<Direction, int> maxIndexOfValid = {
 		{ Direction::UP, MAX_SHIP_LEN },
 		{ Direction::DOWN, MAX_SHIP_LEN },
@@ -24,7 +40,7 @@ int BattleshipAlgoSmart::calcHist(int i, int j)
 	
 	for (auto d_i = 0; d_i <= NUM_OF_DIRECTIONS; ++d_i)
 	{
-		for (auto shipLen = 1; shipLen <= MAX_SHIP_LEN; ++shipLen)
+		for (auto shipLen = 1; shipLen < MAX_SHIP_LEN; ++shipLen)
 		{
 			auto d = static_cast<Direction>(d_i);
 			auto od = Utils::getOppositeDirection(d);
@@ -44,7 +60,7 @@ int BattleshipAlgoSmart::calcHist(int i, int j)
 				checkedColIndex += shipLen;
 				break;
 			case Direction::LEFT: 
-				checkedColIndex += shipLen; 
+				checkedColIndex -= shipLen; 
 				break;
 			default: ;
 			}
@@ -69,6 +85,7 @@ int BattleshipAlgoSmart::calcHist(int i, int j)
 	numOfPotentialShips += calcNumOfOptionalShipsInOffset(maxIndexOfValid.at(Direction::UP), maxIndexOfValid.at(Direction::DOWN));
 	numOfPotentialShips += calcNumOfOptionalShipsInOffset(maxIndexOfValid.at(Direction::LEFT), maxIndexOfValid.at(Direction::RIGHT));
 
+	
 	return numOfPotentialShips;
 }
 
@@ -87,7 +104,6 @@ bool BattleshipAlgoSmart::isOtherNeighborValid(const Cell& cell, Direction d)
 	{
 	case Direction::UP:
 	{
-	
 		ret =	m_board.get(rIndex + 1, cIndex).isEmpty() &&	// Check down
 				m_board.get(rIndex, cIndex + 1).isEmpty() &&	// Check right
 				m_board.get(rIndex, cIndex - 1).isEmpty();		// Check left

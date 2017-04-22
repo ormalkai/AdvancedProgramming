@@ -10,9 +10,19 @@ class BattleshipAlgoSmart : public PlayerAlgo
 private:
 	//char**	m_board;	// The board of the player (currently not in use, for future prposes)
 	Board	m_board;
+	std::priority_queue<std::pair<int,int>, int, cmp> m_histData;
 	int		m_rows;		// number of rows in the board
 	int		m_cols;		// number of columns in the board
 	queue<pair<int, int>> m_attackQueue;
+
+	struct cmp
+	{
+		bool operator()(int a, int b)
+		{
+			return occurrences[a] < occurrences[b];
+		}
+	};
+
 
 public:
 	/**
