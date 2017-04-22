@@ -1,5 +1,6 @@
 #include "PlayerAlgoFactory.h"
 #include "BattleshipAlgoFromFile.h"
+#include "BattleshipAlgoNaive.h"
 
 PlayerAlgo* PlayerAlgoFactory::create(AlgoType type)
 {
@@ -9,6 +10,9 @@ PlayerAlgo* PlayerAlgoFactory::create(AlgoType type)
 	{
 	case(AlgoType::FILE):
 		ret = new BattleshipAlgoFromFile(m_id++);
+		break;
+	case(AlgoType::NAIVE):
+		ret = new BattleshipAlgoNaive(m_id++);
 		break;
 	default:
 		ret = nullptr;

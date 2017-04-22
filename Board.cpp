@@ -52,7 +52,7 @@ char** Board::toCharMat(PlayerIndex playerId) const
 
 		for (int j = 0; j < m_cols; j++)
 		{
-			char c = m_boardData[i][j].getSign();
+			char c = m_boardData[i+1][j+1].getSign();
 			if (SPACE != c && (Utils::getPlayerIdByShip(c) != playerId))
 				c = SPACE;
 

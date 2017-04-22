@@ -3,7 +3,8 @@
 #include "PlayerAlgo.h"
 
 enum class AlgoType {
-	FILE
+	FILE,
+	NAIVE
 };
 
 class PlayerAlgoFactory {

@@ -40,7 +40,7 @@ void parseArgs(int argc, char* argv[], string& filesLocation, bool& isQuiet, int
 int main(int argc, char* argv[])
 {
 	// init log
-	Debug::instance().init("game.log", false, true, Debug::DBG_ERROR);
+	Debug::instance().init("game.log", true, false, Debug::DBG_MAX);
 
 	Game& game = Game::instance();
 

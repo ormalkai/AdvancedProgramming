@@ -11,6 +11,8 @@
 BattleshipAlgoNaive::BattleshipAlgoNaive(int id)
 {
 	this->setId(id);
+	m_nextAttack.first = 1;
+	m_nextAttack.second = 1;
 }
 
 void BattleshipAlgoNaive::setBoard(int player, const char** board, int numRows, int numCols)
@@ -22,7 +24,15 @@ void BattleshipAlgoNaive::setBoard(int player, const char** board, int numRows, 
 	{
 		for (int j=0; j<INIT_BOARD_COL_SIZE; j++)
 		{
-			m_board[i][j] = board[i][j];
+			m_board[i][j] = SPACE;
+		}
+	}
+
+	for (int i = 1; i<=BOARD_ROW_SIZE; i++)
+	{
+		for (int j = 1; j<=BOARD_COL_SIZE; j++)
+		{
+			m_board[i][j] = board[i-1][j-1];
 		}
 	}
 }
@@ -61,8 +71,10 @@ bool BattleshipAlgoNaive::isAlreadyAttacked(char c)
 		NAIVE_ATTACK_SINK != c &&
 		NAIVE_ATTACK_MISS != c)
 	{
+		DBG(Debug::DBG_DEBUG, "Not attacked yet");
 		return false;
 	}
+	DBG(Debug::DBG_DEBUG, "Already Attacked");
 	return true;
 }
 
@@ -75,8 +87,10 @@ bool BattleshipAlgoNaive::isNeighborsMine(int i, int j)
 		myId == Utils::getPlayerIdByShip(m_board[i+1][j]) ||
 		myId == Utils::getPlayerIdByShip(m_board[i][j+1]))
 	{
+		DBG(Debug::DBG_DEBUG, "Has neihbors mine");
 		return true;
 	}
+	DBG(Debug::DBG_DEBUG, "No neighbors mine myId[%d] cell id[%c][%d]", myId, m_board[i][j], Utils::getPlayerIdByShip(m_board[i][j]));
 	return false;
 }
 
@@ -89,6 +103,7 @@ bool BattleshipAlgoNaive::hasShipOnTheLeft(int i, int j)
 	//  NAIVE_ATTACK_SINK <attack is here>
 	if (NAIVE_ATTACK_HIT != m_board[i][j - 1] && NAIVE_ATTACK_SINK != m_board[i][j - 1])
 	{
+		DBG(Debug::DBG_DEBUG, "no sink or hit on the left");
 		return false;
 	}
 	// now we know that the cell on my left was hitted
@@ -98,9 +113,10 @@ bool BattleshipAlgoNaive::hasShipOnTheLeft(int i, int j)
 	if (NAIVE_ATTACK_SINK == m_board[i][j - 1] ||
 		NAIVE_ATTACK_HIT  == m_board[i - 1][j - 1])
 	{
+		DBG(Debug::DBG_DEBUG, "top left sink or hit");
 		return true;
 	}
-
+	DBG(Debug::DBG_DEBUG, "no ship on the left");
 	return false;
 }
 
@@ -114,6 +130,7 @@ bool BattleshipAlgoNaive::hasShipOnTheTop(int i, int j)
 	//	<attack is here>
 	if (NAIVE_ATTACK_HIT != m_board[i - 1][j] && NAIVE_ATTACK_SINK != m_board[i - 1][j])
 	{
+		DBG(Debug::DBG_DEBUG, "no hit or sink on top");
 		return false;
 	}
 	// now we know that the cell on my top was hitted
@@ -124,9 +141,10 @@ bool BattleshipAlgoNaive::hasShipOnTheTop(int i, int j)
 		NAIVE_ATTACK_HIT == m_board[i - 1][j - 1] ||
 		NAIVE_ATTACK_HIT == m_board[i - 1][j + 1])
 	{
+		DBG(Debug::DBG_DEBUG, "sink on top or hit on top left or right");
 		return true;
 	}
-
+	DBG(Debug::DBG_DEBUG, "No ship on top");
 	return false;
 }
 
@@ -148,8 +166,11 @@ pair<int, int> BattleshipAlgoNaive::attack()
 				continue;
 			}
 			// else attack
+			DBG(Debug::DBG_DEBUG, "Attack (%d,%d)", m_nextAttack.first, m_nextAttack.second);
 			return m_nextAttack;
 		}
+		m_nextAttack.second = 1;
 	}
+	DBG(Debug::DBG_DEBUG, "No more attacks, (%d, %d)", m_nextAttack.first, m_nextAttack.second);
 	return pair<int, int>(-1, -1);
 }
