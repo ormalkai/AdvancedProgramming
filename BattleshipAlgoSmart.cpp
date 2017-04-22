@@ -62,7 +62,7 @@ int BattleshipAlgoSmart::calcHist(int i, int j)
 	// If the cell is in the middle of ship
 
 
-
+	return 0;
 }
 
 

@@ -150,7 +150,7 @@ private:
 	 * @param		col - current col to check
 	 * @param		direction - in which direction to go in the next recursive call
 	 */
-	int getShipLength(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthDirection direction);
+	int getShipLength(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipDirection direction);
 	
 	/**
 	* @Details		recursive function for recieving current ship length in specific cell

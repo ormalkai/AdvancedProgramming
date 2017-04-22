@@ -118,9 +118,8 @@ int Utils::getShipLen(char c)
 
 int Utils::getShipLen(ShipType s)
 {
-	return m_shipLenByType[s];
+	return m_shipLenByType.at(s);
 }
-
 
 int Utils::getShipValue(char c)
 {

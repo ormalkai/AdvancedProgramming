@@ -113,8 +113,8 @@ void Game::validateBoard(char** initBoard)
 				continue;
 			}
 			char currentShip = initBoard[i][j];
-			int horizontalShipLen = getShipLength(initBoard, currentShip, i, j, ShipLengthDirection::HORIZONTAL);
-			int verticalShipLen = getShipLength(initBoard, currentShip, i, j, ShipLengthDirection::VERTICAL);
+			int horizontalShipLen = getShipLength(initBoard, currentShip, i, j, ShipDirection::HORIZONTAL);
+			int verticalShipLen = getShipLength(initBoard, currentShip, i, j, ShipDirection::VERTICAL);
 			int expectedLen = Utils::getShipLen(currentShip);
 
 			PlayerIndex playerIndex = Utils::getPlayerIdByShip(currentShip);
@@ -327,7 +327,7 @@ int Game::getShipLengthVertical(char** initBoard, char expectedShip, int i/*row*
  * @Param		j				- column of the cell to test
  * @Param		direction		- direction to calculate in current flow
  */
-int Game::getShipLength(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthDirection direction)
+int Game::getShipLength(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipDirection direction)
 {
 	// sanity
 	if (expectedShip != initBoard[i][j])
@@ -335,7 +335,7 @@ int Game::getShipLength(char** initBoard, char expectedShip, int i/*row*/, int j
 		return 0;
 	}
 
-	if (ShipLengthDirection::HORIZONTAL == direction)
+	if (ShipDirection::HORIZONTAL == direction)
 	{
 		return (1 + Game::getShipLengthHorizontal(initBoard, expectedShip, i, j - 1, ShipLengthSecondDirection::BACKWORD) +
 			Game::getShipLengthHorizontal(initBoard, expectedShip, i, j + 1, ShipLengthSecondDirection::FORWARD));
@@ -443,12 +443,12 @@ ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
 	m_players[PLAYER_A] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
 	(dynamic_cast<BattleshipAlgoFromFile*>(m_players[PLAYER_A]))->AttackFileParser(attackFilePerPlayer[PLAYER_A]);
 	char** playerABoard = m_board.toCharMat(PLAYER_A);
-	m_players[PLAYER_A]->setBoard(const_cast<const char **>(playerABoard), m_rows, m_cols);
+	m_players[PLAYER_A]->setBoard(PLAYER_A, const_cast<const char **>(playerABoard), m_rows, m_cols);
 	
 	m_players[PLAYER_B] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
 	(dynamic_cast<BattleshipAlgoFromFile*>(m_players[PLAYER_B]))->AttackFileParser(attackFilePerPlayer[PLAYER_B]);
 	char** playerBBoard = m_board.toCharMat(PLAYER_B);
-	m_players[PLAYER_B]->setBoard(const_cast<const char **>(playerBBoard), m_rows, m_cols);
+	m_players[PLAYER_B]->setBoard(PLAYER_B, const_cast<const char **>(playerBBoard), m_rows, m_cols);
 
 	for (int i = 0; i < m_board.rows(); i++)
 	{
