@@ -48,6 +48,13 @@ void BattleshipAlgoNaive::notifyOnAttackResult(int player, int row, int col, Att
 	}
 }
 
+bool BattleshipAlgoNaive::init(const std::string & path)
+{
+	m_nextAttack.first = 1;
+	m_nextAttack.second = 1;
+	return true;
+}
+
 bool BattleshipAlgoNaive::isAlreadyAttacked(char c)
 {
 	if (NAIVE_ATTACK_HIT != c &&

@@ -57,5 +57,7 @@ public:
 	*/
 	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override;
 
+	bool init(const std::string& path) override;
+
 
 };
