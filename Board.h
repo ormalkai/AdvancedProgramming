@@ -22,7 +22,7 @@ public:
 	 * @param		rows - number of rows in the board, default BOARD_ROW_SIZE (for future purposes)
 	 * @param		cols - number of Columns in the board, default BOARD_COL_SIZE (for future purposes)
 	 */
-	Board(int rows = BOARD_ROW_SIZE, int cols = BOARD_COL_SIZE) : m_rows(rows), m_cols(cols) , m_isQuiet(false), m_delay(2000) {};
+	Board(int rows = BOARD_ROW_SIZE, int cols = BOARD_COL_SIZE) : m_rows(rows), m_cols(cols) , m_isQuiet(false), m_delay(2000) {}
 
 	/**
 	 * @Details		Destructor of board, releases all related memory (i.e ships on board)
@@ -111,8 +111,15 @@ public:
 	* @Param		r - requested cell's row index
 	* @Param		c - requested cell's col index
 	*/
-	inline void clearCell(int r, int c)
+	void clearCell(int r, int c)
 	{
 		m_boardData[r][c].clear();
 	}
+
+	bool isValidCell(int i, int j) const
+	{
+		return (i >= 1 && i <= m_rows && j >= 1 && j <= m_cols);
+	}
+
+	bool isPaddingCell(const Cell& cell) const { return cell.row() == 0 || cell.row() == m_rows + 1 || cell.col() == 0 || cell.col() == m_cols + 1; }
 };

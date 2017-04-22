@@ -8,22 +8,25 @@ int BattleshipAlgoSmart::calcHist(int i, int j)
 {
 
 	auto& cell = m_board.get(i, j);
+
+	if (!cell.isEmpty())
+		return 0;
+
+
 	auto numOfPotentialShips = 1;
 	map<Direction, int> maxIndexOfValid = {
 		{ Direction::UP, MAX_SHIP_LEN },
 		{ Direction::DOWN, MAX_SHIP_LEN },
 		{ Direction::LEFT, MAX_SHIP_LEN },
 		{ Direction::RIGHT, MAX_SHIP_LEN }
-};
+	};
 
-	if (!cell.isEmpty())
-		return 0;
-
-	for (auto d = 0; d < 4; ++d)
+	
+	for (auto d_i = 0; d_i <= NUM_OF_DIRECTIONS; ++d_i)
 	{
 		for (auto shipLen = 1; shipLen <= MAX_SHIP_LEN; ++shipLen)
 		{
-			Direction d;
+			auto d = static_cast<Direction>(d_i);
 			auto od = Utils::getOppositeDirection(d);
 
 			auto checkedRowIndex = i;
@@ -46,6 +49,9 @@ int BattleshipAlgoSmart::calcHist(int i, int j)
 			default: ;
 			}
 
+			if (!m_board.isValidCell(checkedRowIndex, checkedColIndex))
+				break;
+
 			auto& checkedCell = m_board.get(checkedRowIndex, checkedColIndex);
 			
 			if (isOtherNeighborValid(checkedCell, od))
@@ -60,14 +66,19 @@ int BattleshipAlgoSmart::calcHist(int i, int j)
 
 	
 	// If the cell is in the middle of ship
+	numOfPotentialShips += calcNumOfOptionalShipsInOffset(maxIndexOfValid.at(Direction::UP), maxIndexOfValid.at(Direction::DOWN));
+	numOfPotentialShips += calcNumOfOptionalShipsInOffset(maxIndexOfValid.at(Direction::LEFT), maxIndexOfValid.at(Direction::RIGHT));
 
-
-	return 0;
+	return numOfPotentialShips;
 }
 
 
 bool BattleshipAlgoSmart::isOtherNeighborValid(const Cell& cell, Direction d)
 {
+	// Not mandatory
+	//if (m_board.isPaddingCell(cell))
+	//	return false;
+
 	auto ret = false;
 	auto rIndex = cell.row();
 	auto cIndex = cell.col();
@@ -76,6 +87,7 @@ bool BattleshipAlgoSmart::isOtherNeighborValid(const Cell& cell, Direction d)
 	{
 	case Direction::UP:
 	{
+	
 		ret =	m_board.get(rIndex + 1, cIndex).isEmpty() &&	// Check down
 				m_board.get(rIndex, cIndex + 1).isEmpty() &&	// Check right
 				m_board.get(rIndex, cIndex - 1).isEmpty();		// Check left
@@ -104,4 +116,18 @@ bool BattleshipAlgoSmart::isOtherNeighborValid(const Cell& cell, Direction d)
 
 
 	return ret;
+}
+
+
+int BattleshipAlgoSmart::calcNumOfOptionalShipsInOffset(int i, int j) const
+{
+	auto min = min(i, j);
+
+	if (min == 0)
+		return 0;
+	if (min == 1)
+		return (i + j == 2 ? 1 : 2); // If j==1 only one ship with len 3 is valid
+	
+	// At least 2 cells each direction
+	return min * 2;
 }

@@ -53,14 +53,10 @@ public:
 	*/
 	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override {};
 
-
-
-	void init();
-
-	bool checkLegalShip(int endPointX, int endPointY, ShipDirection direction, ShipType type);
-
+	bool init(const std::string& path) override { return false; }
 	int calcHist(int i, int j);
 	bool isOtherNeighborValid(const Cell& cell, Direction d);
+	int calcNumOfOptionalShipsInOffset(int i, int j) const;
 };
 
 
