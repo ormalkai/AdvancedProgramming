@@ -62,7 +62,8 @@ typedef enum AttackRequestCode
 enum class ShipDirection
 {
 	VERTICAL,
-	HORIZONTAL
+	HORIZONTAL,
+	ALL
 };
 
 enum class Direction

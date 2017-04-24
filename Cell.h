@@ -96,4 +96,10 @@ public:
 	int col() const { return m_colIndex; }
 	void setHistValue(int h) { m_histValue = h; }
 	int getHistValue() const { return m_histValue; }
+	bool isPendingCell() const { return INT_MAX == m_histValue; }
+	double squaredDistance(Cell* oc) const {
+		return (pow(oc->row() - this->row(), 2) + pow(oc->col() - this->col(), 2));
+	}
+	void setIndexes(int r, int c) { m_rowIndex = r; m_colIndex = c; }
+
 };

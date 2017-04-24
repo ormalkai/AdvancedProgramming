@@ -3,6 +3,7 @@
 #include "ShipFactory.h"
 #include "Debug.h"
 #include "Utils.h"
+#include "DummyShip.h"
 
 ShipFactory& ShipFactory::instance()
 {
@@ -42,3 +43,9 @@ Ship* ShipFactory::create(int i, int j, const char ** initBoard)
 	return result;
 
 }
+
+Ship* ShipFactory::createDummyShipByCellsVector(vector<Cell*> vec)
+{
+	return new DummyShip((int)vec.size());
+}
+

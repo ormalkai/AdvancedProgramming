@@ -20,6 +20,8 @@ public:
 	 * @param		initBoard - as recievd in input
 	 */
 	Ship* create(int i, int j, const char ** initBoard);
+	Ship* createDummyShipByCellsVector(vector<Cell*> vec);
+
 private:
 	/**
 	 * @Details		default constructor

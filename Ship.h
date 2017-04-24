@@ -9,6 +9,7 @@ class Cell;
 
 class Ship {
 
+
 private:
 	int m_length;
 	int m_value;
@@ -99,5 +100,7 @@ public:
 	*/
 	void executeAttack();
 
+
+	void addCells(vector<Cell*> vecCell) { m_cellList.insert(m_cellList.end(), vecCell.begin(), vecCell.end()); }
 
 };

@@ -4,7 +4,8 @@
 
 enum class AlgoType {
 	FILE,
-	NAIVE
+	NAIVE,
+	SMART
 };
 
 class PlayerAlgoFactory {

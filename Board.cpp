@@ -13,12 +13,21 @@
 
 void Board::buildBoard(const char ** initBoard)
 {
+	for (int i = 0; i < INIT_BOARD_ROW_SIZE; i++)
+	{
+		for (int j = 0; j < INIT_BOARD_COL_SIZE; j++)
+		{
+			m_boardData[i][j].setStatus(Cell::FREE);
+		}
+	}
+
 	// scan from top left to right and bottom
 	// if my upper and left cells are empty I'm new ship
 	for (int i = 1; i <= BOARD_ROW_SIZE; i++)
 	{
 		for (int j = 1; j <= BOARD_COL_SIZE; j++)
 		{
+			m_boardData[i][j].setIndexes(i, j);
 			// check if the is the start of ship
 			if (SPACE != initBoard[i][j] && SPACE == initBoard[i - 1][j] && SPACE == initBoard[i][j - 1])
 			{
@@ -68,6 +77,22 @@ char Board::getSign(int r, int c)
 	return get(r, c).getSign();
 }
 
+void Board::addDummyNewShipToBoard(vector<Cell*> shipCells)
+{
+	Ship* ship = ShipFactory::instance().createDummyShipByCellsVector(shipCells);
+
+	m_shipsOnBoard.push_back(ship);
+	// init ship in relevant cells and cells in the ship
+
+	for(auto it = shipCells.begin(); it != shipCells.end(); ++it)
+	{
+		(*it)->setShip(ship);
+		(*it)->setStatus(Cell::DEAD);
+	}
+
+	ship->addCells(shipCells);
+}
+
 Board::~Board()
 {
 	for (vector<Ship*>::iterator it = m_shipsOnBoard.begin(); it != m_shipsOnBoard.end(); ++it)
@@ -97,6 +122,24 @@ void Board::printBoard() const
 				Utils::setTextColor(m_boardData[i][j].getShip()->getColor());
 				cout << m_boardData[i][j].getSign();
 			}
+		}
+		cout << endl;
+	}
+}
+
+void Board::printHist()
+{
+	Utils::gotoxy(13,0);
+
+	for (int i = 0; i < INIT_BOARD_ROW_SIZE; ++i)
+	{
+		for (int j = 0; j < INIT_BOARD_COL_SIZE; ++j)
+		{
+
+			Cell* c = getCellPointer(i, j);
+			int h = c->getHistValue();
+			
+			printf("%2d ", h);
 		}
 		cout << endl;
 	}

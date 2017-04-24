@@ -66,6 +66,7 @@ public:
 	* @Details		Prints the board in with sign color for each player's ship
 	*/
 	void printBoard() const;
+	
 
 	/**
 	* @Details		Update GUI board after attack
@@ -122,4 +123,10 @@ public:
 	}
 
 	bool isPaddingCell(const Cell& cell) const { return cell.row() == 0 || cell.row() == m_rows + 1 || cell.col() == 0 || cell.col() == m_cols + 1; }
+
+	void addDummyNewShipToBoard(vector<Cell*> shipCells);
+
+	Cell* getCellPointer(int r, int c) { return  &(m_boardData[r][c]); }
+
+	void printHist();
 };
