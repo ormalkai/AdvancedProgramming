@@ -74,7 +74,7 @@ public:
 	* @Param		j - attacked cell's col index
 	* @return		attackResult - attack restult (hit, miss, sink)
 	*/
-	void printAttack(int i, int j, AttackResult attackResult) const;
+	void printAttack(int player, int i, int j, AttackResult attackResult) const;
 
 	/**
 	* @Details		set true for disable game simulation

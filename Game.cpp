@@ -581,7 +581,7 @@ void Game::startGame()
 			attackResult = AttackResult::Miss;
 		}
 
-		m_board.printAttack(attackReq.first, attackReq.second, attackResult);
+		m_board.printAttack(m_currentPlayerIndex, attackReq.first, attackReq.second, attackResult);
 
 		// Notify for all players
 		for (int i = 0; i < NUM_OF_PLAYERS; i++)
@@ -599,7 +599,8 @@ void Game::startGame()
 		// If iter == last do iter = begin
 
 		// Update next turn
-		if (AttackResult::Miss == attackResult)
+		if (AttackResult::Miss == attackResult ||
+			attackedCell.getPlayerIndexOwner() == m_currentPlayerIndex)
 		{
 			proceedToNextPlayer();
 		}

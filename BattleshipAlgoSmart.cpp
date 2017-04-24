@@ -100,6 +100,9 @@ void BattleshipAlgoSmart::handleUntargetShipSunk(Cell* attackedCell)
 void BattleshipAlgoSmart::handleTargetShipSunk(Cell* attackedCell)
 {
 	m_currentStatus = HUNT;
+
+	m_targetQueue.clear();
+
 	// Add the cell was attacked for update the neighbors
 	m_currentAttackedShipCells.push_back(attackedCell);
 
@@ -150,21 +153,24 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, int row, int col, Att
 		{
 			switch (result)
 			{
-			case AttackResult::Hit: {
+			case AttackResult::Hit: 
+			{
 				m_currentAttackedShipCells.push_back(attackedCell);
 
 				bool toRemoveWrongAxis = false;
 				if (m_currentAttackedShipCells.size() == 2)
 					toRemoveWrongAxis = true;
 				if (m_currentAttackedShipCells.at(0)->row() == m_currentAttackedShipCells.at(1)->row())
-					updateTargetAttackQueue(attackedCell, ShipDirection::VERTICAL, toRemoveWrongAxis);
-				else
 					updateTargetAttackQueue(attackedCell, ShipDirection::HORIZONTAL, toRemoveWrongAxis);
+				else
+					updateTargetAttackQueue(attackedCell, ShipDirection::VERTICAL, toRemoveWrongAxis);
 
 
 			} break;
 			case AttackResult::Sink:
+			{
 				handleTargetShipSunk(attackedCell);
+			}
 			}
 		}
 	}
@@ -175,12 +181,15 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, int row, int col, Att
 			switch (result)
 			{
 			case AttackResult::Sink:
+			{
 				handleUntargetShipSunk(attackedCell);
-				break;
-
+			}
+			break;
 			case AttackResult::Hit:
+			{
 				attackedCell->setHistValue(INT_MAX);
-				break;
+			}
+			break;
 			}
 		}
 		else // TARGET == m_currentStatus
@@ -188,9 +197,10 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, int row, int col, Att
 			switch (result)
 			{
 			case AttackResult::Hit:
-
+			{
 				attackedCell->setHistValue(INT_MAX);
-				break;
+			}
+			break;
 			case AttackResult::Sink:
 			{
 				// If the other player shot the last cell in the ship that current player tried to hit
@@ -210,7 +220,7 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, int row, int col, Att
 
 bool BattleshipAlgoSmart::isCellNeighborToTargetShip(Cell* cell)
 {
-	for (auto it = m_targetQueue.begin(); it != m_targetQueue.end(); ++it)
+	for (auto it = m_currentAttackedShipCells.begin(); it != m_currentAttackedShipCells.end(); ++it)
 	{
 		// If the cell is neighbor of *it cell
 		if (cell->squaredDistance(*it) == 1)
@@ -291,10 +301,10 @@ void BattleshipAlgoSmart::updateTargetAttackQueue(Cell* attackedCell, ShipDirect
 			int cIndex = (*it)->col();
 
 			if (ShipDirection::HORIZONTAL == direction && rowIndex != rIndex)
-				m_targetQueue.erase(it);
+				it = m_targetQueue.erase(it);
 			if (ShipDirection::VERTICAL == direction && colIndex != cIndex)
-				m_targetQueue.erase(it);
-			else
+				it = m_targetQueue.erase(it);
+			else if (it != m_targetQueue.end())
 				++it;
 		}
 
@@ -304,20 +314,28 @@ void BattleshipAlgoSmart::updateTargetAttackQueue(Cell* attackedCell, ShipDirect
 
 	if (ShipDirection::ALL == direction || ShipDirection::VERTICAL == direction) {
 
+		// Down
+		newRow = rowIndex + 1;
 		while (m_board.get(newRow, colIndex).isPendingCell()) newRow++;
 		if (isAttackable(m_board.get(newRow, colIndex)))
 			m_targetQueue.push_back(&(m_board.get(newRow, colIndex)));
 
+		// Up
+		newRow = rowIndex - 1;
 		while (m_board.get(newRow, colIndex).isPendingCell()) newRow--;
 		if (isAttackable(m_board.get(newRow, colIndex)))
 			m_targetQueue.push_back(&(m_board.get(newRow, colIndex)));
 	}
 	if (ShipDirection::ALL == direction || ShipDirection::HORIZONTAL == direction)
 	{
+		// Right
+		newCol = colIndex + 1;
 		while (m_board.get(rowIndex, newCol).isPendingCell()) newCol++;
 		if (isAttackable(m_board.get(rowIndex, newCol)))
 			m_targetQueue.push_back(&(m_board.get(rowIndex, newCol)));
 
+		// Left
+		newCol = colIndex - 1;
 		while (m_board.get(rowIndex, newCol).isPendingCell()) newCol--;
 		if (isAttackable(m_board.get(rowIndex, newCol)))
 			m_targetQueue.push_back(&(m_board.get(rowIndex, newCol)));
@@ -365,13 +383,13 @@ void BattleshipAlgoSmart::calcHist(int i, int j)
 
 
 
-	auto numOfPotentialShips = 1; //
+	auto numOfPotentialShips = 1; 
 
 	map<Direction, int> maxIndexOfValid = {
-		{ Direction::UP, MAX_SHIP_LEN },
-		{ Direction::DOWN, MAX_SHIP_LEN },
-		{ Direction::LEFT, MAX_SHIP_LEN },
-		{ Direction::RIGHT, MAX_SHIP_LEN }
+		{ Direction::UP, MAX_SHIP_LEN - 1 },
+		{ Direction::DOWN, MAX_SHIP_LEN - 1 },
+		{ Direction::LEFT, MAX_SHIP_LEN - 1 },
+		{ Direction::RIGHT, MAX_SHIP_LEN - 1 }
 	};
 
 
@@ -401,22 +419,16 @@ void BattleshipAlgoSmart::calcHist(int i, int j)
 				break;
 			default:;
 			}
-			if (checkedRowIndex == 5 && checkedColIndex == 8)
-			{
-				int a = 4;
-			}
+
 			if (!m_board.isValidCell(checkedRowIndex, checkedColIndex))
 			{
 				maxIndexOfValid[d] = shipLen - 1;
 				break;
 			}
 				
-
 			auto& checkedCell = m_board.get(checkedRowIndex, checkedColIndex);
 
-			if (isOtherNeighborValid(checkedCell, od))
-				numOfPotentialShips++;
-			else
+			if (!isOtherNeighborValid(checkedCell, od))
 			{
 				maxIndexOfValid[d] = shipLen - 1;
 				break;
@@ -425,7 +437,7 @@ void BattleshipAlgoSmart::calcHist(int i, int j)
 	} // Direction
 
 
-	// If the cell is in the middle of ship
+	// Calc 
 	numOfPotentialShips += calcNumOfOptionalShipsInOffset(maxIndexOfValid.at(Direction::UP), maxIndexOfValid.at(Direction::DOWN));
 	numOfPotentialShips += calcNumOfOptionalShipsInOffset(maxIndexOfValid.at(Direction::LEFT), maxIndexOfValid.at(Direction::RIGHT));
 
@@ -480,13 +492,15 @@ bool BattleshipAlgoSmart::isOtherNeighborValid(const Cell& cell, Direction d)
 
 int BattleshipAlgoSmart::calcNumOfOptionalShipsInOffset(int i, int j) const
 {
-	auto min = min(i, j);
+	auto minBottleneck = min(i, j);
 
-	if (min == 0)
-		return 0;
-	if (min == 1)
-		return (i + j == 2 ? 1 : 2); // If j==1 only one ship with len 3 is valid
+	int ret = 0;
 
-	// At least 2 cells each direction
-	return min * 2;
+	for (int shipLen = 2; shipLen <= MAX_SHIP_LEN; ++shipLen)
+	{
+		ret += min(minBottleneck, shipLen);
+
+	}
+
+	return ret;
 }

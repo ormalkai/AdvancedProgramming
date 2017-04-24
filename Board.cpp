@@ -18,6 +18,7 @@ void Board::buildBoard(const char ** initBoard)
 		for (int j = 0; j < INIT_BOARD_COL_SIZE; j++)
 		{
 			m_boardData[i][j].setStatus(Cell::FREE);
+			m_boardData[i][j].setIndexes(i, j);
 		}
 	}
 
@@ -27,7 +28,7 @@ void Board::buildBoard(const char ** initBoard)
 	{
 		for (int j = 1; j <= BOARD_COL_SIZE; j++)
 		{
-			m_boardData[i][j].setIndexes(i, j);
+			
 			// check if the is the start of ship
 			if (SPACE != initBoard[i][j] && SPACE == initBoard[i - 1][j] && SPACE == initBoard[i][j - 1])
 			{
@@ -131,9 +132,9 @@ void Board::printHist()
 {
 	Utils::gotoxy(13,0);
 
-	for (int i = 0; i < INIT_BOARD_ROW_SIZE; ++i)
+	for (int i = 1; i <= BOARD_ROW_SIZE; ++i)
 	{
-		for (int j = 0; j < INIT_BOARD_COL_SIZE; ++j)
+		for (int j = 1; j <= BOARD_COL_SIZE; ++j)
 		{
 
 			Cell* c = getCellPointer(i, j);
@@ -145,7 +146,7 @@ void Board::printHist()
 	}
 }
 
-void Board::printAttack(int i, int j, AttackResult attackResult) const
+void Board::printAttack(int player, int i, int j, AttackResult attackResult) const
 {
 	if (true == m_isQuiet)
 	{
@@ -155,7 +156,11 @@ void Board::printAttack(int i, int j, AttackResult attackResult) const
 	for (int k = 0; k < 3; k++)
 	{
 		Utils::gotoxy(i, j);
-		cout << "@";
+		// TODO: Replace to cout << "@";
+		if (player == PLAYER_A)
+			cout << "@";
+		else
+			cout << "&";
 		Sleep(100);
 		Utils::gotoxy(i, j);
 		cout << m_boardData[i][j].getSign();
@@ -166,7 +171,11 @@ void Board::printAttack(int i, int j, AttackResult attackResult) const
 	case (AttackResult::Hit):
 	case (AttackResult::Sink):
 		Utils::gotoxy(i, j);
-		cout << "*";
+		// TODO: Replace to cout << "*";
+		if (player == PLAYER_A)
+			cout << "*";
+		else
+			cout << "#";
 		break;
 	case (AttackResult::Miss):
 		Utils::gotoxy(i, j);
