@@ -193,13 +193,13 @@ public:
 	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override;
 	bool isCellNeighborToTargetShip(Cell* cell);
 	vector<Cell*> getSunkShipByCell(Cell* c);
-	void updateHist(vector<Cell*> shipCells);
+	void updateHist(vector<Cell*> cells, bool createDummyShip = true);
 	void updateTargetAttackQueue(Cell* attackedCell, ShipDirection direction, bool toRemoveWrongAxis);
 	bool isAttackable(Cell& c) const;
 
 	bool init(const std::string& path) override;
 	void calcHist(int i, int j);
-	bool isOtherNeighborValid(const Cell& cell, Direction d);
+	bool isOtherNeighborsValid(const Cell& cell, Direction d);
 	int calcNumOfOptionalShipsInOffset(int i, int j) const;
 };
 

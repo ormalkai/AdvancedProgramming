@@ -113,21 +113,30 @@ void BattleshipAlgoSmart::handleTargetShipSunk(Cell* attackedCell)
 	m_currentAttackedShipCells.clear();
 }
 
-void BattleshipAlgoSmart::notifyOnAttackResult(int player, int row, int col, AttackResult result)
+void BattleshipAlgoSmart::notifyOnAttackResult(int player, int row, int col, AttackResult attackResult)
 {
 
 	Cell* attackedCell = m_board.getCellPointer(row, col);
-	attackedCell->setStatus(Cell::DEAD);
+	attackedCell->hitCell();
+	if (AttackResult::Hit == attackResult || AttackResult::Sink == attackResult)
+		attackedCell->setStatus(Cell::DEAD);
 	attackedCell->setHistValue(0);
 
+
+
+	if (AttackResult::Miss == attackResult && !attackedCell->hasShip())
+	{
+		// Update hist
+		updateHist(vector<Cell*>{attackedCell}, false);
+	}
+	
 
 	if (m_id == player)
 	{
 		if (HUNT == m_currentStatus)
 		{
-			switch (result)
+			switch (attackResult)
 			{
-
 			case AttackResult::Sink:
 			{
 				// Add the cell was attacked for update the neighbors
@@ -151,7 +160,7 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, int row, int col, Att
 		}
 		else // TARGET == m_currentStatus
 		{
-			switch (result)
+			switch (attackResult)
 			{
 			case AttackResult::Hit: 
 			{
@@ -178,7 +187,7 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, int row, int col, Att
 	{
 		if (HUNT == m_currentStatus)
 		{
-			switch (result)
+			switch (attackResult)
 			{
 			case AttackResult::Sink:
 			{
@@ -194,7 +203,7 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, int row, int col, Att
 		}
 		else // TARGET == m_currentStatus
 		{
-			switch (result)
+			switch (attackResult)
 			{
 			case AttackResult::Hit:
 			{
@@ -265,16 +274,22 @@ vector<Cell*> BattleshipAlgoSmart::getSunkShipByCell(Cell* c)
 	return result;
 }
 
-void BattleshipAlgoSmart::updateHist(vector<Cell*> shipCells)
+void BattleshipAlgoSmart::updateHist(vector<Cell*> cells, bool createDummyShip /*= true*/)
 {
-	// create dummy ship
-	m_board.addDummyNewShipToBoard(shipCells);
+	if (createDummyShip) {
+		// create dummy ship
+		m_board.addDummyNewShipToBoard(cells);
+	}
 
 	// update ships neighbors hist
 
-	for (auto it = shipCells.begin(); it != shipCells.end(); ++it)
+	for (auto it = cells.begin(); it != cells.end(); ++it)
 	{
 		Cell* pc = *it;
+
+		if (!createDummyShip)
+			pc->setHistValue(0);
+
 		int r = pc->row();
 		int c = pc->col();
 
@@ -372,6 +387,7 @@ void BattleshipAlgoSmart::calcHist(int i, int j)
 		return;
 	}
 
+	// Check there are no neighbors ship
 	if (!m_board.get(i + 1, j).isEmpty() ||
 		!m_board.get(i - 1, j).isEmpty() ||
 		!m_board.get(i, j + 1).isEmpty() ||
@@ -420,6 +436,7 @@ void BattleshipAlgoSmart::calcHist(int i, int j)
 			default:;
 			}
 
+
 			if (!m_board.isValidCell(checkedRowIndex, checkedColIndex))
 			{
 				maxIndexOfValid[d] = shipLen - 1;
@@ -428,7 +445,8 @@ void BattleshipAlgoSmart::calcHist(int i, int j)
 				
 			auto& checkedCell = m_board.get(checkedRowIndex, checkedColIndex);
 
-			if (!isOtherNeighborValid(checkedCell, od))
+			if ((checkedCell.isHitted() && !checkedCell.hasShip()) || 
+				!isOtherNeighborsValid(checkedCell, od))
 			{
 				maxIndexOfValid[d] = shipLen - 1;
 				break;
@@ -445,11 +463,11 @@ void BattleshipAlgoSmart::calcHist(int i, int j)
 }
 
 
-bool BattleshipAlgoSmart::isOtherNeighborValid(const Cell& cell, Direction d)
+bool BattleshipAlgoSmart::isOtherNeighborsValid(const Cell& cell, Direction d)
 {
-	// Not mandatory
-	//if (m_board.isPaddingCell(cell))
-	//	return false;
+
+	if (m_board.isPaddingCell(cell))
+		return false;
 
 	auto ret = false;
 	auto rIndex = cell.row();
@@ -493,6 +511,12 @@ bool BattleshipAlgoSmart::isOtherNeighborValid(const Cell& cell, Direction d)
 int BattleshipAlgoSmart::calcNumOfOptionalShipsInOffset(int i, int j) const
 {
 	auto minBottleneck = min(i, j);
+
+	// If one of the sides is 0 -> the cell in edge of ship 
+	// Num of ship will be exacly the same as the other side's len
+	if (0 == minBottleneck)
+		return max(i, j);
+
 
 	int ret = 0;
 

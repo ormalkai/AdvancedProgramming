@@ -526,6 +526,8 @@ void Game::startGame()
 		}
 
 		Cell& attackedCell = m_board.get(attackReq);
+		attackedCell.hitCell();
+
 		AttackResult attackResult;
 
 		// Check attack result
@@ -573,7 +575,10 @@ void Game::startGame()
 		case Cell::DEAD:
 		{
 			DBG(Debug::DBG_INFO, "This cell was already bombed, go to sleep bro...");
-			attackResult = AttackResult::Hit;
+			if (attackedCell.getShip()->isShipAlive())
+				attackResult = AttackResult::Hit;
+			else
+				attackResult = AttackResult::Miss;
 		}
 		break;
 		case Cell::FREE:

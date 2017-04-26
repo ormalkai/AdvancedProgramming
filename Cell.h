@@ -23,6 +23,7 @@ private:
 	int				m_rowIndex;
 	int				m_colIndex;
 	int				m_histValue;
+	bool			m_isHitted;
 
 
 public:
@@ -102,4 +103,8 @@ public:
 	}
 	void setIndexes(int r, int c) { m_rowIndex = r; m_colIndex = c; }
 
+	bool hasShip() const { return nullptr != m_pShip; }
+	bool isHitted() const { return m_isHitted; }
+
+	void hitCell() { m_isHitted = true; }
 };
