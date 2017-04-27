@@ -10,6 +10,7 @@
 #include "Board.h"
 #include "BattleshipAlgoFromFile.h"
 #include <codecvt>
+#include "BattleshipAlgoInteractive.h"
 
 #define SHIPS_PER_PLAYER (5)
 
@@ -458,11 +459,19 @@ ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
 	/*==============*/
 
 
-	/* testing naive*/
+	// Or
+	m_players[PLAYER_B] = new BattleshipAlgoInteractive(1);
+	char** playerBBoard = m_board.toCharMat(PLAYER_B);
+	m_players[PLAYER_B]->setBoard(PLAYER_B, const_cast<const char **>(playerBBoard), m_rows, m_cols);
+
+
+	
+/*
+	/* testing naive#1#
 	m_players[PLAYER_B] = PlayerAlgoFactory::instance().create(AlgoType::NAIVE);
 	char** playerBBoard = m_board.toCharMat(PLAYER_B);
 	m_players[PLAYER_B]->setBoard(PLAYER_B, const_cast<const char **>(playerBBoard), m_rows, m_cols);
-	/*==============*/
+	/*==============#1#*/
 
 	for (int i = 0; i < m_board.rows(); i++)
 	{

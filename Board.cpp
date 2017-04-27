@@ -130,7 +130,11 @@ void Board::printBoard() const
 
 void Board::printHist()
 {
-	Utils::gotoxy(13,0);
+	static int k = 1;
+	if (k++ % 2 == 0)
+		Utils::gotoxy(13,0);
+	else
+		Utils::gotoxy(27, 0);
 
 	for (int i = 1; i <= BOARD_ROW_SIZE; ++i)
 	{

@@ -17,7 +17,7 @@
  * Hunt mode:
  *		In Hunt mode the player creates histogram of how many ships can use the cell for each cell.
  *		For example, at the corners, the value can be at most 7:
- *			1. One foe size of size 1
+ *			1. One for size of size 1
  *			2. Two for ships of size 2 (one vertical and one horizontal)
  *			3. Two for ships of size 3 (one vertical and one horizontal)
  *			4. Two for ships of size 4 (one vertical and one horizontal)
@@ -41,7 +41,15 @@
  *		sunk.
  *		
  *	Creating and Updating the Histogram:
- *		TODO GAL add your staff here
+ *		Creation of the histogram is basically calculation of each cell in the board while considering my ships.
+ *		Updating of the histogram is calculation of the relevant cells accrordiong to the change was triggerd the update event.
+ *		The histogram value of each cell is the number of options (potential ships) that this cell could be part of them.
+ *		Cell that part of a ship (ship cell) will be with value 0.
+ *		Cell that neighbor of ship cell will be with value 0.
+ *		We calculate the farthest cell each direction (Up,Down,Left,Right) and save the values.
+ *		The farthest cell is the cell is in the board (not exceeds the limits) and not a neighbor of another ship. 
+ *		Then, we calculate for each ship's length: how many ships can be at this cell and sum all of that.
+ *		
  *		
  *	Handling attack results:
  *		We need to define between several situations:

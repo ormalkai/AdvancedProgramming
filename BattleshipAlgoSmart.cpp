@@ -225,6 +225,8 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, int row, int col, Att
 			}
 		}
 	}
+	
+	m_board.printHist();
 }
 
 bool BattleshipAlgoSmart::isCellNeighborToTargetShip(Cell* cell)
