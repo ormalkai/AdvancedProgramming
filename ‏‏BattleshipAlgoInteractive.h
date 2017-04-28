@@ -5,36 +5,36 @@
 
 using namespace std;
 
-class BattleshipAlgoFromFile : public PlayerAlgo {
+class BattleshipAlgoInteractive : public PlayerAlgo {
 
 private:
 	char**	m_board;	// The board of the player (currently not in use, for future prposes)
 	int		m_rows;		// number of rows in the board
 	int		m_cols;		// number of columns in the board
 	queue<pair<int, int>> m_attackQueue;
-	
+
 public:
 	/**
-	 * @Details		Constructor receives id of the player
-	 * @param		id - Unique identifier of the player
-	 */
-	BattleshipAlgoFromFile(int id);
-	
-	/**
-	 * @Details		Default destructor
-	 */
-	~BattleshipAlgoFromFile() = default;
+	* @Details		Constructor receives id of the player
+	* @param		id - Unique identifier of the player
+	*/
+	BattleshipAlgoInteractive(int id);
 
-	BattleshipAlgoFromFile(const BattleshipAlgoFromFile &) = default;
-	BattleshipAlgoFromFile &operator=(const BattleshipAlgoFromFile &) = default;
+	/**
+	* @Details		Default destructor
+	*/
+	~BattleshipAlgoInteractive() = default;
+
+	BattleshipAlgoInteractive(const BattleshipAlgoInteractive &) = default;
+	BattleshipAlgoInteractive &operator=(const BattleshipAlgoInteractive &) = default;
 
 	/**
 	* @Details		receives path of attack file and build attack queue
 	* @Param		attackPath - path of attack file
 	*/
 	void AttackFileParser(string & attackPath);
-	
-	
+
+
 	/**
 	* @Details		Receive board matrix and matrix's size, and notify player on his board
 	* @Param		board - player's board

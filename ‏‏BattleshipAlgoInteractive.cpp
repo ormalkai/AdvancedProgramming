@@ -7,6 +7,8 @@
 #include <cctype>
 #include <locale>
 #include "Debug.h"
+#include "BattleshipAlgoInteractive.h"
+#include <iostream>
 
 // trim from start (in place)
 static inline void ltrim(std::string &s) {
@@ -26,29 +28,26 @@ static inline void trim(std::string &s) {
 	rtrim(s);
 }
 
-BattleshipAlgoFromFile::BattleshipAlgoFromFile(int id)
+BattleshipAlgoInteractive::BattleshipAlgoInteractive(int id)
 {
 	this->setId(id);
 }
 
-void BattleshipAlgoFromFile::setBoard(int player, const char** board, int numRows, int numCols)
+void BattleshipAlgoInteractive::setBoard(int player, const char** board, int numRows, int numCols)
 {
 	// noting to do in player algo from file
 }
 
-std::pair<int, int> BattleshipAlgoFromFile::attack()
+std::pair<int, int> BattleshipAlgoInteractive::attack()
 {
-	if (0 == m_attackQueue.size())
-	{
-		static bool isFirst = true;
-		if (true == isFirst)
-		{
-			DBG(Debug::DBG_DEBUG, "Attacks of player %c done", Utils::getPlayerCharByIndex(getId()));
-		}
-		return std::pair<int, int>(-1, -1);
-	}
-	std::pair<int, int> attack = m_attackQueue.front();
-	m_attackQueue.pop();
+
+	Utils::gotoxy(41, 0);
+	pair<int, int> attack(-1, -1);
+	cout << "Enter attack bro: ";
+
+	cin >> attack.first >> attack.second;
+
+	cout << endl;
 	return attack;
 }
 
@@ -68,7 +67,7 @@ static std::vector<std::string> split(const std::string &s, char delim)
 	return elems;
 }
 
-void BattleshipAlgoFromFile::AttackFileParser(string& attackPath) {
+void BattleshipAlgoInteractive::AttackFileParser(string& attackPath) {
 	vector<pair<int, int>> attackMoves;
 	vector<string> tokens;
 	int i, j;
@@ -82,7 +81,7 @@ void BattleshipAlgoFromFile::AttackFileParser(string& attackPath) {
 			break;
 
 		++lineNumber;
-			
+
 		tokens = split(line, ',');
 		if (tokens.size() != 2)
 		{
@@ -92,7 +91,7 @@ void BattleshipAlgoFromFile::AttackFileParser(string& attackPath) {
 		}
 		trim(tokens[0]);
 		trim(tokens[1]);
-		try 
+		try
 		{
 			i = stoi(tokens[0]);
 			j = stoi(tokens[1]);

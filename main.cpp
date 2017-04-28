@@ -8,7 +8,7 @@ void parseArgs(int argc, char* argv[], string& filesLocation, bool& isQuiet, int
 	bool isDelayInitialized = false;
 
 	// set defaults
-	filesLocation = "./";
+	filesLocation = ".\\";
 	isQuiet = DEFAULT_IS_QUIET_MODE;
 	delay = DEFAULT_DELAY_ATTACK;
 
@@ -32,7 +32,7 @@ void parseArgs(int argc, char* argv[], string& filesLocation, bool& isQuiet, int
 		}
 		else /* this is path */
 		{
-			filesLocation = arg + "/";
+			filesLocation = arg + "\\";
 		}
 	}
 }

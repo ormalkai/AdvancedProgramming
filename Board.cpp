@@ -11,11 +11,23 @@
 #define INC_COL(IS_VERTICAL, COL, OFFSET) (((false) == (IS_VERTICAL)) ? ((COL) + (OFFSET)) : (COL))
 
 
-void Board::buildBoard(const char ** initBoard)
+void Board::buildBoard(const char ** initBoard, int numRows, int numCols)
 {
-	for (int i = 0; i < INIT_BOARD_ROW_SIZE; i++)
+	m_rows = numRows;
+	m_cols = numCols;
+
+	// first allocate board TODO nullptr in constructor
+	int initRowSize = m_rows + BOARD_PADDING;
+	int initColSize = m_cols + BOARD_PADDING;
+	m_boardData = new Cell*[initRowSize];
+	for (int i = 0; i < initRowSize; ++i)
 	{
-		for (int j = 0; j < INIT_BOARD_COL_SIZE; j++)
+		m_boardData[i] = new Cell[initColSize];
+	}
+
+	for (int i = 0; i < initRowSize; i++)
+	{
+		for (int j = 0; j < initColSize; j++)
 		{
 			m_boardData[i][j].setStatus(Cell::FREE);
 			m_boardData[i][j].setIndexes(i, j);
@@ -24,9 +36,9 @@ void Board::buildBoard(const char ** initBoard)
 
 	// scan from top left to right and bottom
 	// if my upper and left cells are empty I'm new ship
-	for (int i = 1; i <= BOARD_ROW_SIZE; i++)
+	for (int i = 1; i <= m_rows; i++)
 	{
-		for (int j = 1; j <= BOARD_COL_SIZE; j++)
+		for (int j = 1; j <= m_cols; j++)
 		{
 			
 			// check if the is the start of ship
@@ -100,6 +112,16 @@ Board::~Board()
 	{
 		delete (*it);
 	}
+
+	if (nullptr != m_boardData)
+	{
+		int initRowSize = m_rows + BOARD_PADDING;
+		for (int i = 0; i < initRowSize; ++i)
+		{
+			delete[] m_boardData[i];
+		}
+		delete[] m_boardData;
+	}
 }
 
 void Board::printBoard() const
@@ -108,9 +130,11 @@ void Board::printBoard() const
 	{
 		return;
 	}
-	for (int i = 0; i < INIT_BOARD_ROW_SIZE; ++i)
+	int initRowSize = m_rows + BOARD_PADDING;
+	int initColSize = m_cols + BOARD_PADDING;
+	for (int i = 0; i < initRowSize; ++i)
 	{
-		for (int j = 0; j < INIT_BOARD_COL_SIZE; ++j)
+		for (int j = 0; j < initColSize; ++j)
 		{
 			Utils::gotoxy(i, j);
 			if (SPACE == m_boardData[i][j].getSign())
@@ -136,9 +160,9 @@ void Board::printHist()
 	else
 		Utils::gotoxy(27, 0);
 
-	for (int i = 1; i <= BOARD_ROW_SIZE; ++i)
+	for (int i = 1; i <= m_rows; ++i)
 	{
-		for (int j = 1; j <= BOARD_COL_SIZE; ++j)
+		for (int j = 1; j <= m_cols; ++j)
 		{
 
 			Cell* c = getCellPointer(i, j);

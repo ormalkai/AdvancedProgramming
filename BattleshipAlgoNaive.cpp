@@ -20,17 +20,20 @@ void BattleshipAlgoNaive::setBoard(int player, const char** board, int numRows, 
 	if (NULL == board)
 		return;
 
-	for (int i=0; i<INIT_BOARD_ROW_SIZE; i++)
+	m_rows = numRows;
+	m_cols = numCols;
+
+	for (int i=0; i<m_rows + BOARD_PADDING; i++)
 	{
-		for (int j=0; j<INIT_BOARD_COL_SIZE; j++)
+		for (int j=0; j<m_cols + BOARD_PADDING; j++)
 		{
 			m_board[i][j] = SPACE;
 		}
 	}
 
-	for (int i = 1; i<=BOARD_ROW_SIZE; i++)
+	for (int i = 1; i<= m_rows; i++)
 	{
-		for (int j = 1; j<=BOARD_COL_SIZE; j++)
+		for (int j = 1; j<= m_cols; j++)
 		{
 			m_board[i][j] = board[i-1][j-1];
 		}
@@ -150,18 +153,21 @@ bool BattleshipAlgoNaive::hasShipOnTheTop(int i, int j)
 
 pair<int, int> BattleshipAlgoNaive::attack()
 {
-	for (;m_nextAttack.first <= BOARD_ROW_SIZE; m_nextAttack.first++)
+	for (;m_nextAttack.first <= m_rows; m_nextAttack.first++)
 	{
-		for (; m_nextAttack.second <= BOARD_COL_SIZE; m_nextAttack.second++)
+		for (; m_nextAttack.second <= m_cols; m_nextAttack.second++)
 		{
 			char c = m_board[m_nextAttack.first][m_nextAttack.second];
 			// if one of the conditions met -> continue
 
 			// check if this cell has already been attacked
 			if (true == isAlreadyAttacked(c) ||
-				true == isNeighborsMine(m_nextAttack.first, m_nextAttack.second) ||
-				true == hasShipOnTheLeft(m_nextAttack.first, m_nextAttack.second) ||
-				true == hasShipOnTheTop(m_nextAttack.first, m_nextAttack.second))
+				true == isNeighborsMine(m_nextAttack.first, m_nextAttack.second))
+				/* for future use:
+				 * the naive algorithm can take care of information he gathers during the game
+				 * currently the naive algorithm looks only at his ships
+				true == hasShipOnTheLeft(m_nextAttack.first, m_nextAttack.second) ||*/
+				/*true == hasShipOnTheTop(m_nextAttack.first, m_nextAttack.second)*/
 			{
 				continue;
 			}

@@ -432,7 +432,7 @@ ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
 	}
 
 	// now the board is valid lets build our board
-	m_board.buildBoard(const_cast<const char**>(initBoard));
+	m_board.buildBoard(const_cast<const char**>(initBoard), BOARD_ROW_SIZE, BOARD_COL_SIZE);
 	// initBoard is no longer relevant lets delete it
 	for (int i = 0; i < INIT_BOARD_ROW_SIZE; ++i)
 	{
@@ -441,36 +441,36 @@ ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
 	delete[] initBoard;
 
 	// init players
-	/*m_players[PLAYER_A] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
-	(dynamic_cast<BattleshipAlgoFromFile*>(m_players[PLAYER_A]))->AttackFileParser(attackFilePerPlayer[PLAYER_A]);
+	m_players[PLAYER_A] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
 	char** playerABoard = m_board.toCharMat(PLAYER_A);
 	m_players[PLAYER_A]->setBoard(PLAYER_A, const_cast<const char **>(playerABoard), m_rows, m_cols);
+	(dynamic_cast<BattleshipAlgoFromFile*>(m_players[PLAYER_A]))->AttackFileParser(attackFilePerPlayer[PLAYER_A]);
 	
 	m_players[PLAYER_B] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
-	(dynamic_cast<BattleshipAlgoFromFile*>(m_players[PLAYER_B]))->AttackFileParser(attackFilePerPlayer[PLAYER_B]);
 	char** playerBBoard = m_board.toCharMat(PLAYER_B);
-	m_players[PLAYER_B]->setBoard(PLAYER_B, const_cast<const char **>(playerBBoard), m_rows, m_cols);*/
+	m_players[PLAYER_B]->setBoard(PLAYER_B, const_cast<const char **>(playerBBoard), m_rows, m_cols);
+	(dynamic_cast<BattleshipAlgoFromFile*>(m_players[PLAYER_B]))->AttackFileParser(attackFilePerPlayer[PLAYER_B]);
 
 	/* testing smart*/
-	m_players[PLAYER_A] = PlayerAlgoFactory::instance().create(AlgoType::SMART);
+	/*m_players[PLAYER_A] = PlayerAlgoFactory::instance().create(AlgoType::SMART);
 	char** playerABoard = m_board.toCharMat(PLAYER_A);
 	m_players[PLAYER_A]->init("");
-	m_players[PLAYER_A]->setBoard(PLAYER_A, const_cast<const char **>(playerABoard), m_rows, m_cols);
+	m_players[PLAYER_A]->setBoard(PLAYER_A, const_cast<const char **>(playerABoard), m_rows, m_cols);*/
 	/*==============*/
 
 
 	// Or
-	m_players[PLAYER_B] = new BattleshipAlgoInteractive(1);
+	/*m_players[PLAYER_B] = new BattleshipAlgoInteractive(1);
 	char** playerBBoard = m_board.toCharMat(PLAYER_B);
-	m_players[PLAYER_B]->setBoard(PLAYER_B, const_cast<const char **>(playerBBoard), m_rows, m_cols);
+	m_players[PLAYER_B]->setBoard(PLAYER_B, const_cast<const char **>(playerBBoard), m_rows, m_cols);*/
 
 
 	
-/*
-	/* testing naive#1#
-	m_players[PLAYER_B] = PlayerAlgoFactory::instance().create(AlgoType::NAIVE);
+
+	/* testing naive#1#*/
+	/*m_players[PLAYER_B] = PlayerAlgoFactory::instance().create(AlgoType::NAIVE);
 	char** playerBBoard = m_board.toCharMat(PLAYER_B);
-	m_players[PLAYER_B]->setBoard(PLAYER_B, const_cast<const char **>(playerBBoard), m_rows, m_cols);
+	m_players[PLAYER_B]->setBoard(PLAYER_B, const_cast<const char **>(playerBBoard), m_rows, m_cols);*/
 	/*==============#1#*/
 
 	for (int i = 0; i < m_board.rows(); i++)

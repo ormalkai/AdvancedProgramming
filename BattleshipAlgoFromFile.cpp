@@ -33,7 +33,8 @@ BattleshipAlgoFromFile::BattleshipAlgoFromFile(int id)
 
 void BattleshipAlgoFromFile::setBoard(int player, const char** board, int numRows, int numCols)
 {
-	// noting to do in player algo from file
+	m_rows = numRows;
+	m_cols = numCols;
 }
 
 std::pair<int, int> BattleshipAlgoFromFile::attack()
@@ -104,7 +105,7 @@ void BattleshipAlgoFromFile::AttackFileParser(string& attackPath) {
 		}
 
 		// input validation
-		if (i < 1 || j < 1 || i > BOARD_ROW_SIZE || j > BOARD_COL_SIZE)
+		if (i < 1 || j < 1 || i > m_rows || j > m_cols)
 		{
 			DBG(Debug::DBG_WARNING, "Failed to parse attack requet: line[%d] [%s]", lineNumber, line.c_str());
 			continue;;

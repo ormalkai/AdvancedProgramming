@@ -5,6 +5,7 @@
 #include "Board.h"
 #include <list>
 #include "PriorityQueue.h"
+#include <unordered_map>
 
 /**
  *
@@ -146,6 +147,7 @@ private:
 	list<Cell*> m_targetQueue;
 	SmartAlgoStautus m_currentStatus;
 	vector<Cell*> m_currentAttackedShipCells;
+	map<pair<int, int>, int> m_stripToPotentialShips;
 	
 	Cell* popAttack();
 
@@ -209,6 +211,8 @@ public:
 	void calcHist(int i, int j);
 	bool isOtherNeighborsValid(const Cell& cell, Direction d);
 	int calcNumOfOptionalShipsInOffset(int i, int j) const;
+	bool isShipValidInOffset(int shipLen, int offset, int hasLeft, int hasRight);
+	void initStripSizeToNumPotentialShips();
 };
 
 

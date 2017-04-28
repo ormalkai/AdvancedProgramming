@@ -9,7 +9,7 @@ using std::vector;
 class Board
 {
 private:
-	Cell			m_boardData[INIT_BOARD_ROW_SIZE][INIT_BOARD_COL_SIZE];	// The board is matrix of Cells
+	Cell**			m_boardData;	// The board is matrix of Cells
 	vector<Ship*>	m_shipsOnBoard;											// Pointer to every ship on the board
 	int				m_rows;													// Number of rows in the board
 	int				m_cols;													// Number of columns in the board
@@ -22,7 +22,7 @@ public:
 	 * @param		rows - number of rows in the board, default BOARD_ROW_SIZE (for future purposes)
 	 * @param		cols - number of Columns in the board, default BOARD_COL_SIZE (for future purposes)
 	 */
-	Board(int rows = BOARD_ROW_SIZE, int cols = BOARD_COL_SIZE) : m_rows(rows), m_cols(cols) , m_isQuiet(false), m_delay(2000) {}
+	Board(int rows = BOARD_ROW_SIZE, int cols = BOARD_COL_SIZE) : m_boardData(nullptr), m_rows(BOARD_ROW_SIZE), m_cols(BOARD_COL_SIZE) , m_isQuiet(false), m_delay(2000) {}
 
 	/**
 	 * @Details		Destructor of board, releases all related memory (i.e ships on board)
@@ -98,7 +98,7 @@ public:
 	* @Details		build board by given input (matrix of chars)
 	* @Param		initBoard - input board matrix 
 	*/
-	void buildBoard(const char ** initBoard);
+	void buildBoard(const char ** initBoard, int numRows, int numCols);
 	
 	/**
 	* @Details		receive cell's coords and returns sign of requested cell
