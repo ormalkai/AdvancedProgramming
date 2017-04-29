@@ -401,6 +401,7 @@ ReturnCode Game::initFilesPath(string& filesPath, string& sboardFile, vector<str
  */
 ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
 {
+	// TEST ORM TODO
 	string sboardFile, attackAFile, attackBFile;
 	vector<string> attackFilePerPlayer;
 	ReturnCode rc = initFilesPath(filesPath, sboardFile, attackFilePerPlayer);

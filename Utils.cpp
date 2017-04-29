@@ -1,6 +1,10 @@
 
 #include "Utils.h"
 #include <istream>
+#include <iostream>
+#include <locale>
+#include <codecvt>
+#include <algorithm>
 
 
 map<char, int> Utils::m_shipLenBySign = {
@@ -238,4 +242,40 @@ Direction Utils::getOppositeDirection(Direction d)
 	case Direction::LEFT: return Direction::RIGHT;
 	default: return Direction::DOWN;
 	}
+}
+
+ReturnCode Utils::getListOfFilesInDirectoryBySuffix(const string& path, const string& suffix, vector<string>& files)
+{
+	DWORD ftyp = GetFileAttributesA(path.c_str());
+	if ("" != path &&
+		(ftyp == INVALID_FILE_ATTRIBUTES || false == (ftyp & FILE_ATTRIBUTE_DIRECTORY)))
+	{
+		cout << "Wrong path: " << path << endl;
+		return RC_ERROR;  //something is wrong with your path!
+	}
+
+
+	WIN32_FIND_DATA FindFileData;
+	HANDLE hFind;
+
+	string sboardFile = path + "*." + suffix;
+	wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
+	hFind = FindFirstFile(converter.from_bytes(sboardFile).c_str(), &FindFileData);
+	if (INVALID_HANDLE_VALUE == hFind)
+	{
+		// TODO handle error outside function
+		return RC_ERROR;
+	}
+
+	do
+	{
+		files.push_back(path + converter.to_bytes(FindFileData.cFileName));
+	} while (FindNextFile(hFind, &FindFileData) != 0);
+
+	FindClose(hFind);
+	
+ 	// sort files in lex order
+	sort(files.begin(), files.end(), less<string>());
+ 	
+ 	return RC_SUCCESS;
 }
