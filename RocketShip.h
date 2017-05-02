@@ -12,4 +12,5 @@ public:
 	~RocketShip() = default;
 	RocketShip(const RocketShip &) = default;
 	RocketShip &operator=(const RocketShip &) = default;
+	RocketShip(RocketShip &&) = default;
 };

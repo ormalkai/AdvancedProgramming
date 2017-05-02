@@ -32,25 +32,25 @@ using namespace std;
 
 typedef enum ReturnCode
 {
-    RC_ERROR = -1,
-    RC_SUCCESS,
-    RC_INVALID_ARG
+	RC_ERROR = -1,
+	RC_SUCCESS,
+	RC_INVALID_ARG
 } ReturnCode;
 
 typedef enum PlayerIndex
 {
-    PLAYER_A = 0,
-    PLAYER_B,
-    MAX_PLAYER
+	PLAYER_A = 0,
+	PLAYER_B,
+	MAX_PLAYER
 } PlayerIndex;
 
 enum ShipType
 {
-    RUBBER_SHIP,
-    ROCKET_SHIP,
-    SUBMARINE,
-    DESTROYER,
-    MAX_SHIP
+	RUBBER_SHIP,
+	ROCKET_SHIP,
+	SUBMARINE,
+	DESTROYER,
+	MAX_SHIP
 };
 
 typedef enum AttackRequestCode
@@ -86,7 +86,7 @@ private:
 	static map<char, _In_ WORD> m_shipToColor;// conversion between ship and its color
 	static const vector<char> m_playerIndexToChar;
 	static const map<ShipType, int> m_shipLenByType;
-	
+
 
 	static const vector<char> m_playerALegalSign;
 
@@ -95,7 +95,7 @@ private:
 	static const vector<string> m_expectedAttackFilePerPlayer;
 
 public:
-	
+
 	/**
 	 * @Details		receives char and returns for which player the ship belongs to
 	 * @Param		c - query ship
@@ -164,7 +164,7 @@ public:
 
 
 	static std::istream& safeGetline(std::istream& is, std::string& t);
-	
+
 	/*
 	* @Details		receives coordinates and move the cursor to the position
 	* @Param		row - row index
@@ -184,10 +184,11 @@ public:
 	* @Param		val - element
 	* @return		true if elem exist otherwise false
 	*/
-	template<class T>
+	template <class T>
 	static bool isExistInVec(vector<T> vec, T val)
 	{
-		if (find(vec.begin(), vec.end(), val) != vec.end()) {
+		if (find(vec.begin(), vec.end(), val) != vec.end())
+		{
 			return true;
 		}
 		return false;
@@ -200,6 +201,3 @@ public:
 
 	static void ShowConsoleCursor(bool showFlag);
 };
-
-
-

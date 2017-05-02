@@ -12,5 +12,6 @@ public:
 	~DummyShip() = default;
 	DummyShip(const DummyShip &) = default;
 	DummyShip &operator=(const DummyShip &) = default;
+	DummyShip(DummyShip &&) = default;
 };
 

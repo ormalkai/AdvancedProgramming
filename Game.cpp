@@ -1,5 +1,4 @@
 
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -10,7 +9,6 @@
 #include "Board.h"
 #include "BattleshipAlgoFromFile.h"
 #include <codecvt>
-#include "BattleshipAlgoInteractive.h"
 
 #define SHIPS_PER_PLAYER (5)
 
@@ -101,7 +99,7 @@ bool Game::checkErrors() const
 	return result;
 }
 
-void Game::validateBoard(char** initBoard)
+void Game::validateBoard(const char** initBoard)
 {
 	// for each char
 	for (int i = 1; i <= m_rows; ++i)
@@ -149,9 +147,14 @@ void Game::validateBoard(char** initBoard)
 	}
 }
 
-void Game::readSBoardFile(std::string filePath, char** initBoard)
+ReturnCode Game::readSBoardFile(const string filePath, char** const initBoard) const
 {
 	ifstream sboard(filePath);
+	if (!sboard.is_open())
+	{
+		DBG(Debug::DBG_ERROR, "Could not open board file: %s", filePath);
+		return RC_ERROR;
+	}
 	string line;
 	int rowIndex = 1;
 	// Line by line up to 10 line and up to 10 chars per line
@@ -174,9 +177,11 @@ void Game::readSBoardFile(std::string filePath, char** initBoard)
 	}
 	// close sboard file
 	sboard.close();
+
+	return RC_SUCCESS;
 }
 
-ReturnCode Game::getSboardFileNameFromDirectory(string filesPath, string& sboardFileName)
+ReturnCode Game::getSboardFileNameFromDirectory(const string filesPath, string& sboardFileName)
 {
 	WIN32_FIND_DATA FindFileData;
 	HANDLE hFind;
@@ -184,7 +189,6 @@ ReturnCode Game::getSboardFileNameFromDirectory(string filesPath, string& sboard
 	string sboardFile = filesPath + "*.sboard";
 	std::wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
 	hFind = FindFirstFile(converter.from_bytes(sboardFile).c_str(), &FindFileData);
-	/*hFind = FindFirstFile(sboardFile.c_str(), &FindFileData);*/
 	if (INVALID_HANDLE_VALUE == hFind)
 	{
 		cout << "Missing board file (*.sboard) looking in path: " << filesPath << endl;
@@ -198,7 +202,7 @@ ReturnCode Game::getSboardFileNameFromDirectory(string filesPath, string& sboard
 	}
 }
 
-ReturnCode Game::getattackFilesNameFromDirectory(string filesPath, vector<string>& attackFilePerPlayer)
+ReturnCode Game::getattackFilesNameFromDirectory(const string filesPath, vector<string>& attackFilePerPlayer)
 {
 	WIN32_FIND_DATA FindFileData;
 	HANDLE hFind;
@@ -230,15 +234,14 @@ ReturnCode Game::getattackFilesNameFromDirectory(string filesPath, vector<string
 
 /**
  * @Details		parses sboard file and initializes the game board
- * @Param		filepath		- path to sboard file
- * @Param		rows			- number of rows
- * @param		cols			- number of columns
+ * @Param		sboardFileName		- path to sboard file
+ * @Param		initBoard			- 2d array for initialize game board
  * @Return		ReturnCode
  */
-ReturnCode Game::parseBoardFile(string sboardFileName, char** initBoard)
+ReturnCode Game::parseBoardFile(const string sboardFileName, char** initBoard)
 {
 	// Init board file with spaces
-	for (int i = 0; i < m_rows + BOARD_PADDING; ++i)
+	for (int i = 0; i < m_board.rows() + BOARD_PADDING; ++i)
 	{
 		for (int j = 0; j < m_cols + BOARD_PADDING; ++j)
 		{
@@ -246,12 +249,15 @@ ReturnCode Game::parseBoardFile(string sboardFileName, char** initBoard)
 		}
 	}
 	// Read from file 
-	readSBoardFile(sboardFileName, initBoard);
+	ReturnCode result = readSBoardFile(sboardFileName, initBoard);
+	if (RC_SUCCESS != result)
+	{
+		return result;
+	}
 
 	// input validation
-	validateBoard(initBoard);
+	validateBoard(const_cast<const char**>(initBoard));
 	// Print errors and return ERROR if needed
-	ReturnCode result = RC_SUCCESS;
 	if (false == checkErrors())
 	{
 		result = RC_ERROR;
@@ -266,7 +272,7 @@ ReturnCode Game::parseBoardFile(string sboardFileName, char** initBoard)
  * @Param		i				- row of the cell to test
  * @Param		j				- column of the cell to test
  */
-bool Game::isAdjacencyValid(char** initBoard, int i/*row*/, int j/*col*/)
+bool Game::isAdjacencyValid(const char** initBoard, int i/*row*/, int j/*col*/)
 {
 	char expectedShip = initBoard[i][j];
 	if (SPACE == expectedShip)
@@ -285,7 +291,7 @@ bool Game::isAdjacencyValid(char** initBoard, int i/*row*/, int j/*col*/)
 	return true;
 }
 
-int Game::getShipLengthHorizontal(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction)
+int Game::getShipLengthHorizontal(const char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction)
 {
 	// stop condition
 	if (expectedShip != initBoard[i][j])
@@ -302,7 +308,7 @@ int Game::getShipLengthHorizontal(char** initBoard, char expectedShip, int i/*ro
 	}
 }
 
-int Game::getShipLengthVertical(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction)
+int Game::getShipLengthVertical(const char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction)
 {
 	// stop condition
 	if (expectedShip != initBoard[i][j])
@@ -328,7 +334,7 @@ int Game::getShipLengthVertical(char** initBoard, char expectedShip, int i/*row*
  * @Param		j				- column of the cell to test
  * @Param		direction		- direction to calculate in current flow
  */
-int Game::getShipLength(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipDirection direction)
+int Game::getShipLength(const char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipDirection direction)
 {
 	// sanity
 	if (expectedShip != initBoard[i][j])
@@ -338,7 +344,7 @@ int Game::getShipLength(char** initBoard, char expectedShip, int i/*row*/, int j
 
 	if (ShipDirection::HORIZONTAL == direction)
 	{
-		return (1 + Game::getShipLengthHorizontal(initBoard, expectedShip, i, j - 1, ShipLengthSecondDirection::BACKWORD) +
+		return (1 + getShipLengthHorizontal(initBoard, expectedShip, i, j - 1, ShipLengthSecondDirection::BACKWORD) +
 			Game::getShipLengthHorizontal(initBoard, expectedShip, i, j + 1, ShipLengthSecondDirection::FORWARD));
 
 
@@ -351,7 +357,6 @@ int Game::getShipLength(char** initBoard, char expectedShip, int i/*row*/, int j
 
 	}
 }
-
 
 void Game::initErrorDataStructures()
 {
@@ -368,7 +373,7 @@ void Game::initErrorDataStructures()
 	m_foundAdjacentShips = false;
 }
 
-ReturnCode Game::initFilesPath(string& filesPath, string& sboardFile, vector<string>& dllPerPlayer)
+ReturnCode Game::initFilesPath(const string& filesPath, string& sboardFile, vector<string>& dllPerPlayer)
 {
 	vector<string> sboardFiles;
 	// load sboard file
@@ -403,9 +408,8 @@ ReturnCode Game::initFilesPath(string& filesPath, string& sboardFile, vector<str
  *				players, board etc
  * @Param		filesPath - location of sboard and attack files
  */
-ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
+ReturnCode Game::init(const string filesPath, bool isQuiet, int delay)
 {
-	// TEST ORM TODO
 	string sboardFile, attackAFile, attackBFile;
 	vector<string> dllPaths;
 	ReturnCode rc = initFilesPath(filesPath, sboardFile, dllPaths);
@@ -426,27 +430,25 @@ ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
 	// Init board is larger by 1 from actual board in every dimension for 
 	// traversing within the board more easily
 	char** initBoard = new char*[m_rows + BOARD_PADDING];
-	for (int i = 0; i < m_rows + BOARD_PADDING; ++i)
+	for (int i = 0; i < m_board.rows() + BOARD_PADDING; ++i)
 	{
-		initBoard[i] = new char[m_cols + BOARD_PADDING];
+		initBoard[i] = new char[m_board.cols() + BOARD_PADDING];
 	}
 	rc = parseBoardFile(sboardFile, initBoard);
 	if (RC_SUCCESS != rc)
 	{
 		return rc;
 	}
-
+	
 	// now the board is valid lets build our board
 	m_board.buildBoard(const_cast<const char**>(initBoard), m_rows, m_cols);
 	// initBoard is no longer relevant lets delete it
-	for (int i = 0; i < m_rows + BOARD_PADDING; ++i)
+	for (int i = 0; i < m_board.rows() + BOARD_PADDING; ++i)
 	{
 		delete[] initBoard[i];
 	}
 	delete[] initBoard;
-
-
-
+	
 	// Load algorithms from DLL
 	rc = loadAllAlgoFromDLLs(dllPaths);
 	if (RC_SUCCESS != rc)
@@ -458,62 +460,51 @@ ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
 	m_players[PLAYER_A] = get<1>(m_algoDLLVec[PLAYER_A])();
 	char** playerABoard = m_board.toCharMat(PLAYER_A);
 	m_players[PLAYER_A]->setBoard(PLAYER_A, const_cast<const char **>(playerABoard), m_rows, m_cols);
-	m_players[PLAYER_A]->init(filesPath);
+	freePlayerBoard(playerABoard);
+	bool ret = m_players[PLAYER_A]->init(filesPath);
+	if (false == ret)
+	{
+		cout << "Algorithm initialization failed for dll: " << dllPaths[PLAYER_A] << endl;
+		return RC_ERROR;
+	}
 
 	// Init player B
 	m_players[PLAYER_B] = get<1>(m_algoDLLVec[PLAYER_B])();
 	char** playerBBoard = m_board.toCharMat(PLAYER_B);
-	m_players[PLAYER_B]->setBoard(PLAYER_B, const_cast<const char **>(playerABoard), m_rows, m_cols);
-	m_players[PLAYER_B]->init(filesPath);
-	
-		
-	
-	
-	/* testing smart*/
-	/*m_players[PLAYER_A] = PlayerAlgoFactory::instance().create(AlgoType::SMART);
-	char** playerABoard = m_board.toCharMat(PLAYER_A);
-	m_players[PLAYER_A]->init("");
-	m_players[PLAYER_A]->setBoard(PLAYER_A, const_cast<const char **>(playerABoard), m_rows, m_cols);*/
-	/*==============*/
-
-
-	// Or
-	/*m_players[PLAYER_B] = new BattleshipAlgoInteractive(1);
-	char** playerBBoard = m_board.toCharMat(PLAYER_B);
-	m_players[PLAYER_B]->setBoard(PLAYER_B, const_cast<const char **>(playerBBoard), m_rows, m_cols);*/
-
-
-	
-
-	/* testing naive#1#*/
-	/*m_players[PLAYER_B] = PlayerAlgoFactory::instance().create(AlgoType::NAIVE);
-	char** playerBBoard = m_board.toCharMat(PLAYER_B);
-	m_players[PLAYER_B]->setBoard(PLAYER_B, const_cast<const char **>(playerBBoard), m_rows, m_cols);*/
-	/*==============#1#*/
-
-	for (int i = 0; i < m_board.rows(); i++)
+	m_players[PLAYER_B]->setBoard(PLAYER_B, const_cast<const char **>(playerBBoard), m_rows, m_cols);
+	freePlayerBoard(playerBBoard);
+	ret = m_players[PLAYER_B]->init(filesPath);
+	if (false == ret)
 	{
-		delete[] playerABoard[i];
-		delete[] playerBBoard[i];
+		cout << "Algorithm initialization failed for dll: " << dllPaths[PLAYER_B] << endl;
+		return RC_ERROR;
 	}
 	
-	delete[] playerABoard;
-	delete[] playerBBoard;
-
-
-	// For more players - add new section
-
 	return RC_SUCCESS;
 }
 
-AttackRequestCode Game::requestAttack(pair<int, int> req) const
+void Game::freePlayerBoard(char** board) const
+{
+	if (nullptr == board)
+		return;
+
+	for (int i = 0; i < m_rows; i++)
+	{
+		delete[] board[i];
+	}
+	delete[] board;
+}
+
+AttackRequestCode Game::requestAttack(const pair<int, int>& req)
 {
 
 	if (ARC_FINISH_REQ == req.first && ARC_FINISH_REQ == req.second)
 		if (true == m_finishedAttackPlayer[m_otherPlayerIndex])
 			return ARC_GAME_OVER;
-		else
+		else {
+			m_finishedAttackPlayer[m_currentPlayerIndex] = true;
 			return ARC_FINISH_REQ;
+		}
 	else if (	req.first < 0 || req.first > m_rows ||
 				req.second < 0 || req.second > m_cols)
 		return ARC_ERROR;
@@ -529,7 +520,7 @@ void Game::startGame()
 	m_board.printBoard();
 
 	pair<int, int> attackReq;
-	IBattleshipGameAlgo* currentPlayer = m_players[PLAYER_A];
+	IBattleshipGameAlgo* currentPlayer;
 	m_currentPlayerIndex = PLAYER_A;
 	m_otherPlayerIndex = PLAYER_B;
 	bool gameOver = false;
@@ -546,10 +537,10 @@ void Game::startGame()
 		switch (arc)
 		{
 		case ARC_GAME_OVER:
-			DBG(Debug::DBG_INFO, "Both players are epmty attack queue");
-			break;
+			DBG(Debug::DBG_INFO, "For both players - No more attack requests");
+			gameOver = true;
+			continue;
 		case ARC_FINISH_REQ:
-			// TODO:Fix both players with empty attack queue
 			proceedToNextPlayer();
 			continue;
 		case ARC_ERROR:
@@ -659,15 +650,15 @@ ReturnCode Game::loadAllAlgoFromDLLs(const vector<string>& dllPaths)
 		HINSTANCE hDll = LoadLibraryA(path.c_str()); // Notice: Unicode compatible version of LoadLibrary
 		if (!hDll)
 		{
-			DBG(Debug::DBG_ERROR, "Failed to load dll %s", path);
+			cout << "Cannot load dll: " << path << endl;
 			return RC_ERROR;
 		}
-
+		
 		// Get GetAlgorithm function pointer
 		getAlgoFunc = (GetAlgoFuncType)GetProcAddress(hDll, "GetAlgorithm");
 		if (!getAlgoFunc)
 		{
-			DBG(Debug::DBG_ERROR, "Could not load function GetAlgorithm", path);
+			cout << "Cannot load dll: " << path << endl;		
 			return RC_ERROR;
 		}
 

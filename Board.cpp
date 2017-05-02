@@ -16,7 +16,6 @@ void Board::buildBoard(const char ** initBoard, int numRows, int numCols)
 	m_rows = numRows;
 	m_cols = numCols;
 
-	// first allocate board TODO nullptr in constructor
 	int initRowSize = m_rows + BOARD_PADDING;
 	int initColSize = m_cols + BOARD_PADDING;
 	m_boardData = new Cell*[initRowSize];
@@ -85,12 +84,12 @@ char** Board::toCharMat(PlayerIndex playerId) const
 	return ret;
 }
 
-char Board::getSign(int r, int c)
+char Board::getSign(int r, int c) const
 {
 	return get(r, c).getSign();
 }
 
-void Board::addDummyNewShipToBoard(vector<Cell*> shipCells)
+void Board::addDummyNewShipToBoard(const vector<Cell*>& shipCells)
 {
 	Ship* ship = ShipFactory::instance().createDummyShipByCellsVector(shipCells);
 
@@ -168,7 +167,7 @@ void Board::printBoard() const
 	}
 }
 
-void Board::printHist()
+void Board::printHist() const
 {
 	static int k = 1;
 	if (k++ % 2 == 0)
@@ -200,14 +199,13 @@ void Board::printAttack(int player, int i, int j, AttackResult attackResult) con
 	// animation of attack
 	for (int k = 0; k < 3; k++)
 	{
-		Utils::gotoxy(i, j + 3);
-		// TODO: Replace to cout << "@";
+		Utils::gotoxy(i, j * 3);
 		if (player == PLAYER_A)
-			cout << "@";
+			cout << "@  ";
 		else
-			cout << "&";
+			cout << "&  ";
 		Sleep(100);
-		Utils::gotoxy(i, j + 3);
+		Utils::gotoxy(i, j * 3);
 		cout << m_boardData[i][j].getSign();
 		Sleep(100);
 	}
@@ -215,15 +213,14 @@ void Board::printAttack(int player, int i, int j, AttackResult attackResult) con
 	{
 	case (AttackResult::Hit):
 	case (AttackResult::Sink):
-		Utils::gotoxy(i, j + 3);
-		// TODO: Replace to cout << "*";
+		Utils::gotoxy(i, j * 3);
 		if (player == PLAYER_A)
-			cout << "*";
+			cout << "*  ";
 		else
-			cout << "#";
+			cout << "#  ";
 		break;
 	case (AttackResult::Miss):
-		Utils::gotoxy(i, j + 3);
+		Utils::gotoxy(i, j * 3);
 		cout << SPACE;
 		break;
 	}

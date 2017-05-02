@@ -12,4 +12,5 @@ public:
 	~RubberShip() = default;
 	RubberShip(const RubberShip &) = default;
 	RubberShip &operator=(const RubberShip &) = default;
+	RubberShip(RubberShip &&) = default;
 };

@@ -32,8 +32,9 @@ public:
 	/**
 	 * @Details		Copy constructor, default.
 	 */
-	Board(const Board &) = default;
-	Board &operator=(const Board &) = default;
+	Board(const Board &) = delete;
+	Board &operator=(const Board &) = delete;
+	Board(Board &&) = delete;
 
 	/**
 	* @Details		Receive row and col indexes and returns reference for the cell in the board
@@ -41,14 +42,14 @@ public:
 	* @Param		c - requested cell's col index
 	* @return		ref of cell in row r and col c
 	*/
-	Cell& get(int r, int c) { return  m_boardData[r][c]; }
+	Cell& get(int r, int c) const { return  m_boardData[r][c]; }
 
 	/**
 	* @Details		Receive pair of row and col indexes and returns reference for the cell in the board
 	* @Param		i - requested cell's indexes
 	* @return		ref of cell in row r and col c
 	*/
-	Cell& get(pair<int, int> i) { return get(i.first, i.second); }
+	Cell& get(pair<int, int> i) const { return get(i.first, i.second); }
 
 	/**
 	* @Details		Returns num of rows in the board (int)
@@ -105,14 +106,14 @@ public:
 	* @Param		r - requested cell's row index
 	* @Param		c - requested cell's col index
 	*/
-	char getSign(int r, int c);
+	char getSign(int r, int c) const;
 
 	/**
 	* @Details		receive cell's coords and clear the cell (status=FREE and sign=SPACE)
 	* @Param		r - requested cell's row index
 	* @Param		c - requested cell's col index
 	*/
-	void clearCell(int r, int c)
+	void clearCell(int r, int c) const
 	{
 		m_boardData[r][c].clear();
 	}
@@ -124,9 +125,9 @@ public:
 
 	bool isPaddingCell(const Cell& cell) const { return cell.row() == 0 || cell.row() == m_rows + 1 || cell.col() == 0 || cell.col() == m_cols + 1; }
 
-	void addDummyNewShipToBoard(vector<Cell*> shipCells);
+	void addDummyNewShipToBoard(const vector<Cell*>& shipCells);
 
-	Cell* getCellPointer(int r, int c) { return  &(m_boardData[r][c]); }
+	Cell* getCellPointer(int r, int c) const { return  &(m_boardData[r][c]); }
 
-	void printHist();
+	void printHist() const;
 };

@@ -130,7 +130,7 @@ class BattleshipAlgoSmart : public IBattleshipGameAlgo
 
 	struct cmp
 	{
-		bool operator()(Cell* a, Cell* b)
+		bool operator()(Cell* a, Cell* b) const
 		{
 			return a->getHistValue() < b->getHistValue();
 		}
@@ -162,17 +162,17 @@ private:
 public:
 	/**
 	* @Details		Constructor receives id of the player
-	* @param		id - Unique identifier of the player
 	*/
-	BattleshipAlgoSmart(int id);
+	BattleshipAlgoSmart() = default;
 
 	/**
 	* @Details		Default destructor
 	*/
 	~BattleshipAlgoSmart() = default;
 
-	BattleshipAlgoSmart(const BattleshipAlgoSmart &) = default;
-	BattleshipAlgoSmart &operator=(const BattleshipAlgoSmart &) = default;
+	BattleshipAlgoSmart(const BattleshipAlgoSmart &) = delete;
+	BattleshipAlgoSmart &operator=(const BattleshipAlgoSmart &) = delete;
+	BattleshipAlgoSmart(BattleshipAlgoSmart &&) = delete;
 
 	/**
 	* @Details		getter for id
@@ -198,8 +198,8 @@ public:
 	*				in case the queue is empty returns the pair (-1,-1)
 	*/
 	std::pair<int, int> attack() override;
-	void handleUntargetShipSunk(Cell* attackedCell);
-	void handleTargetShipSunk(Cell* attackedCell);
+	void handleUntargetShipSunk(Cell*const attackedCell);
+	void handleTargetShipSunk(Cell*const attackedCell);
 
 	/**
 	* @Details		notify player on last move result
@@ -210,16 +210,16 @@ public:
 	*/
 	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override;
 	bool isCellNeighborToTargetShip(Cell* cell);
-	vector<Cell*> getSunkShipByCell(Cell* c);
-	void updateHist(vector<Cell*> cells, bool createDummyShip = true);
-	void updateTargetAttackQueue(Cell* attackedCell, ShipDirection direction, bool toRemoveWrongAxis);
-	bool isAttackable(Cell& c) const;
+	vector<Cell*> getSunkShipByCell(Cell*const c) const;
+	void updateHist(const vector<Cell*>& cells, bool createDummyShip = true);
+	void updateTargetAttackQueue(const Cell* attackedCell, ShipDirection direction, bool toRemoveWrongAxis);
+	bool isAttackable(const Cell& c) const;
 
 	bool init(const std::string& path) override;
 	void calcHist(int i, int j);
-	bool isOtherNeighborsValid(const Cell& cell, Direction d);
-	int calcNumOfOptionalShipsInOffset(int i, int j) const;
-	bool isShipValidInOffset(int shipLen, int offset, int hasLeft, int hasRight);
+	bool isOtherNeighborsValid(const Cell& cell, Direction d) const;
+	static int calcNumOfOptionalShipsInOffset(int i, int j);
+	static bool isShipValidInOffset(int shipLen, int offset, int hasLeft, int hasRight);
 	void initStripSizeToNumPotentialShips();
 };
 

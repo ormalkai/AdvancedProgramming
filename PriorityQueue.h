@@ -3,7 +3,7 @@
 #include <vector>
 #include <algorithm>
 
-
+// Credit: https://www.quora.com/How-is-priority-queue-implemented-in-C++ 
 template <class T, class Container = std::vector<T>,
 	class Compare = std::less<T> >
 	class PriorityQueue {

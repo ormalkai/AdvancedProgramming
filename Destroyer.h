@@ -12,4 +12,5 @@ public:
 	~Destroyer() = default;
 	Destroyer(const Destroyer &) = default;
 	Destroyer &operator=(const Destroyer &) = default;
+	Destroyer(Destroyer &&) = default;
 };

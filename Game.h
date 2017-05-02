@@ -60,7 +60,12 @@ private:
 	/**
 	 * @Details		ignore = operator
 	 */
-	Game &operator=(Game const&) { return *this; }
+	Game &operator=(const Game&) = delete;
+
+	/**
+	* @Details		ignore = operator
+	*/
+	Game(Game&&) = delete;
 
 	/**
 	* @Details		check if there is a ship with inappropriate size
@@ -92,14 +97,16 @@ private:
 	*				and fill error data structure.
 	* @param		initBoard - input board to verify
 	*/
-	void validateBoard(char** initBoard);
+	void validateBoard(const char** initBoard);
 
 	/**
 	* @Details		read board from file and fill initBoard
 	* @param		filePath - board file path
 	* @param		initBoard - matrix for output
+	* @return		ReturnCode::RC_ERROR - in case file not found
+	*				ReturnCode::RC_SUCCESS - return in sboardFileName the file path
 	*/
-	void readSBoardFile(string filePath, char** initBoard);
+	ReturnCode readSBoardFile(const string filePath, char**const initBoard) const;
 
 	/**
 	* @Details		find sboard file by given directory, search first file with extension *.sboard
@@ -108,7 +115,7 @@ private:
 	* @return		ReturnCode::RC_ERROR - in case file not found
 	*				ReturnCode::RC_SUCCESS - return in sboardFileName the file path
 	*/
-	ReturnCode getSboardFileNameFromDirectory(string filesPath, string& sboardFileName);
+	static ReturnCode getSboardFileNameFromDirectory(const string filesPath, string& sboardFileName);
 
 	/**
 	* @Details		find attack files by given directory, search files with extension *.attack-a and *.attack-b
@@ -117,16 +124,16 @@ private:
 	* @return		ReturnCode::RC_ERROR - in case file not found
 	*				ReturnCode::RC_SUCCESS - return in attackFilePerPlayer the vector of files paths
 	*/
-	ReturnCode getattackFilesNameFromDirectory(string filesPath, vector<string>& attackFilePerPlayer);
+	static ReturnCode getattackFilesNameFromDirectory(string filesPath, vector<string>& attackFilePerPlayer);
 	
 	/**
 	 * @Details		finds the sboard and attack files from given directory
 	 * @param		filesPath - given directory
 	 * @param		sboardFile - will contain the sboard file name
-	 * @param		attackFilePerPlayer - will contain the attack file per player
+	 * @param		dllPerPlayer - will contain the attack file per player
 	 * @return		RC_ERROR if path is wrong or files are missing, RC_SUCCESS otherwise
 	 */
-	ReturnCode initFilesPath(string& filesPath, string& sboardFile, vector<string>& attackFilePerPlayer);
+	static ReturnCode initFilesPath(const string& filesPath, string& sboardFile, vector<string>& dllPerPlayer);
 
 	/**
 	 * @Details		Parses the sboard file and validates it
@@ -146,7 +153,7 @@ private:
 	 * @param		req - curren attacks
 	 * @return		ARC_FINISH_REQ if no attack, ARC_ERROR if attack is illegal, ARC_SUCCESS otherwise
 	 */
-	AttackRequestCode requestAttack(pair<int, int> req) const;
+	AttackRequestCode requestAttack(const pair<int, int>& req);
 
 	/**
 	 * @Details		Wrapper for recursive function for recieving current ship length in specific cell
@@ -156,7 +163,7 @@ private:
 	 * @param		col - current col to check
 	 * @param		direction - in which direction to go in the next recursive call
 	 */
-	int getShipLength(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipDirection direction);
+	static int getShipLength(const char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipDirection direction);
 	
 	/**
 	* @Details		recursive function for recieving current ship length in specific cell
@@ -166,7 +173,7 @@ private:
 	* @param		col - current col to check
 	* @param		direction - in which direction to go in the next recursive call
 	*/
-	int getShipLengthHorizontal(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction);
+	static int getShipLengthHorizontal(const char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction);
 
 	/**
 	* @Details		Wrapper for recursive function for recieving current ship length in specific cell
@@ -176,7 +183,7 @@ private:
 	* @param		col - current col to check
 	* @param		direction - in which direction to go in the next recursive call
 	*/
-	int getShipLengthVertical(char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction);
+	static int getShipLengthVertical(const char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction);
 
 	/**
 	 * @Details		Checks if  adjacency in specific cell is valid
@@ -184,7 +191,7 @@ private:
 	 * @param		j - col to check
 	 * @return		true if valid, false otherwise
 	 */
-	bool isAdjacencyValid(char** initBoard, int i/*row*/, int j/*col*/);
+	static bool isAdjacencyValid(const char** initBoard, int i/*row*/, int j/*col*/);
 
 	/**
 	 * @Details		proceed To Next Player after attack
@@ -204,8 +211,9 @@ public:
 	 * @param		isQuiet - print simulation ot not
 	 * @param		delay - delay between attacks in simulations
 	 */
-	ReturnCode init(string filesPath, bool isQuiet, int delay);
+	ReturnCode init(const string filesPath, bool isQuiet, int delay);
 	
+
 	/*
 	 * @Details		start current game
 	 */
@@ -222,4 +230,5 @@ public:
 
 
 	ReturnCode loadAllAlgoFromDLLs(const vector<string>& dllPaths);
+	void freePlayerBoard(char** board) const;
 };

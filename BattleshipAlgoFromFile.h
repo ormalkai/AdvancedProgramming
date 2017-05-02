@@ -2,39 +2,42 @@
 
 #include <queue>		// for attack queue
 #include "IBattleshipGameAlgo.h"
+#include "Utils.h"
 
 using namespace std;
 
-class BattleshipAlgoFromFile : public IBattleshipGameAlgo {
-
+class BattleshipAlgoFromFile : public IBattleshipGameAlgo
+{
 private:
-	char**	m_board;	// The board of the player (currently not in use, for future prposes)
-	int		m_rows;		// number of rows in the board
-	int		m_cols;		// number of columns in the board
-	int		m_id;		// unique identifier of the player
+	char** m_board; // The board of the player (currently not in use, for future prposes)
+	int m_rows; // number of rows in the board
+	int m_cols; // number of columns in the board
+	int m_id; // unique identifier of the player
 	queue<pair<int, int>> m_attackQueue;
-	
+	int m_sss;
+
 public:
 	/**
 	 * @Details		Constructor receives id of the player
 	 */
 	BattleshipAlgoFromFile() = default;
-	
+
 	/**
 	 * @Details		Default destructor
 	 */
 	~BattleshipAlgoFromFile() = default;
 
-	BattleshipAlgoFromFile(const BattleshipAlgoFromFile &) = default;
-	BattleshipAlgoFromFile &operator=(const BattleshipAlgoFromFile &) = default;
+	BattleshipAlgoFromFile(const BattleshipAlgoFromFile&) = delete;
+	BattleshipAlgoFromFile& operator=(const BattleshipAlgoFromFile&) = delete;
+	BattleshipAlgoFromFile(BattleshipAlgoFromFile&&) = delete;
 
 	/**
 	* @Details		receives path of attack file and build attack queue
 	* @Param		attackPath - path of attack file
 	*/
-	void AttackFileParser(string & attackPath);
-	
-	
+	ReturnCode AttackFileParser(const string& attackPath);
+
+
 	/**
 	* @Details		Receive board matrix and matrix's size, and notify player on his board
 	* @Param		board - player's board
@@ -57,7 +60,9 @@ public:
 	* @Param		col - attacked cell's col index
 	* @Param		result - attack's result (hit, miss, sink)
 	*/
-	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override {};
+	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override
+	{
+	};
 
 	/**
 	* @Details		getter for id
@@ -70,4 +75,5 @@ public:
 	void setId(int id) { m_id = id; }
 
 	bool init(const std::string& path) override;
+
 };

@@ -40,6 +40,7 @@ public:
 
 	Ship(const Ship &) = default;
 	Ship &operator=(const Ship &) = default;
+	Ship(Ship &&) = default;
 
 	/**
 	* @Details		returns ship's length

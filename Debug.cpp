@@ -1,8 +1,9 @@
-
 #include "Debug.h"
 #include <cstdarg>
 
-Debug::Debug(): m_logFile("game.log"), m_printToLog(true), m_printToStd(true), m_debugLevel(DBG_ERROR), m_pFile(nullptr){}
+Debug::Debug(): m_logFile("game.log"), m_printToLog(true), m_printToStd(true), m_debugLevel(DBG_ERROR), m_pFile(nullptr)
+{
+}
 
 Debug::~Debug()
 {
@@ -15,7 +16,7 @@ Debug::~Debug()
 Debug& Debug::instance()
 {
 	static Debug Instance;
-	return  Instance;
+	return Instance;
 }
 
 void Debug::init(string logFile, bool printToLog, bool printToStd, DebugLevel debugLevel)
@@ -34,22 +35,22 @@ void Debug::init(string logFile, bool printToLog, bool printToStd, DebugLevel de
 	}
 }
 
-void Debug::print(DebugLevel debugLevel, const char* fmt, ...)
+void Debug::print(DebugLevel debugLevel, const char* fmt, ...) const
 {
 	if (debugLevel > m_debugLevel)
 	{
 		return;
 	}
-	
+
 	va_list ap;
 	va_start(ap, fmt);
 	vprint(fmt, ap);
 	va_end(ap);
 }
 
-void Debug::vprint(const char *fmt, va_list ap)
+void Debug::vprint(const char* fmt, va_list ap) const
 {
-	if (fmt == NULL || ap == NULL)
+	if (fmt == nullptr || ap == nullptr)
 		return;
 
 	if (true == m_printToStd)

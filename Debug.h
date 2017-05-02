@@ -57,14 +57,14 @@ public:
 	 * @param		debugLevel - printouts from level equal or lower should be printed
 	 */
 	void init(string logFile, bool printToLog, bool printToStd, DebugLevel debugLevel);
-	
+
 	/**
 	 * @Details		print function
 	 * @param		debugLevel - level of current printout
 	 * @param		fmt - format of the print
 	 * @param		... - arguments for the format
 	 */
-	void print(DebugLevel debugLevel, const char *fmt, ...);
+	void print(DebugLevel debugLevel, const char* fmt, ...) const;
 
 private:
 	/**
@@ -83,17 +83,19 @@ private:
 	/**
 	 * @Details		ignore assignment
 	 */
-	Debug &operator=(const Debug&) { return *this; };
+	Debug& operator=(const Debug&) = delete;
 
-	string			m_logFile;		// path to the lo file
-	bool			m_printToLog;	// print to log file or not
-	bool			m_printToStd;	// print to std or not
-	DebugLevel		m_debugLevel;	// minimum debug level
-	FILE *			m_pFile;
-	
+	Debug(Debug &&) = delete;
+
+	string m_logFile; // path to the lo file
+	bool m_printToLog; // print to log file or not
+	bool m_printToStd; // print to std or not
+	DebugLevel m_debugLevel; // minimum debug level
+	FILE* m_pFile;
+
 
 	/**
 	 * @Details		assistent prin function
 	 */
-	void vprint(const char *fmt, va_list ap);
+	void vprint(const char* fmt, va_list ap) const;
 };

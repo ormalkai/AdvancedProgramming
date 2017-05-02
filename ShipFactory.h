@@ -19,8 +19,8 @@ public:
 	 * @param		j - column in initBoard
 	 * @param		initBoard - as recievd in input
 	 */
-	Ship* create(int i, int j, const char ** initBoard);
-	Ship* createDummyShipByCellsVector(vector<Cell*> vec);
+	Ship* create(int i, int j, const char ** initBoard) const;
+	Ship* createDummyShipByCellsVector(const vector<Cell*>& vec) const;
 
 private:
 	/**
@@ -41,6 +41,11 @@ private:
 	/**
 	 * @Details		ignore assignment
 	 */
-	ShipFactory &operator=(const ShipFactory&) { return *this; }
+	ShipFactory &operator=(const ShipFactory&) = delete;
+	
+	/**
+	* @Details		ignore move assignment
+	*/
+	ShipFactory(ShipFactory&&) = delete;
 
 };

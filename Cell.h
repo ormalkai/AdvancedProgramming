@@ -39,6 +39,7 @@ public:
 	
 	Cell(const Cell &) = default;
 	Cell &operator=(const Cell &) = default;
+	Cell(Cell &&) = default;
 
 	/**
 	* @Details		returns cell's status

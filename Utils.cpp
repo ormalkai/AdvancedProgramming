@@ -1,4 +1,3 @@
-
 #include "Utils.h"
 #include <istream>
 #include <iostream>
@@ -8,44 +7,44 @@
 
 
 map<char, int> Utils::m_shipLenBySign = {
-	{ PLAYER_A_RUBBER_SHIP, 1 },
-	{ PLAYER_A_ROCKET_SHIP, 2 },
-	{ PLAYER_A_SUBMARINE, 3 },
-	{ PLAYER_A_DESTROYER, 4 },
-	{ PLAYER_B_RUBBER_SHIP, 1 },
-	{ PLAYER_B_ROCKET_SHIP, 2 },
-	{ PLAYER_B_SUBMARINE, 3 },
-	{ PLAYER_B_DESTROYER, 4 }
+	{PLAYER_A_RUBBER_SHIP, 1},
+	{PLAYER_A_ROCKET_SHIP, 2},
+	{PLAYER_A_SUBMARINE, 3},
+	{PLAYER_A_DESTROYER, 4},
+	{PLAYER_B_RUBBER_SHIP, 1},
+	{PLAYER_B_ROCKET_SHIP, 2},
+	{PLAYER_B_SUBMARINE, 3},
+	{PLAYER_B_DESTROYER, 4}
 };
 
 
 const map<ShipType, int> Utils::m_shipLenByType = {
-	{ RUBBER_SHIP, 1 },
-	{ ROCKET_SHIP, 2 },
-	{ SUBMARINE, 3 },
-	{ DESTROYER, 4 }
+	{RUBBER_SHIP, 1},
+	{ROCKET_SHIP, 2},
+	{SUBMARINE, 3},
+	{DESTROYER, 4}
 };
 
 map<char, int> Utils::m_shipToValue = {
-{PLAYER_A_RUBBER_SHIP, 2 },
-{PLAYER_A_ROCKET_SHIP, 3},
-{PLAYER_A_SUBMARINE, 7},
-{PLAYER_A_DESTROYER, 8},
-{PLAYER_B_RUBBER_SHIP, 2},
-{PLAYER_B_ROCKET_SHIP, 3},
-{PLAYER_B_SUBMARINE, 7},
-{PLAYER_B_DESTROYER, 8}
+	{PLAYER_A_RUBBER_SHIP, 2},
+	{PLAYER_A_ROCKET_SHIP, 3},
+	{PLAYER_A_SUBMARINE, 7},
+	{PLAYER_A_DESTROYER, 8},
+	{PLAYER_B_RUBBER_SHIP, 2},
+	{PLAYER_B_ROCKET_SHIP, 3},
+	{PLAYER_B_SUBMARINE, 7},
+	{PLAYER_B_DESTROYER, 8}
 };
 
-map<char, _In_ WORD>  Utils::m_shipToColor = {
-{ PLAYER_A_RUBBER_SHIP , FOREGROUND_BLUE | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED },
-{ PLAYER_B_RUBBER_SHIP, FOREGROUND_BLUE | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED },
-{ PLAYER_A_ROCKET_SHIP, FOREGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED },
-{ PLAYER_B_ROCKET_SHIP, FOREGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED },
-{ PLAYER_A_SUBMARINE, FOREGROUND_BLUE | FOREGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED },
-{ PLAYER_B_SUBMARINE, FOREGROUND_BLUE | FOREGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED },
-{ PLAYER_A_DESTROYER, FOREGROUND_RED | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED },
-{ PLAYER_B_DESTROYER, FOREGROUND_RED | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED }
+map<char, _In_ WORD> Utils::m_shipToColor = {
+	{PLAYER_A_RUBBER_SHIP , FOREGROUND_BLUE | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED},
+	{PLAYER_B_RUBBER_SHIP, FOREGROUND_BLUE | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED},
+	{PLAYER_A_ROCKET_SHIP, FOREGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED},
+	{PLAYER_B_ROCKET_SHIP, FOREGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED},
+	{PLAYER_A_SUBMARINE, FOREGROUND_BLUE | FOREGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED},
+	{PLAYER_B_SUBMARINE, FOREGROUND_BLUE | FOREGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED},
+	{PLAYER_A_DESTROYER, FOREGROUND_RED | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED},
+	{PLAYER_B_DESTROYER, FOREGROUND_RED | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED}
 };
 
 
@@ -55,7 +54,7 @@ const vector<char> Utils::m_playerIndexToChar
 	PLAYER_B_CHAR
 };
 
-const vector<char>  Utils::m_playerALegalSign =
+const vector<char> Utils::m_playerALegalSign =
 {
 	PLAYER_A_RUBBER_SHIP,
 	PLAYER_A_ROCKET_SHIP,
@@ -63,7 +62,7 @@ const vector<char>  Utils::m_playerALegalSign =
 	PLAYER_A_DESTROYER
 };
 
-const vector<char>  Utils::m_playerBLegalSign =
+const vector<char> Utils::m_playerBLegalSign =
 {
 	PLAYER_B_RUBBER_SHIP,
 	PLAYER_B_ROCKET_SHIP,
@@ -71,7 +70,7 @@ const vector<char>  Utils::m_playerBLegalSign =
 	PLAYER_B_DESTROYER
 };
 
-const vector<string>  Utils::m_expectedAttackFilePerPlayer =
+const vector<string> Utils::m_expectedAttackFilePerPlayer =
 {
 	// if no attack file - empty string
 	PLAYER_A_ATTACK_FILE,
@@ -79,9 +78,8 @@ const vector<string>  Utils::m_expectedAttackFilePerPlayer =
 };
 
 
- PlayerIndex Utils::getPlayerIdByShip(char c)
+PlayerIndex Utils::getPlayerIdByShip(char c)
 {
-
 	if (isExistInVec(m_playerALegalSign, c))
 	{
 		return PlayerIndex::PLAYER_A;
@@ -96,7 +94,8 @@ const vector<string>  Utils::m_expectedAttackFilePerPlayer =
 
 int Utils::getIndexByShip(char c)
 {
-	switch (c) {
+	switch (c)
+	{
 	case 'b':
 	case 'B':
 		return RUBBER_SHIP;
@@ -141,21 +140,22 @@ int Utils::getShipByIndexAndPlayer(int ship, int player)
 {
 	if (MAX_SHIP < ship || 0 > ship)
 	{
-		return (int)ReturnCode::RC_ERROR;
+		return static_cast<int>(ReturnCode::RC_ERROR);
 	}
 
 	if (MAX_PLAYER < player || 0 > player)
 	{
-		return (int)ReturnCode::RC_ERROR;
+		return static_cast<int>(ReturnCode::RC_ERROR);
 	}
 
-	switch (player) {
+	switch (player)
+	{
 	case PLAYER_A:
 		return m_playerALegalSign[ship];
 	case PLAYER_B:
 		return m_playerBLegalSign[ship];
 	default:
-		return (int)ReturnCode::RC_ERROR;
+		return static_cast<int>(ReturnCode::RC_ERROR);
 	}
 }
 
@@ -197,9 +197,11 @@ std::istream& Utils::safeGetline(std::istream& is, std::string& t)
 	std::istream::sentry se(is, true);
 	std::streambuf* sb = is.rdbuf();
 
-	for (;;) {
+	for (;;)
+	{
 		int c = sb->sbumpc();
-		switch (c) {
+		switch (c)
+		{
 		case '\n':
 			return is;
 		case '\r':
@@ -212,7 +214,7 @@ std::istream& Utils::safeGetline(std::istream& is, std::string& t)
 				is.setstate(std::ios::eofbit);
 			return is;
 		default:
-			t += (char)c;
+			t += static_cast<char>(c);
 		}
 	}
 }
@@ -228,7 +230,7 @@ void Utils::gotoxy(int row, int col)
 
 void Utils::setTextColor(_In_ WORD color)
 {
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);  // Get handle to standard output
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE); // Get handle to standard output
 	SetConsoleTextAttribute(hConsole, color);
 }
 
@@ -251,7 +253,7 @@ ReturnCode Utils::getListOfFilesInDirectoryBySuffix(const string& path, const st
 		(ftyp == INVALID_FILE_ATTRIBUTES || false == (ftyp & FILE_ATTRIBUTE_DIRECTORY)))
 	{
 		cout << "Wrong path: " << path << endl;
-		return RC_INVALID_ARG;  //something is wrong with your path!
+		return RC_INVALID_ARG; //something is wrong with your path!
 	}
 
 
@@ -260,34 +262,31 @@ ReturnCode Utils::getListOfFilesInDirectoryBySuffix(const string& path, const st
 
 	string sboardFile = path + "*." + suffix;
 	wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
-	//hFind = FindFirstFile(converter.from_bytes(sboardFile).c_str(), &FindFileData);
 	hFind = FindFirstFileA(sboardFile.c_str(), &FindFileData);
 	if (INVALID_HANDLE_VALUE == hFind)
 	{
-		// TODO handle error outside function
 		return RC_ERROR;
 	}
 
 	do
 	{
-		//files.push_back(path + converter.to_bytes(FindFileData.cFileName));
 		files.push_back(path + FindFileData.cFileName);
-	//} while (FindNextFile(hFind, &FindFileData) != 0);
-	} while (FindNextFileA(hFind, &FindFileData) != 0);
+	}
+	while (FindNextFileA(hFind, &FindFileData) != 0);
 
 	FindClose(hFind);
-	
- 	// sort files in lex order
+
+	// sort files in lex order
 	sort(files.begin(), files.end(), less<string>());
- 	
- 	return RC_SUCCESS;
+
+	return RC_SUCCESS;
 }
 
 void Utils::ShowConsoleCursor(bool showFlag)
 {
 	HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
 
-	CONSOLE_CURSOR_INFO     cursorInfo;
+	CONSOLE_CURSOR_INFO cursorInfo;
 
 	GetConsoleCursorInfo(out, &cursorInfo);
 	cursorInfo.bVisible = showFlag; // set the cursor visibility

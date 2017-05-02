@@ -8,18 +8,14 @@
 #define NAIVE_ATTACK_SINK '$'
 #define NAIVE_ATTACK_MISS '&'
 
-BattleshipAlgoNaive::BattleshipAlgoNaive(int id)
-{
-	this->setId(id);
-	m_nextAttack.first = 1;
-	m_nextAttack.second = 1;
-}
-
 void BattleshipAlgoNaive::setBoard(int player, const char** board, int numRows, int numCols)
 {
+	m_id = player;
+
 	if (NULL == board)
 		return;
 
+	m_id = player;
 	m_rows = numRows;
 	m_cols = numCols;
 
@@ -65,6 +61,7 @@ bool BattleshipAlgoNaive::init(const std::string & path)
 {
 	m_nextAttack.first = 1;
 	m_nextAttack.second = 1;
+
 	return true;
 }
 
@@ -178,5 +175,10 @@ pair<int, int> BattleshipAlgoNaive::attack()
 		m_nextAttack.second = 1;
 	}
 	DBG(Debug::DBG_DEBUG, "No more attacks, (%d, %d)", m_nextAttack.first, m_nextAttack.second);
-	return pair<int, int>(-1, -1);
+	return make_pair(-1, -1);
+}
+
+IBattleshipGameAlgo* GetAlgorithm()
+{
+	return (new BattleshipAlgoNaive());
 }

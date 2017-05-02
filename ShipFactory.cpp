@@ -11,7 +11,7 @@ ShipFactory& ShipFactory::instance()
 	return  instance;
 }
 
-Ship* ShipFactory::create(int i, int j, const char ** initBoard)
+Ship* ShipFactory::create(int i, int j, const char ** initBoard) const
 {
 	char ship = initBoard[i][j];
 	int shipLen = Utils::getShipLen(ship);
@@ -44,7 +44,7 @@ Ship* ShipFactory::create(int i, int j, const char ** initBoard)
 
 }
 
-Ship* ShipFactory::createDummyShipByCellsVector(vector<Cell*> vec)
+Ship* ShipFactory::createDummyShipByCellsVector(const vector<Cell*>& vec) const
 {
 	return new DummyShip((int)vec.size());
 }

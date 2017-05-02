@@ -14,24 +14,24 @@ private:
 	int				m_cols;			// number of columns in the board
 	pair<int,int>	m_nextAttack;	// generator for next attack
 
-	bool isAlreadyAttacked(char c);
+	static bool isAlreadyAttacked(char c);
 	bool isNeighborsMine(int i, int j);
 	bool hasShipOnTheLeft(int i, int j);
 	bool hasShipOnTheTop(int i, int j);
 public:
 	/**
 	* @Details		Constructor receives id of the player
-	* @param		id - Unique identifier of the player
 	*/
-	BattleshipAlgoNaive(int id);
+	BattleshipAlgoNaive() = default;
 
 	/**
 	* @Details		Default destructor
 	*/
 	~BattleshipAlgoNaive() = default;
 
-	BattleshipAlgoNaive(const BattleshipAlgoNaive &) = default;
-	BattleshipAlgoNaive &operator=(const BattleshipAlgoNaive &) = default;
+	BattleshipAlgoNaive(const BattleshipAlgoNaive &) = delete;
+	BattleshipAlgoNaive &operator=(const BattleshipAlgoNaive &) = delete;
+	BattleshipAlgoNaive(BattleshipAlgoNaive &&) = delete;
 	
 	/**
 	* @Details		getter for id

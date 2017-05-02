@@ -2,27 +2,30 @@
 #include <fstream>
 #include <sstream>
 
-#include <algorithm> 
-#include <functional> 
+#include <algorithm>
+#include <functional>
 #include <cctype>
 #include <locale>
 #include "Debug.h"
 #include "Utils.h"
 
 // trim from start (in place)
-static inline void ltrim(std::string &s) {
+static inline void ltrim(string& s)
+{
 	s.erase(s.begin(), std::find_if(s.begin(), s.end(),
-		std::not1(std::ptr_fun<int, int>(std::isspace))));
+	                                std::not1(std::ptr_fun<int, int>(std::isspace))));
 }
 
 // trim from end (in place)
-static inline void rtrim(std::string &s) {
+static inline void rtrim(string& s)
+{
 	s.erase(std::find_if(s.rbegin(), s.rend(),
-		std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+	                     std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
 }
 
 // trim from both ends (in place)
-static inline void trim(std::string &s) {
+static inline void trim(string& s)
+{
 	ltrim(s);
 	rtrim(s);
 }
@@ -43,22 +46,23 @@ std::pair<int, int> BattleshipAlgoFromFile::attack()
 		{
 			DBG(Debug::DBG_DEBUG, "Attacks of player %c done", Utils::getPlayerCharByIndex(getId()));
 		}
-		return std::pair<int, int>(-1, -1);
+		return make_pair(-1, -1);
 	}
-	std::pair<int, int> attack = m_attackQueue.front();
+	
+	pair<int, int> attack = m_attackQueue.front();
 	m_attackQueue.pop();
 	return attack;
 }
 
 
 //splits string s to a vector
-static std::vector<std::string> split(const std::string &s, char delim)
+static std::vector<std::string> split(const string& s, char delim)
 {
-	std::vector<std::string> elems;
-	std::stringstream strSt(s);
-	std::string item;
+	vector<string> elems;
+	stringstream strSt(s);
+	string item;
 
-	while (std::getline(strSt, item, delim)) //we could ommit the 'std::' notion from here.
+	while (getline(strSt, item, delim)) //we could ommit the 'std::' notion from here.
 	{
 		elems.push_back(item); //push_back is a function of vector class, it inserted to the back of the vector.
 	}
@@ -66,12 +70,17 @@ static std::vector<std::string> split(const std::string &s, char delim)
 	return elems;
 }
 
-void BattleshipAlgoFromFile::AttackFileParser(string & attackFile)
+ReturnCode BattleshipAlgoFromFile::AttackFileParser(const string& attackFile)
 {
 	vector<pair<int, int>> attackMoves;
 	vector<string> tokens;
 	int i, j;
 	ifstream fin(attackFile);
+	if (!fin.is_open())
+	{
+		DBG(Debug::DBG_ERROR, "Could not open attack file: %s", attackFile);
+		return RC_ERROR;
+	}
 	string line;
 	DBG(Debug::DBG_INFO, "Parsing file [%s]", attackFile.c_str());
 	int lineNumber = 0;
@@ -112,10 +121,12 @@ void BattleshipAlgoFromFile::AttackFileParser(string & attackFile)
 		pair<int, int> aPair(i, j);
 		m_attackQueue.push(aPair);
 	}
+
+	return RC_SUCCESS;
 }
 
-bool BattleshipAlgoFromFile::init(const std::string& path) {
-
+bool BattleshipAlgoFromFile::init(const string& path)
+{
 	// first lets find the attack file
 	vector<string> attackFiles;
 	// load sboard file
@@ -146,10 +157,16 @@ bool BattleshipAlgoFromFile::init(const std::string& path) {
 		}
 	}
 	// parse attack file
-	AttackFileParser(attackFile);
+	ReturnCode ret = AttackFileParser(attackFile);
+	if (RC_SUCCESS != ret)
+	{
+		return false;
+	}
 
 	return true;
 }
 
-
-
+IBattleshipGameAlgo* GetAlgorithm()
+{
+	return (new BattleshipAlgoFromFile());
+}

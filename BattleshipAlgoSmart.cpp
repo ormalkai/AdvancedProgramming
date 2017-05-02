@@ -3,7 +3,7 @@
 #include <climits>
 #include "BattleshipAlgoSmart.h"
 #include "Utils.h"
-#include "ShipFactory.h"
+#include "Debug.h"
 
 Cell* BattleshipAlgoSmart::popAttack()
 {
@@ -11,12 +11,6 @@ Cell* BattleshipAlgoSmart::popAttack()
 	Cell* c = m_attackedQueue.top();
 	m_attackedQueue.pop();
 	return c;
-}
-
-BattleshipAlgoSmart::BattleshipAlgoSmart(int id) : m_rows(0), m_cols(0)
-{
-	this->setId(id);
-	m_currentStatus = HUNT;
 }
 
 void BattleshipAlgoSmart::setBoard(int player, const char** board, int numRows, int numCols)
@@ -31,9 +25,9 @@ void BattleshipAlgoSmart::setBoard(int player, const char** board, int numRows, 
 	{
 		initBoard[i] = new char[initBoardCols];
 	}
-	for (int i=0; i<initBoardRows; i++)
+	for (int i = 0; i < initBoardRows; i++)
 	{
-		for (int j = 0; j<initBoardCols; j++)
+		for (int j = 0; j < initBoardCols; j++)
 		{
 			initBoard[i][j] = SPACE;
 		}
@@ -42,7 +36,7 @@ void BattleshipAlgoSmart::setBoard(int player, const char** board, int numRows, 
 	{
 		for (int j = 1; j <= m_cols; ++j)
 		{
-			initBoard[i][j] = board[i-1][j-1];
+			initBoard[i][j] = board[i - 1][j - 1];
 		}
 	}
 	m_board.buildBoard(const_cast<const char**>(initBoard), m_rows, m_cols);
@@ -79,19 +73,19 @@ pair<int, int> BattleshipAlgoSmart::attack()
 			updateTargetAttackQueue(c, ShipDirection::ALL, false);
 
 			c = popTargetAttack();
-			return pair<int, int>(c->row(), c->col());
+			return make_pair(c->row(), c->col());
 		}
 
-		return pair<int, int>(c->row(), c->col());
+		return make_pair(c->row(), c->col());
 	}
 	else /*(m_currentStatus == TARGET)*/
 	{
 		Cell* c = popTargetAttack();
-		return pair<int, int>(c->row(), c->col());
+		return make_pair(c->row(), c->col());
 	}
 }
 
-void BattleshipAlgoSmart::handleUntargetShipSunk(Cell* attackedCell)
+void BattleshipAlgoSmart::handleUntargetShipSunk(Cell* const attackedCell)
 {
 	vector<Cell*> attackedShipCells = getSunkShipByCell(attackedCell);
 
@@ -99,7 +93,7 @@ void BattleshipAlgoSmart::handleUntargetShipSunk(Cell* attackedCell)
 	updateHist(attackedShipCells);
 }
 
-void BattleshipAlgoSmart::handleTargetShipSunk(Cell* attackedCell)
+void BattleshipAlgoSmart::handleTargetShipSunk(Cell* const attackedCell)
 {
 	m_currentStatus = HUNT;
 
@@ -131,7 +125,7 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, int row, int col, Att
 		// Update hist
 		updateHist(vector<Cell*>{attackedCell}, false);
 	}
-	
+
 
 	if (m_id == player)
 	{
@@ -158,13 +152,15 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, int row, int col, Att
 				updateTargetAttackQueue(attackedCell, ShipDirection::ALL, false);
 
 			} break;
+			default: ;
+				DBG(Debug::DBG_WARNING, "Unknown attack result %d in %s", attackResult, __func__);
 			}
 		}
 		else // TARGET == m_currentStatus
 		{
 			switch (attackResult)
 			{
-			case AttackResult::Hit: 
+			case AttackResult::Hit:
 			{
 				m_currentAttackedShipCells.push_back(attackedCell);
 
@@ -182,6 +178,8 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, int row, int col, Att
 			{
 				handleTargetShipSunk(attackedCell);
 			}
+			default: 
+				DBG(Debug::DBG_WARNING, "Unknown attack result %d in %s", attackResult, __func__);
 			}
 		}
 	}
@@ -201,6 +199,8 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, int row, int col, Att
 				attackedCell->setHistValue(INT_MAX);
 			}
 			break;
+			default: 
+				DBG(Debug::DBG_WARNING, "Unknown attack result %d in %s", attackResult, __func__);
 			}
 		}
 		else // TARGET == m_currentStatus
@@ -224,10 +224,12 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, int row, int col, Att
 					handleUntargetShipSunk(attackedCell);
 				}
 			}
+			default: 
+				DBG(Debug::DBG_WARNING, "Unknown attack result %d in %s", attackResult, __func__);
 			}
 		}
 	}
-	
+
 	m_board.printHist();
 }
 
@@ -243,7 +245,7 @@ bool BattleshipAlgoSmart::isCellNeighborToTargetShip(Cell* cell)
 	return false;
 }
 
-vector<Cell*> BattleshipAlgoSmart::getSunkShipByCell(Cell* c)
+vector<Cell*> BattleshipAlgoSmart::getSunkShipByCell(Cell* const c) const
 {
 	int row = c->row();
 	int col = c->col();
@@ -278,7 +280,7 @@ vector<Cell*> BattleshipAlgoSmart::getSunkShipByCell(Cell* c)
 	return result;
 }
 
-void BattleshipAlgoSmart::updateHist(vector<Cell*> cells, bool createDummyShip /*= true*/)
+void BattleshipAlgoSmart::updateHist(const vector<Cell*>& cells, bool createDummyShip /*= true*/)
 {
 	if (createDummyShip) {
 		// create dummy ship
@@ -307,7 +309,7 @@ void BattleshipAlgoSmart::updateHist(vector<Cell*> cells, bool createDummyShip /
 	}
 }
 
-void BattleshipAlgoSmart::updateTargetAttackQueue(Cell* attackedCell, ShipDirection direction, bool toRemoveWrongAxis)
+void BattleshipAlgoSmart::updateTargetAttackQueue(const Cell* attackedCell, ShipDirection direction, bool toRemoveWrongAxis)
 {
 	int rowIndex = attackedCell->row();
 	int colIndex = attackedCell->col();
@@ -329,7 +331,7 @@ void BattleshipAlgoSmart::updateTargetAttackQueue(Cell* attackedCell, ShipDirect
 
 	}
 
-	int newRow = rowIndex, newCol = colIndex;
+	int newRow, newCol;
 
 	if (ShipDirection::ALL == direction || ShipDirection::VERTICAL == direction) {
 
@@ -361,7 +363,7 @@ void BattleshipAlgoSmart::updateTargetAttackQueue(Cell* attackedCell, ShipDirect
 	}
 }
 
-bool BattleshipAlgoSmart::isAttackable(Cell& c) const
+bool BattleshipAlgoSmart::isAttackable(const Cell& c) const
 {
 	return (!m_board.isPaddingCell(c)) && c.isEmpty();
 
@@ -372,9 +374,7 @@ bool BattleshipAlgoSmart::init(const std::string& path)
 	m_currentStatus = HUNT;
 	initStripSizeToNumPotentialShips();
 
-
 	return false;
-
 }
 
 void BattleshipAlgoSmart::calcHist(int i, int j)
@@ -400,10 +400,8 @@ void BattleshipAlgoSmart::calcHist(int i, int j)
 		cell.setHistValue(0);
 		return;
 	}
-
-
-
-	auto numOfPotentialShips = 1; 
+	
+	auto numOfPotentialShips = 1;
 
 	map<Direction, int> maxIndexOfValid = {
 		{ Direction::UP, MAX_SHIP_LEN - 1 },
@@ -439,17 +437,16 @@ void BattleshipAlgoSmart::calcHist(int i, int j)
 				break;
 			default:;
 			}
-
-
+			
 			if (!m_board.isValidCell(checkedRowIndex, checkedColIndex))
 			{
 				maxIndexOfValid[d] = shipLen - 1;
 				break;
 			}
-				
+
 			auto& checkedCell = m_board.get(checkedRowIndex, checkedColIndex);
 
-			if ((checkedCell.isHitted() && !checkedCell.hasShip()) || 
+			if ((checkedCell.isHitted() && !checkedCell.hasShip()) ||
 				!isOtherNeighborsValid(checkedCell, od))
 			{
 				maxIndexOfValid[d] = shipLen - 1;
@@ -467,7 +464,7 @@ void BattleshipAlgoSmart::calcHist(int i, int j)
 }
 
 
-bool BattleshipAlgoSmart::isOtherNeighborsValid(const Cell& cell, Direction d)
+bool BattleshipAlgoSmart::isOtherNeighborsValid(const Cell& cell, Direction d) const
 {
 
 	if (m_board.isPaddingCell(cell))
@@ -491,22 +488,21 @@ bool BattleshipAlgoSmart::isOtherNeighborsValid(const Cell& cell, Direction d)
 			m_board.get(rIndex, cIndex + 1).isEmpty() &&	// Check right
 			m_board.get(rIndex, cIndex - 1).isEmpty();		// Check left
 	}
-						  break;
+	break;
 	case Direction::RIGHT: {
 		ret = m_board.get(rIndex - 1, cIndex).isEmpty() &&	// Check up
 			m_board.get(rIndex + 1, cIndex).isEmpty() &&	// Check down
 			m_board.get(rIndex, cIndex - 1).isEmpty();		// Check left
 	}
-						   break;
+	break;
 	case Direction::LEFT: {
 		ret = m_board.get(rIndex - 1, cIndex).isEmpty() &&	// Check up
 			m_board.get(rIndex + 1, cIndex).isEmpty() &&	// Check down
 			m_board.get(rIndex, cIndex + 1).isEmpty();		// Check right
 	}
-						  break;
+	break;
 	default:;
 	}
-
 
 	return ret;
 }
@@ -525,14 +521,14 @@ bool BattleshipAlgoSmart::isShipValidInOffset(int shipLen, int offset, int hasLe
 
 void BattleshipAlgoSmart::initStripSizeToNumPotentialShips()
 {
-	for (int i=0; i<MAX_SHIP_LEN; i++)
+	for (int i = 0; i < MAX_SHIP_LEN; i++)
 	{
-		for (int j = 0; j<MAX_SHIP_LEN; j++)
+		for (int j = 0; j < MAX_SHIP_LEN; j++)
 		{
 			int numPotentialShips = 0;
-			for (int shipLen = 2; shipLen<=MAX_SHIP_LEN; shipLen++)
+			for (int shipLen = 2; shipLen <= MAX_SHIP_LEN; shipLen++)
 			{
-				for (int offset = 0; offset<shipLen; offset++)
+				for (int offset = 0; offset < shipLen; offset++)
 				{
 					if (isShipValidInOffset(shipLen, offset, i, j))
 					{
@@ -546,7 +542,7 @@ void BattleshipAlgoSmart::initStripSizeToNumPotentialShips()
 }
 
 
-int BattleshipAlgoSmart::calcNumOfOptionalShipsInOffset(int i, int j) const
+int BattleshipAlgoSmart::calcNumOfOptionalShipsInOffset(int i, int j)
 {
 	auto minBottleneck = min(i, j);
 
@@ -565,4 +561,9 @@ int BattleshipAlgoSmart::calcNumOfOptionalShipsInOffset(int i, int j) const
 	}
 
 	return ret;
+}
+
+IBattleshipGameAlgo* GetAlgorithm()
+{
+	return (new BattleshipAlgoSmart());
 }
