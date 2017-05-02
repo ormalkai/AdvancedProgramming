@@ -255,12 +255,13 @@ ReturnCode Utils::getListOfFilesInDirectoryBySuffix(const string& path, const st
 	}
 
 
-	WIN32_FIND_DATA FindFileData;
+	WIN32_FIND_DATAA FindFileData;
 	HANDLE hFind;
 
 	string sboardFile = path + "*." + suffix;
 	wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
-	hFind = FindFirstFile(converter.from_bytes(sboardFile).c_str(), &FindFileData);
+	//hFind = FindFirstFile(converter.from_bytes(sboardFile).c_str(), &FindFileData);
+	hFind = FindFirstFileA(sboardFile.c_str(), &FindFileData);
 	if (INVALID_HANDLE_VALUE == hFind)
 	{
 		// TODO handle error outside function
@@ -269,8 +270,10 @@ ReturnCode Utils::getListOfFilesInDirectoryBySuffix(const string& path, const st
 
 	do
 	{
-		files.push_back(path + converter.to_bytes(FindFileData.cFileName));
-	} while (FindNextFile(hFind, &FindFileData) != 0);
+		//files.push_back(path + converter.to_bytes(FindFileData.cFileName));
+		files.push_back(path + FindFileData.cFileName);
+	//} while (FindNextFile(hFind, &FindFileData) != 0);
+	} while (FindNextFileA(hFind, &FindFileData) != 0);
 
 	FindClose(hFind);
 	
