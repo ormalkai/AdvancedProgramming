@@ -104,9 +104,9 @@ bool Game::checkErrors() const
 void Game::validateBoard(char** initBoard)
 {
 	// for each char
-	for (int i = 1; i <= BOARD_ROW_SIZE; ++i)
+	for (int i = 1; i <= m_rows; ++i)
 	{
-		for (int j = 1; j <= BOARD_COL_SIZE; ++j)
+		for (int j = 1; j <= m_cols; ++j)
 		{
 			if (SPACE == initBoard[i][j])
 			{
@@ -155,7 +155,7 @@ void Game::readSBoardFile(std::string filePath, char** initBoard)
 	string line;
 	int rowIndex = 1;
 	// Line by line up to 10 line and up to 10 chars per line
-	while (Utils::safeGetline(sboard, line) && rowIndex <= BOARD_ROW_SIZE)
+	while (Utils::safeGetline(sboard, line) && rowIndex <= m_rows)
 	{
 		int colIndex = 1;
 		for (std::string::size_type i = 0; i < line.size() && colIndex <= 10; i++)
@@ -238,9 +238,9 @@ ReturnCode Game::getattackFilesNameFromDirectory(string filesPath, vector<string
 ReturnCode Game::parseBoardFile(string sboardFileName, char** initBoard)
 {
 	// Init board file with spaces
-	for (int i = 0; i < INIT_BOARD_ROW_SIZE; ++i)
+	for (int i = 0; i < m_rows + BOARD_PADDING; ++i)
 	{
-		for (int j = 0; j < INIT_BOARD_COL_SIZE; ++j)
+		for (int j = 0; j < m_cols + BOARD_PADDING; ++j)
 		{
 			initBoard[i][j] = SPACE;
 		}
@@ -405,7 +405,6 @@ ReturnCode Game::initFilesPath(string& filesPath, string& sboardFile, vector<str
  */
 ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
 {
-
 	// TEST ORM TODO
 	string sboardFile, attackAFile, attackBFile;
 	vector<string> dllPaths;
@@ -426,10 +425,10 @@ ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
 
 	// Init board is larger by 1 from actual board in every dimension for 
 	// traversing within the board more easily
-	char** initBoard = new char*[INIT_BOARD_ROW_SIZE];
-	for (int i = 0; i < INIT_BOARD_ROW_SIZE; ++i)
+	char** initBoard = new char*[m_rows + BOARD_PADDING];
+	for (int i = 0; i < m_rows + BOARD_PADDING; ++i)
 	{
-		initBoard[i] = new char[INIT_BOARD_COL_SIZE];
+		initBoard[i] = new char[m_cols + BOARD_PADDING];
 	}
 	rc = parseBoardFile(sboardFile, initBoard);
 	if (RC_SUCCESS != rc)
@@ -438,9 +437,9 @@ ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
 	}
 
 	// now the board is valid lets build our board
-	m_board.buildBoard(const_cast<const char**>(initBoard), BOARD_ROW_SIZE, BOARD_COL_SIZE);
+	m_board.buildBoard(const_cast<const char**>(initBoard), m_rows, m_cols);
 	// initBoard is no longer relevant lets delete it
-	for (int i = 0; i < INIT_BOARD_ROW_SIZE; ++i)
+	for (int i = 0; i < m_rows + BOARD_PADDING; ++i)
 	{
 		delete[] initBoard[i];
 	}

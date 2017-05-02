@@ -22,7 +22,7 @@ public:
 	 * @param		rows - number of rows in the board, default BOARD_ROW_SIZE (for future purposes)
 	 * @param		cols - number of Columns in the board, default BOARD_COL_SIZE (for future purposes)
 	 */
-	Board(int rows = BOARD_ROW_SIZE, int cols = BOARD_COL_SIZE) : m_boardData(nullptr), m_rows(BOARD_ROW_SIZE), m_cols(BOARD_COL_SIZE) , m_isQuiet(false), m_delay(2000) {}
+	Board(int rows = BOARD_ROW_SIZE, int cols = BOARD_COL_SIZE) : m_boardData(nullptr), m_rows(rows), m_cols(cols) , m_isQuiet(false), m_delay(2000) {}
 
 	/**
 	 * @Details		Destructor of board, releases all related memory (i.e ships on board)
