@@ -391,7 +391,8 @@ ReturnCode Game::initFilesPath(string& filesPath, string& sboardFile, vector<str
 	else if (RC_ERROR == rc || (RC_SUCCESS == rc && dllPerPlayer.size() < 2)) // no dlls in path or less then 2 dlls
 	{
 		cout << "Missing an algorithm(dll) file looking in path : " + filesPath;
-		return RC_ERROR;	}
+		return RC_ERROR;
+	}
 
 	return RC_SUCCESS;
 }
@@ -404,10 +405,11 @@ ReturnCode Game::initFilesPath(string& filesPath, string& sboardFile, vector<str
  */
 ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
 {
+
 	// TEST ORM TODO
 	string sboardFile, attackAFile, attackBFile;
-	vector<string> attackFilePerPlayer;
-	ReturnCode rc = initFilesPath(filesPath, sboardFile, attackFilePerPlayer);
+	vector<string> dllPaths;
+	ReturnCode rc = initFilesPath(filesPath, sboardFile, dllPaths);
 	if (RC_SUCCESS != rc)
 	{
 		return rc;
@@ -420,6 +422,7 @@ ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
 
 	// init ERRORs data structures
 	initErrorDataStructures();
+
 
 	// Init board is larger by 1 from actual board in every dimension for 
 	// traversing within the board more easily
@@ -443,17 +446,30 @@ ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
 	}
 	delete[] initBoard;
 
-	// init players
-	m_players[PLAYER_A] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
+
+
+	// Load algorithms from DLL
+	rc = loadAllAlgoFromDLLs(dllPaths);
+	if (RC_SUCCESS != rc)
+	{
+		return rc;
+	}
+
+	// Init player A
+	m_players[PLAYER_A] = get<1>(m_algoDLLVec[PLAYER_A])();
 	char** playerABoard = m_board.toCharMat(PLAYER_A);
 	m_players[PLAYER_A]->setBoard(PLAYER_A, const_cast<const char **>(playerABoard), m_rows, m_cols);
-	(dynamic_cast<BattleshipAlgoFromFile*>(m_players[PLAYER_A]))->AttackFileParser(attackFilePerPlayer[PLAYER_A]);
-	
-	m_players[PLAYER_B] = PlayerAlgoFactory::instance().create(AlgoType::FILE);
-	char** playerBBoard = m_board.toCharMat(PLAYER_B);
-	m_players[PLAYER_B]->setBoard(PLAYER_B, const_cast<const char **>(playerBBoard), m_rows, m_cols);
-	(dynamic_cast<BattleshipAlgoFromFile*>(m_players[PLAYER_B]))->AttackFileParser(attackFilePerPlayer[PLAYER_B]);
+	m_players[PLAYER_A]->init(filesPath);
 
+	// Init player B
+	m_players[PLAYER_B] = get<1>(m_algoDLLVec[PLAYER_B])();
+	char** playerBBoard = m_board.toCharMat(PLAYER_B);
+	m_players[PLAYER_B]->setBoard(PLAYER_B, const_cast<const char **>(playerABoard), m_rows, m_cols);
+	m_players[PLAYER_B]->init(filesPath);
+	
+		
+	
+	
 	/* testing smart*/
 	/*m_players[PLAYER_A] = PlayerAlgoFactory::instance().create(AlgoType::SMART);
 	char** playerABoard = m_board.toCharMat(PLAYER_A);
@@ -493,8 +509,12 @@ ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
 
 AttackRequestCode Game::requestAttack(pair<int, int> req) const
 {
+
 	if (ARC_FINISH_REQ == req.first && ARC_FINISH_REQ == req.second)
-		return ARC_FINISH_REQ;
+		if (true == m_finishedAttackPlayer[m_otherPlayerIndex])
+			return ARC_GAME_OVER;
+		else
+			return ARC_FINISH_REQ;
 	else if (	req.first < 0 || req.first > m_rows ||
 				req.second < 0 || req.second > m_cols)
 		return ARC_ERROR;
@@ -510,7 +530,7 @@ void Game::startGame()
 	m_board.printBoard();
 
 	pair<int, int> attackReq;
-	PlayerAlgo* currentPlayer = m_players[PLAYER_A];
+	IBattleshipGameAlgo* currentPlayer = m_players[PLAYER_A];
 	m_currentPlayerIndex = PLAYER_A;
 	m_otherPlayerIndex = PLAYER_B;
 	bool gameOver = false;
@@ -526,6 +546,9 @@ void Game::startGame()
 		AttackRequestCode arc = requestAttack(attackReq);
 		switch (arc)
 		{
+		case ARC_GAME_OVER:
+			DBG(Debug::DBG_INFO, "Both players are epmty attack queue");
+			break;
 		case ARC_FINISH_REQ:
 			// TODO:Fix both players with empty attack queue
 			proceedToNextPlayer();
@@ -569,14 +592,13 @@ void Game::startGame()
 				// Hit myself
 				if (attackedCell.getPlayerIndexOwner() == m_currentPlayerIndex)
 				{
-					m_players[m_otherPlayerIndex]->addToScore(pShip->getValue());
-	
+					m_playerScore[m_otherPlayerIndex] += pShip->getValue();
 					m_numOfShipsPerPlayer[m_currentPlayerIndex]--;
 				}
 				else
 				{
 					// Update score for player
-					currentPlayer->addToScore(pShip->getValue());
+					m_playerScore[m_currentPlayerIndex] += pShip->getValue();
 
 					// Update number of alive ships
 					m_numOfShipsPerPlayer[m_otherPlayerIndex]--;
@@ -622,10 +644,38 @@ void Game::startGame()
 			proceedToNextPlayer();
 		}
 
-	} 
+	} // Game Loop
 	
 
 	printSummary();
+}
+
+ReturnCode Game::loadAllAlgoFromDLLs(const vector<string>& dllPaths)
+{
+	GetAlgoFuncType getAlgoFunc;
+
+	for (string path : dllPaths)
+	{
+		// Load dynamic library
+		HINSTANCE hDll = LoadLibraryA(path.c_str()); // Notice: Unicode compatible version of LoadLibrary
+		if (!hDll)
+		{
+			DBG(Debug::DBG_ERROR, "Failed to load dll %s", path);
+			return RC_ERROR;
+		}
+
+		// Get GetAlgorithm function pointer
+		getAlgoFunc = (GetAlgoFuncType)GetProcAddress(hDll, "GetAlgorithm");
+		if (!getAlgoFunc)
+		{
+			DBG(Debug::DBG_ERROR, "Could not load function GetAlgorithm", path);
+			return RC_ERROR;
+		}
+
+		m_algoDLLVec.push_back(make_tuple(hDll, getAlgoFunc));
+	}
+
+	return RC_SUCCESS;
 }
 
 void Game::printSummary() const
@@ -635,25 +685,23 @@ void Game::printSummary() const
 		Utils::gotoxy(13, 0);
 	}
 
-	int maxScore = -1;
-	int winner = MAX_PLAYER;
-
 	// Notify winner
-	for (int i = 0; i < NUM_OF_PLAYERS; i++)
-	{
-		if (maxScore < m_players[i]->getScore())
-		{
-			maxScore = m_players[i]->getScore();
-			winner = i;
-		}
-	}
+	int scoreDef = m_playerScore[PLAYER_A] - m_playerScore[PLAYER_B];
 
-	cout << "Player " << Utils::getPlayerCharByIndex(winner) << " Won" << endl;
+	if (0 == scoreDef)
+	{
+		cout << "Draw" << endl;
+	}
+	else 
+	{
+		int winner = (scoreDef > 0) ? PLAYER_A : PLAYER_B;
+		cout << "Player " << Utils::getPlayerCharByIndex(winner) << " Won" << endl;
+	}
 
 	// Print points
 	cout << "Points:" << endl;
 	for (int i = 0; i < NUM_OF_PLAYERS; i++)
 	{
-		cout << "Player " << Utils::getPlayerCharByIndex(i) << ": " << m_players[i]->getScore() << endl;
+		cout << "Player " << Utils::getPlayerCharByIndex(i) << ": " << m_playerScore[i] << endl;
 	}
 }

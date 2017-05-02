@@ -4,11 +4,12 @@
 #include <vector>
 #include "IBattleshipGameAlgo.h"
 #include "Utils.h"
-#include "PlayerAlgoFactory.h"
 #include "Board.h"
-#include "PlayerAlgo.h"
 
 using namespace std;
+
+
+typedef IBattleshipGameAlgo *(*GetAlgoFuncType)();
 
 class Game
 {
@@ -31,10 +32,15 @@ private:
 	int						m_cols;							// number of columns in the board
 	int						m_currentPlayerIndex;			// he id of the next player to attack
 	int						m_otherPlayerIndex;				// the id of the other playre to attack
-	PlayerAlgo*				m_players[MAX_PLAYER];			// the players
+	IBattleshipGameAlgo*	m_players[MAX_PLAYER];			// the players
 	vector<int>				m_numOfShipsPerPlayer;			// how many ships each player has
 	bool					m_foundAdjacentShips;			// need to print Adjacency error per player
 	vector<vector<bool>>	m_wrongSizeOrShapePerPlayer;	// 2 players X 4 ships
+	
+	int						m_playerScore[NUM_OF_PLAYERS] = { 0 };
+	int						m_victoriesPerPlayer[NUM_OF_PLAYERS] = { 0 };
+	bool					m_finishedAttackPlayer[NUM_OF_PLAYERS] = { false };
+	vector<tuple<HINSTANCE, GetAlgoFuncType>> m_algoDLLVec;
 
 	/**
 	 * @Details		game constructor
@@ -213,4 +219,7 @@ public:
 		static Game gameInstance;
 		return gameInstance;
 	}
+
+
+	ReturnCode loadAllAlgoFromDLLs(const vector<string>& dllPaths);
 };

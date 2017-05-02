@@ -1,4 +1,7 @@
+#pragma once
+
 #include <vector>
+#include <algorithm>
 
 
 template <class T, class Container = std::vector<T>,

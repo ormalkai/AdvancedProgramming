@@ -1,11 +1,8 @@
 #pragma once
 
-#include "PlayerAlgo.h"
-#include <queue>
 #include "Board.h"
 #include <list>
 #include "PriorityQueue.h"
-#include <unordered_map>
 
 /**
  *
@@ -123,7 +120,7 @@
  *
  */
 
-class BattleshipAlgoSmart : public PlayerAlgo
+class BattleshipAlgoSmart : public IBattleshipGameAlgo
 {
 
 	enum SmartAlgoStautus {
@@ -139,6 +136,7 @@ class BattleshipAlgoSmart : public PlayerAlgo
 		}
 	};
 private:
+	int m_id;				// unique identifier of the player (PlayerA/PlayerB)
 	//char**	m_board;	// The board of the player (currently not in use, for future prposes)
 	int		m_rows;		// number of rows in the board
 	int		m_cols;		// number of columns in the board
@@ -175,6 +173,16 @@ public:
 
 	BattleshipAlgoSmart(const BattleshipAlgoSmart &) = default;
 	BattleshipAlgoSmart &operator=(const BattleshipAlgoSmart &) = default;
+
+	/**
+	* @Details		getter for id
+	*/
+	int getId() const { return m_id; }
+
+	/**
+	* @Details		setter for id
+	*/
+	void setId(int id) { m_id = id; }
 
 	/**
 	* @Details		Receive board matrix and matrix's size, and notify player on his board

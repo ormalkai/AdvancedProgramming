@@ -57,6 +57,7 @@ typedef enum AttackRequestCode
 {
 	ARC_ERROR,
 	ARC_SUCCESS,
+	ARC_GAME_OVER,
 	ARC_FINISH_REQ = -1
 } AttackRequestCode;
 

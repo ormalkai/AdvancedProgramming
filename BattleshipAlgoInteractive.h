@@ -1,13 +1,13 @@
 #pragma once
 
-#include "PlayerAlgo.h"	// interface
 #include <queue>		// for attack queue
 
 using namespace std;
 
-class BattleshipAlgoInteractive : public PlayerAlgo {
+class BattleshipAlgoInteractive : public IBattleshipGameAlgo {
 
 private:
+	int m_id;				// unique identifier of the player (PlayerA/PlayerB)
 	char**	m_board;	// The board of the player (currently not in use, for future prposes)
 	int		m_rows;		// number of rows in the board
 	int		m_cols;		// number of columns in the board
@@ -34,6 +34,16 @@ public:
 	*/
 	void AttackFileParser(string & attackPath);
 
+
+	/**
+	* @Details		getter for id
+	*/
+	int getId() const { return m_id; }
+
+	/**
+	* @Details		setter for id
+	*/
+	void setId(int id) { m_id = id; }
 
 	/**
 	* @Details		Receive board matrix and matrix's size, and notify player on his board

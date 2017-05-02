@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Ship.h"
-#include "PlayerAlgoFactory.h"
 
 /*
 * @Note		The inheritence from Ship is for future use,
