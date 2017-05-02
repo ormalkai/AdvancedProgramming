@@ -118,15 +118,6 @@ private:
 	static ReturnCode getSboardFileNameFromDirectory(const string filesPath, string& sboardFileName);
 
 	/**
-	* @Details		find attack files by given directory, search files with extension *.attack-a and *.attack-b
-	* @param		filesPath - input directory
-	* @param		attackFilePerPlayer - reference for vector of valid input file (if return code is success)
-	* @return		ReturnCode::RC_ERROR - in case file not found
-	*				ReturnCode::RC_SUCCESS - return in attackFilePerPlayer the vector of files paths
-	*/
-	static ReturnCode getattackFilesNameFromDirectory(string filesPath, vector<string>& attackFilePerPlayer);
-	
-	/**
 	 * @Details		finds the sboard and attack files from given directory
 	 * @param		filesPath - given directory
 	 * @param		sboardFile - will contain the sboard file name

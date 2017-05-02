@@ -183,53 +183,20 @@ ReturnCode Game::readSBoardFile(const string filePath, char** const initBoard) c
 
 ReturnCode Game::getSboardFileNameFromDirectory(const string filesPath, string& sboardFileName)
 {
-	WIN32_FIND_DATA FindFileData;
+	WIN32_FIND_DATAA FindFileData;
 	HANDLE hFind;
 
 	string sboardFile = filesPath + "*.sboard";
-	std::wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
-	hFind = FindFirstFile(converter.from_bytes(sboardFile).c_str(), &FindFileData);
+	hFind = FindFirstFileA(sboardFile.c_str(), &FindFileData);
 	if (INVALID_HANDLE_VALUE == hFind)
 	{
 		cout << "Missing board file (*.sboard) looking in path: " << filesPath << endl;
 		return RC_ERROR;
 	}
-	else
-	{
-		sboardFileName = filesPath + converter.to_bytes(FindFileData.cFileName);
-		FindClose(hFind);
-		return RC_SUCCESS;
-	}
-}
-
-ReturnCode Game::getattackFilesNameFromDirectory(const string filesPath, vector<string>& attackFilePerPlayer)
-{
-	WIN32_FIND_DATA FindFileData;
-	HANDLE hFind;
-	ReturnCode rc = RC_SUCCESS;
-	std::wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
-	for (int i = PLAYER_A; i < PlayerIndex::MAX_PLAYER; i++)
-	{
-		string attackFileExtensionPerPlayer = Utils::getAttackFileByPlayer(i);
-		if (NO_ATTACK_FILE == attackFileExtensionPerPlayer)
-		{
-			attackFilePerPlayer.push_back(NO_ATTACK_FILE);
-			continue;
-		}
-		string attackFile = filesPath + attackFileExtensionPerPlayer;
-		hFind = FindFirstFile(converter.from_bytes(attackFile).c_str(), &FindFileData);
-		if (INVALID_HANDLE_VALUE == hFind)
-		{
-			cout << "Missing attack file for player " << Utils::getPlayerCharByIndex(i) << " looking in path: " << filesPath << endl;
-			rc = RC_ERROR;
-		}
-		else
-		{
-			attackFilePerPlayer.push_back(filesPath + converter.to_bytes(FindFileData.cFileName));
-			FindClose(hFind);
-		}
-	}
-	return rc;
+	
+	sboardFileName = filesPath + FindFileData.cFileName;
+	FindClose(hFind);
+	return RC_SUCCESS;
 }
 
 /**
@@ -380,7 +347,7 @@ ReturnCode Game::initFilesPath(const string& filesPath, string& sboardFile, vect
 	auto rc = Utils::getListOfFilesInDirectoryBySuffix(filesPath, "sboard", sboardFiles);
 	if (RC_SUCCESS != rc)
 	{
-		DBG(Debug::DBG_ERROR, "Failed in finding sboard file");
+		cout << "Missing board file (*.sboard) looking in path: " << filesPath << endl;
 		return rc;
 	}
 	sboardFile = sboardFiles[0];
@@ -393,9 +360,9 @@ ReturnCode Game::initFilesPath(const string& filesPath, string& sboardFile, vect
 		DBG(Debug::DBG_ERROR, "Failed in finding dll files");
 		return rc;
 	}
-	else if (RC_ERROR == rc || (RC_SUCCESS == rc && dllPerPlayer.size() < 2)) // no dlls in path or less then 2 dlls
+	else if (RC_ERROR == rc || (RC_SUCCESS == rc && dllPerPlayer.size() < MAX_PLAYER)) // no dlls in path or less then 2 dlls
 	{
-		cout << "Missing an algorithm(dll) file looking in path : " + filesPath;
+		cout << "Missing an algorithm (dll) file looking in path : " + filesPath << endl;
 		return RC_ERROR;
 	}
 
@@ -480,6 +447,9 @@ ReturnCode Game::init(const string filesPath, bool isQuiet, int delay)
 		return RC_ERROR;
 	}
 	
+	Utils::gotoxy(20, 0);
+	cout << "PlayerA algo: " << dllPaths[PLAYER_A].substr(dllPaths[PLAYER_A].find_last_of("\\") + 1) << endl;
+	cout << "PlayerB algo: " << dllPaths[PLAYER_B].substr(dllPaths[PLAYER_B].find_last_of("\\") + 1) << endl;
 	return RC_SUCCESS;
 }
 
@@ -654,7 +624,7 @@ ReturnCode Game::loadAllAlgoFromDLLs(const vector<string>& dllPaths)
 			return RC_ERROR;
 		}
 		
-		// Get GetAlgorithm function pointer
+		// Get GetAlgorithm function pointerm
 		getAlgoFunc = (GetAlgoFuncType)GetProcAddress(hDll, "GetAlgorithm");
 		if (!getAlgoFunc)
 		{
@@ -678,14 +648,10 @@ void Game::printSummary() const
 	// Notify winner
 	int scoreDef = m_playerScore[PLAYER_A] - m_playerScore[PLAYER_B];
 
-	if (0 == scoreDef)
-	{
-		cout << "Draw" << endl;
-	}
-	else 
+	if (0 != scoreDef)
 	{
 		int winner = (scoreDef > 0) ? PLAYER_A : PLAYER_B;
-		cout << "Player " << Utils::getPlayerCharByIndex(winner) << " Won" << endl;
+		cout << "Player " << Utils::getPlayerCharByIndex(winner) << " won" << endl;
 	}
 
 	// Print points

@@ -8,6 +8,7 @@
 #include <locale>
 #include "Debug.h"
 #include "Utils.h"
+#include <iostream>
 
 // trim from start (in place)
 static inline void ltrim(string& s)
@@ -133,7 +134,7 @@ bool BattleshipAlgoFromFile::init(const string& path)
 	auto rc = Utils::getListOfFilesInDirectoryBySuffix(path, "attack", attackFiles);
 	if (RC_SUCCESS != rc)
 	{
-		DBG(Debug::DBG_ERROR, "Failed finding attack file in [%s]", path.c_str());
+		cout << "Missing attack file for player " << Utils::getPlayerCharByIndex(m_id) << " (*.attack) looking in path: " << path << endl;
 		return false;
 	}
 	string attackFile;

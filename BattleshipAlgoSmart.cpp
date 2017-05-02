@@ -59,7 +59,6 @@ void BattleshipAlgoSmart::setBoard(int player, const char** board, int numRows, 
 
 pair<int, int> BattleshipAlgoSmart::attack()
 {
-	m_board.printHist();
 	if (m_currentStatus == HUNT)
 	{
 		Cell* c = popAttack();
@@ -229,8 +228,6 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, int row, int col, Att
 			}
 		}
 	}
-
-	m_board.printHist();
 }
 
 bool BattleshipAlgoSmart::isCellNeighborToTargetShip(Cell* cell)
@@ -369,12 +366,12 @@ bool BattleshipAlgoSmart::isAttackable(const Cell& c) const
 
 }
 
-bool BattleshipAlgoSmart::init(const std::string& path)
+bool BattleshipAlgoSmart::init(const string& path)
 {
 	m_currentStatus = HUNT;
 	initStripSizeToNumPotentialShips();
 
-	return false;
+	return true;
 }
 
 void BattleshipAlgoSmart::calcHist(int i, int j)
