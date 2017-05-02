@@ -251,7 +251,7 @@ ReturnCode Utils::getListOfFilesInDirectoryBySuffix(const string& path, const st
 		(ftyp == INVALID_FILE_ATTRIBUTES || false == (ftyp & FILE_ATTRIBUTE_DIRECTORY)))
 	{
 		cout << "Wrong path: " << path << endl;
-		return RC_ERROR;  //something is wrong with your path!
+		return RC_INVALID_ARG;  //something is wrong with your path!
 	}
 
 

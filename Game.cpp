@@ -368,27 +368,30 @@ void Game::initErrorDataStructures()
 	m_foundAdjacentShips = false;
 }
 
-ReturnCode Game::initFilesPath(string& filesPath, string& sboardFile, vector<string>& attackFilePerPlayer)
+ReturnCode Game::initFilesPath(string& filesPath, string& sboardFile, vector<string>& dllPerPlayer)
 {
-	// first check that the folder exists
-	DWORD ftyp = GetFileAttributesA(filesPath.c_str());
-	if ("" != filesPath && 
-		(ftyp == INVALID_FILE_ATTRIBUTES || false == (ftyp & FILE_ATTRIBUTE_DIRECTORY)))
+	vector<string> sboardFiles;
+	// load sboard file
+	auto rc = Utils::getListOfFilesInDirectoryBySuffix(filesPath, "sboard", sboardFiles);
+	if (RC_SUCCESS != rc)
 	{
-		cout << "Wrong path: " << filesPath << endl;
-		return RC_ERROR;  //something is wrong with your path!
+		DBG(Debug::DBG_ERROR, "Failed in finding sboard file");
+		return rc;
 	}
+	sboardFile = sboardFiles[0];
 
-	// path is OK
-	if (RC_SUCCESS != getSboardFileNameFromDirectory(filesPath, sboardFile))
+	// find dll files
+	rc = Utils::getListOfFilesInDirectoryBySuffix(filesPath, "dll", dllPerPlayer);
+	if (RC_INVALID_ARG == rc)
 	{
-		return RC_ERROR;
+		// something bad happens, someone deleted the path between getting sboard and getting dll
+		DBG(Debug::DBG_ERROR, "Failed in finding dll files");
+		return rc;
 	}
-
-	if (RC_SUCCESS != getattackFilesNameFromDirectory(filesPath, attackFilePerPlayer))
+	else if (RC_ERROR == rc || (RC_SUCCESS == rc && dllPerPlayer.size() < 2)) // no dlls in path or less then 2 dlls
 	{
-		return RC_ERROR;
-	}
+		cout << "Missing an algorithm(dll) file looking in path : " + filesPath;
+		return RC_ERROR;	}
 
 	return RC_SUCCESS;
 }
@@ -420,7 +423,6 @@ ReturnCode Game::init(std::string filesPath, bool isQuiet, int delay)
 
 	// Init board is larger by 1 from actual board in every dimension for 
 	// traversing within the board more easily
-	//char initBoard[INIT_BOARD_ROW_SIZE][INIT_BOARD_COL_SIZE];
 	char** initBoard = new char*[INIT_BOARD_ROW_SIZE];
 	for (int i = 0; i < INIT_BOARD_ROW_SIZE; ++i)
 	{
