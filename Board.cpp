@@ -126,6 +126,7 @@ Board::~Board()
 
 void Board::printBoard() const
 {
+	Utils::ShowConsoleCursor(false);
 	if (true == m_isQuiet)
 	{
 		return;
@@ -136,16 +137,31 @@ void Board::printBoard() const
 	{
 		for (int j = 0; j < initColSize; ++j)
 		{
-			Utils::gotoxy(i, j);
+			Utils::gotoxy(i, j*3);
 			if (SPACE == m_boardData[i][j].getSign())
 			{
 				Utils::setTextColor(BACKGROUND_BLUE | BACKGROUND_RED | BACKGROUND_GREEN);
-				cout << " ";
+				if (0 == i && j >= 1 && j <= m_cols)
+				{
+					if (m_cols == j)
+						cout << j << " ";
+					else
+						cout << j << "  ";
+				}
+				else if (0 == j && i >= 1 && i <= m_cols)
+				{
+					if (m_rows == i)
+						cout << i << " ";
+					else
+						cout << i << "  ";
+				}
+				else
+					cout << "   ";
 			}
 			else
 			{
 				Utils::setTextColor(m_boardData[i][j].getShip()->getColor());
-				cout << m_boardData[i][j].getSign();
+				cout <<  m_boardData[i][j].getSign() << "  ";
 			}
 		}
 		cout << endl;
@@ -180,17 +196,18 @@ void Board::printAttack(int player, int i, int j, AttackResult attackResult) con
 	{
 		return;
 	}
+	Utils::ShowConsoleCursor(false);
 	// animation of attack
 	for (int k = 0; k < 3; k++)
 	{
-		Utils::gotoxy(i, j);
+		Utils::gotoxy(i, j + 3);
 		// TODO: Replace to cout << "@";
 		if (player == PLAYER_A)
 			cout << "@";
 		else
 			cout << "&";
 		Sleep(100);
-		Utils::gotoxy(i, j);
+		Utils::gotoxy(i, j + 3);
 		cout << m_boardData[i][j].getSign();
 		Sleep(100);
 	}
@@ -198,7 +215,7 @@ void Board::printAttack(int player, int i, int j, AttackResult attackResult) con
 	{
 	case (AttackResult::Hit):
 	case (AttackResult::Sink):
-		Utils::gotoxy(i, j);
+		Utils::gotoxy(i, j + 3);
 		// TODO: Replace to cout << "*";
 		if (player == PLAYER_A)
 			cout << "*";
@@ -206,7 +223,7 @@ void Board::printAttack(int player, int i, int j, AttackResult attackResult) con
 			cout << "#";
 		break;
 	case (AttackResult::Miss):
-		Utils::gotoxy(i, j);
+		Utils::gotoxy(i, j + 3);
 		cout << SPACE;
 		break;
 	}

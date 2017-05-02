@@ -1,24 +1,24 @@
 #pragma once
 
-#include "PlayerAlgo.h"	// interface
 #include <queue>		// for attack queue
+#include "IBattleshipGameAlgo.h"
 
 using namespace std;
 
-class BattleshipAlgoFromFile : public PlayerAlgo {
+class BattleshipAlgoFromFile : public IBattleshipGameAlgo {
 
 private:
 	char**	m_board;	// The board of the player (currently not in use, for future prposes)
 	int		m_rows;		// number of rows in the board
 	int		m_cols;		// number of columns in the board
+	int		m_id;		// unique identifier of the player
 	queue<pair<int, int>> m_attackQueue;
 	
 public:
 	/**
 	 * @Details		Constructor receives id of the player
-	 * @param		id - Unique identifier of the player
 	 */
-	BattleshipAlgoFromFile(int id);
+	BattleshipAlgoFromFile() = default;
 	
 	/**
 	 * @Details		Default destructor
@@ -59,6 +59,15 @@ public:
 	*/
 	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override {};
 
+	/**
+	* @Details		getter for id
+	*/
+	int getId() const { return m_id; }
 
-	bool init(const std::string& path) override { return false; }
+	/**
+	* @Details		setter for id
+	*/
+	void setId(int id) { m_id = id; }
+
+	bool init(const std::string& path) override;
 };

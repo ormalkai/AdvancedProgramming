@@ -26,13 +26,9 @@ static inline void trim(std::string &s) {
 	rtrim(s);
 }
 
-BattleshipAlgoFromFile::BattleshipAlgoFromFile(int id)
-{
-	this->setId(id);
-}
-
 void BattleshipAlgoFromFile::setBoard(int player, const char** board, int numRows, int numCols)
 {
+	this->setId(player);
 	m_rows = numRows;
 	m_cols = numCols;
 }
@@ -69,13 +65,14 @@ static std::vector<std::string> split(const std::string &s, char delim)
 	return elems;
 }
 
-void BattleshipAlgoFromFile::AttackFileParser(string& attackPath) {
+void BattleshipAlgoFromFile::AttackFileParser(string & attackFile)
+{
 	vector<pair<int, int>> attackMoves;
 	vector<string> tokens;
 	int i, j;
-	ifstream fin(attackPath);
+	ifstream fin(attackFile);
 	string line;
-	DBG(Debug::DBG_INFO, "Parsing file [%s]", attackPath.c_str());
+	DBG(Debug::DBG_INFO, "Parsing file [%s]", attackFile.c_str());
 	int lineNumber = 0;
 	while (Utils::safeGetline(fin, line))
 	{
@@ -83,7 +80,7 @@ void BattleshipAlgoFromFile::AttackFileParser(string& attackPath) {
 			break;
 
 		++lineNumber;
-			
+
 		tokens = split(line, ',');
 		if (tokens.size() != 2)
 		{
@@ -93,7 +90,7 @@ void BattleshipAlgoFromFile::AttackFileParser(string& attackPath) {
 		}
 		trim(tokens[0]);
 		trim(tokens[1]);
-		try 
+		try
 		{
 			i = stoi(tokens[0]);
 			j = stoi(tokens[1]);
@@ -114,6 +111,43 @@ void BattleshipAlgoFromFile::AttackFileParser(string& attackPath) {
 		pair<int, int> aPair(i, j);
 		m_attackQueue.push(aPair);
 	}
+}
+
+bool BattleshipAlgoFromFile::init(const std::string& path) {
+
+	// first lets find the attack file
+	vector<string> attackFiles;
+	// load sboard file
+	auto rc = Utils::getListOfFilesInDirectoryBySuffix(path, "attack", attackFiles);
+	if (RC_SUCCESS != rc)
+	{
+		DBG(Debug::DBG_ERROR, "Failed finding attack file in [%s]", path.c_str());
+		return false;
+	}
+	string attackFile;
+	// get the correct file according to player id and number of files
+	if (PLAYER_A == getId())
+	{
+		// I'm player A lets take the first file
+		attackFile = attackFiles[0];
+	}
+	else // PLAYER_B == getId()
+	{
+		if (2 <= attackFiles.size())
+		{
+			// there are two files lets use the second file
+			attackFile = attackFiles[1];
+		}
+		else
+		{
+			// there is only one file
+			attackFile = attackFiles[0];
+		}
+	}
+	// parse attack file
+	AttackFileParser(attackFile);
+
+	return true;
 }
 
 

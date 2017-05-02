@@ -197,6 +197,8 @@ public:
 	Direction static getOppositeDirection(Direction d);
 
 	static ReturnCode getListOfFilesInDirectoryBySuffix(const string& path, const string& suffix, vector<string>& files);
+
+	static void ShowConsoleCursor(bool showFlag);
 };
 
 
