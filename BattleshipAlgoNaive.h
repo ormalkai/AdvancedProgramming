@@ -14,9 +14,35 @@ private:
 	int				m_cols;			// number of columns in the board
 	pair<int,int>	m_nextAttack;	// generator for next attack
 
+	/**
+	* @Details		Check if cell attacked by given char represent the status
+	* @param		c - char of the cell
+	* @return		true if the cell was attacked, o.w false
+	*/
 	static bool isAlreadyAttacked(char c);
+
+	/**
+	* @Details		Check if a given cell (by 2 indexes) is neighbor of my ships
+	* @param		i - cell's row index
+	* @param		j - cell's col index
+	* @return		true if the cell is neighbor of my ship
+	*/
 	bool isNeighborsMine(int i, int j);
+
+	/**
+	* @Details		Check if there is a ship to the left of a given cell (by 2 indexes)
+	* @param		i - cell's row index
+	* @param		j - cell's col index
+	* @return		true if there is a ship
+	*/
 	bool hasShipOnTheLeft(int i, int j);
+
+	/**
+	* @Details		Check if there is a ship to the right of a given cell (by 2 indexes)
+	* @param		i - cell's row index
+	* @param		j - cell's col index
+	* @return		true if there is a ship
+	*/
 	bool hasShipOnTheTop(int i, int j);
 public:
 	/**
@@ -67,6 +93,10 @@ public:
 	*/
 	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override;
 
+	/**
+	* @Details		Initializion for naive algorithm
+	* @Param		path - unused
+	*/
 	bool init(const std::string& path) override;
 
 

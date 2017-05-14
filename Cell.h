@@ -117,17 +117,41 @@ public:
 	int getHistValue() const { return m_histValue; }
 	
 	/**
-	* @Details		this function check if the cell is pending - in the attack queue (because one of his neighbors was discovered as part of ship)
-	* @return		cell's histogram value
+	* @Details		this function check if the cell is pending to attack (in the attack queue because one of his neighbors was discovered as part of ship)
+	* @return		true of the cell in attack queue, false otherwise
 	*/
 	bool isPendingCell() const { return INT_MAX == m_histValue; }
+
+	/**
+	* @Details		this function calculates the squared distance of current cell from a given cell
+	* @return		oc - other cell to calc distance
+	* @return		the squared distance
+	*/
 	double squaredDistance(Cell* oc) const {
 		return (pow(oc->row() - this->row(), 2) + pow(oc->col() - this->col(), 2));
 	}
+	
+	/**
+	* @Details		setter for indexes of the cell
+	* @param		r - row index
+	* @param		c - column index
+	*/
 	void setIndexes(int r, int c) { m_rowIndex = r; m_colIndex = c; }
 
+	/**
+	* @Details		check if this cell is part of ship
+	* @return		true - if the cell is part of ship, o.w false
+	*/
 	bool hasShip() const { return nullptr != m_pShip; }
+
+	/**
+	* @Details		check if this cell was attacked
+	* @return		true - if the cell was attacked, o.w false
+	*/
 	bool isHitted() const { return m_isHitted; }
 
+	/**
+	* @Details		hit cell - set indicator this cell was attacked
+	*/
 	void hitCell() { m_isHitted = true; }
 };

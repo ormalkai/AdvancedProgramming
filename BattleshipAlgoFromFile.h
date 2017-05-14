@@ -74,6 +74,10 @@ public:
 	*/
 	void setId(int id) { m_id = id; }
 
+	/**
+	* @Details		Initializion for From file algorithm
+	* @Param		path - path of attack file
+	*/
 	bool init(const std::string& path) override;
 
 };

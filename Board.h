@@ -10,11 +10,11 @@ class Board
 {
 private:
 	Cell**			m_boardData;	// The board is matrix of Cells
-	vector<Ship*>	m_shipsOnBoard;											// Pointer to every ship on the board
-	int				m_rows;													// Number of rows in the board
-	int				m_cols;													// Number of columns in the board
-	bool			m_isQuiet;												// Is quiet run, for print simulation game
-	int				m_delay;												// delay between every attack in game simulation
+	vector<Ship*>	m_shipsOnBoard;	// Pointer to every ship on the board
+	int				m_rows;			// Number of rows in the board
+	int				m_cols;			// Number of columns in the board
+	bool			m_isQuiet;		// Is quiet run, for print simulation game
+	int				m_delay;		// delay between every attack in game simulation
 
 public:
 	/**
@@ -118,16 +118,40 @@ public:
 		m_boardData[r][c].clear();
 	}
 
+	/**
+	* @Details		This function checks if 2 indexes of cell is legal in current board
+	* @Param		r - cell's row index
+	* @Param		c - cell's col index
+	*/
 	bool isValidCell(int i, int j) const
 	{
 		return (i >= 1 && i <= m_rows && j >= 1 && j <= m_cols);
 	}
 
+	/**
+	* @Details		This function checks if a given cell is padding cell (one of padding frame) 
+	* @Param		r - cell's row index
+	* @Param		c - cell's col index
+	*/
 	bool isPaddingCell(const Cell& cell) const { return cell.row() == 0 || cell.row() == m_rows + 1 || cell.col() == 0 || cell.col() == m_cols + 1; }
 
+	/**
+	* @Details		This function adds a dummy ship to the board by given cells
+	*				The func expected that all the cells in the vector is legal ship
+	* @Param		shipCells - cells of the dummy ship
+	*/
 	void addDummyNewShipToBoard(const vector<Cell*>& shipCells);
 
+	/**
+	* @Details		Get pointer for specific cell in the board by given row and col indexes
+	* @Param		r - cell's row index
+	* @Param		c - cell's col index
+	* @return		cell's pointer
+	*/
 	Cell* getCellPointer(int r, int c) const { return  &(m_boardData[r][c]); }
 
+	/**
+	* @Details		This function prints the histogram - value of each cell, for debug and future porposes
+	*/
 	void printHist() const;
 };

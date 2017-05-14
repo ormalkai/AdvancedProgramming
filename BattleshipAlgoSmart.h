@@ -147,9 +147,17 @@ private:
 	vector<Cell*> m_currentAttackedShipCells;
 	map<pair<int, int>, int> m_stripToPotentialShips;
 	
+
+	/**
+	* @Details		Return the next attack request in hunt mode - the cell with the highest hist value
+	* @Return		The next cell to be attacked
+	*/
 	Cell* popAttack();
 
-
+	/**
+	* @Details		Return the next attack request in target mode - the cell is negihbor on the last attack
+	* @Return		The next cell to be attacked
+	*/
 	Cell* popTargetAttack()
 	{
 		Cell* c = m_targetQueue.front();
@@ -157,7 +165,84 @@ private:
 		return c;
 	}
 
+	/**
+	* @Details		Handle case (update hist value for relevent cells) sink not it target mode - for example: we hit ship of one cell
+	* @param		attackedCell - The attacked cell's pointer
+	*/
+	void handleUntargetShipSunk(Cell*const attackedCell);
+	
+	/**
+	* @Details		Handle case sink not it target mode - for example: we hit ship of one cell
+	* @param		attackedCell - The attacked cell's pointer
+	*/
+	void handleTargetShipSunk(Cell*const attackedCell);
 
+	/**
+	* @Details		check if a given cell is neighbor of one of the cells in attack target queue
+	* @Param		cell - given cell to check
+	*/
+	bool isCellNeighborToTargetShip(Cell* cell);
+
+	/**
+	* @Details		get vector of all cells of sunk ship by given cell is part of the ship
+	* @Param		cell - given cell in the sunk ship
+	*/
+	vector<Cell*> getSunkShipByCell(Cell*const c) const;
+
+	/**
+	* @Details		This function update the hist value only for the relevant cells by given ship as vector of cells
+	* @Param		cells - vector of ship cells to update their neigbors
+	* @Param		createDummyShip - true if create dummy ship
+	*/
+	void updateHist(const vector<Cell*>& cells, bool createDummyShip = true);
+
+	/**
+	* @Details		This function update the attack target queue by given cell and ship direction
+	* @Param		attackedCell - attacked cell is part of ship
+	* @Param		direction - ship is direction vertical \ horizontal
+	* @Param		toRemoveWrongAxis - true if need to remove irrelevant cells from the attacked queue
+	*/
+	void updateTargetAttackQueue(const Cell* attackedCell, ShipDirection direction, bool toRemoveWrongAxis);
+
+	/**
+	* @Details		Return true if the cell is attackable - not padding, empty and legal cell
+	* @Param		Cell - cell to check attackable
+	*/
+	bool isAttackable(const Cell& c) const;
+
+	/**
+	* @Details		Initializion for smart algorithm
+	* @Param		path - unused
+	*/
+	bool init(const string& path) override;
+
+	/**
+	* @Details		Calculate and update hist value of cell by given 2 indexes
+	* @Param		i - row index
+	* @Param		j - col index
+	*/
+	void calcHist(int i, int j);
+
+	/**
+	* @Details		Check if all neighbors of given cell except the neighbor in the direction d, are lagal.
+	* @Param		cell - cell to check his neighbors
+	* @Param		d - the only direction we do not have to check
+	*/
+	bool isOtherNeighborsValid(const Cell& cell, Direction d) const;
+
+	/**
+	* @Details		Internal function for check is ship is legal is specific offset.
+	* @Param		shipLen - ship's length
+	* @Param		offset - the checked offset
+	* @Param		hasLeft - cell to the left
+	* @Param		hasLeft - cell to the right
+	*/
+	static bool isShipValidInOffset(int shipLen, int offset, int hasLeft, int hasRight);
+
+	/**
+	* @Details		Initialize the board by number of potential ships.
+	*/
+	void initStripSizeToNumPotentialShips();
 
 public:
 	/**
@@ -184,6 +269,7 @@ public:
 	*/
 	void setId(int id) { m_id = id; }
 
+
 	/**
 	* @Details		Receive board matrix and matrix's size, and notify player on his board
 	* @Param		board - player's board
@@ -198,8 +284,6 @@ public:
 	*				in case the queue is empty returns the pair (-1,-1)
 	*/
 	std::pair<int, int> attack() override;
-	void handleUntargetShipSunk(Cell*const attackedCell);
-	void handleTargetShipSunk(Cell*const attackedCell);
 
 	/**
 	* @Details		notify player on last move result
@@ -209,18 +293,7 @@ public:
 	* @Param		result - attack's result (hit, miss, sink)
 	*/
 	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override;
-	bool isCellNeighborToTargetShip(Cell* cell);
-	vector<Cell*> getSunkShipByCell(Cell*const c) const;
-	void updateHist(const vector<Cell*>& cells, bool createDummyShip = true);
-	void updateTargetAttackQueue(const Cell* attackedCell, ShipDirection direction, bool toRemoveWrongAxis);
-	bool isAttackable(const Cell& c) const;
-
-	bool init(const std::string& path) override;
-	void calcHist(int i, int j);
-	bool isOtherNeighborsValid(const Cell& cell, Direction d) const;
-	static int calcNumOfOptionalShipsInOffset(int i, int j);
-	static bool isShipValidInOffset(int shipLen, int offset, int hasLeft, int hasRight);
-	void initStripSizeToNumPotentialShips();
+	
 };
 
 

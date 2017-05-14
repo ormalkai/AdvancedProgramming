@@ -538,28 +538,6 @@ void BattleshipAlgoSmart::initStripSizeToNumPotentialShips()
 	}
 }
 
-
-int BattleshipAlgoSmart::calcNumOfOptionalShipsInOffset(int i, int j)
-{
-	auto minBottleneck = min(i, j);
-
-	// If one of the sides is 0 -> the cell in edge of ship 
-	// Num of ship will be exacly the same as the other side's len
-	if (0 == minBottleneck)
-		return max(i, j);
-
-
-	int ret = 0;
-
-	for (int shipLen = 2; shipLen <= MAX_SHIP_LEN; ++shipLen)
-	{
-		ret += min(minBottleneck, shipLen);
-
-	}
-
-	return ret;
-}
-
 IBattleshipGameAlgo* GetAlgorithm()
 {
 	return (new BattleshipAlgoSmart());
