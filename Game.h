@@ -37,10 +37,10 @@ private:
 	bool					m_foundAdjacentShips;			// need to print Adjacency error per player
 	vector<vector<bool>>	m_wrongSizeOrShapePerPlayer;	// 2 players X 4 ships
 	
-	int						m_playerScore[NUM_OF_PLAYERS] = { 0 };
-	int						m_victoriesPerPlayer[NUM_OF_PLAYERS] = { 0 };
-	bool					m_finishedAttackPlayer[NUM_OF_PLAYERS] = { false };
-	vector<tuple<HINSTANCE, GetAlgoFuncType>> m_algoDLLVec;
+	int						m_playerScore[NUM_OF_PLAYERS] = { 0 };				// player's score
+	int						m_victoriesPerPlayer[NUM_OF_PLAYERS] = { 0 };		// player's num of victories
+	bool					m_finishedAttackPlayer[NUM_OF_PLAYERS] = { false }; // finished attack inidicator per player
+	vector<tuple<HINSTANCE, GetAlgoFuncType>> m_algoDLLVec;						// dll tuples <hanfle, algo func>
 
 	/**
 	 * @Details		game constructor
@@ -205,7 +205,7 @@ public:
 	ReturnCode init(const string filesPath, bool isQuiet, int delay);
 	
 
-	/*
+	/**
 	 * @Details		start current game
 	 */
 	void startGame();
@@ -219,7 +219,17 @@ public:
 		return gameInstance;
 	}
 
-
+	/**
+	* @Details		Load dlls by given pathes to data memberes (tuples of handle and pointer to function)
+	* @param		dllPaths - vector of paths of the dlls
+	* @Return		ReturnCode::RC_ERROR - in case loading error
+	*				ReturnCode::RC_SUCCESS - return in all dlls load successfully  
+	*/
 	ReturnCode loadAllAlgoFromDLLs(const vector<string>& dllPaths);
+
+	/**
+	* @Details		Free board resources
+	* @param		board - board to free
+	*/
 	void freePlayerBoard(char** board) const;
 };

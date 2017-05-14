@@ -46,6 +46,6 @@ Ship* ShipFactory::create(int i, int j, const char ** initBoard) const
 
 Ship* ShipFactory::createDummyShipByCellsVector(const vector<Cell*>& vec) const
 {
-	return new DummyShip((int)vec.size());
+	return new DummyShip(static_cast<int>(vec.size()));
 }
 

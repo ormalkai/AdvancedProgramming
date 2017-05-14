@@ -194,10 +194,30 @@ public:
 		return false;
 	}
 
-
+	/*
+	* @Details		Get the opposite direction by given direction 
+	*				For ex: 
+	*					getOppositeDirection(Direction::UP) ==> Direction::DOWN
+	*					getOppositeDirection(Direction::RIGHT) ==> Direction::LEFT
+	*				
+	* @Param		d - given direction
+	* @Return		Opposite direction
+	*/
 	Direction static getOppositeDirection(Direction d);
 
+	/*
+	* @Details		Get the list of all files paths with specific suffix by given directory path and suffix.
+	* @Param		path - directory path
+	* @Param		suffix - given direction
+	* @Param		files - reference to vector of files paths
+	* @Return		ReturnCode::RC_ERROR - in case loading error
+	*				ReturnCode::RC_SUCCESS - return in all dlls load successfully  
+	*/
 	static ReturnCode getListOfFilesInDirectoryBySuffix(const string& path, const string& suffix, vector<string>& files);
 
+	/*
+	* @Details		Set true for show cursor in the console or false for hide it.
+	* @Param		showFlag - cursor show flag
+	*/
 	static void ShowConsoleCursor(bool showFlag);
 };

@@ -101,7 +101,10 @@ public:
 	*/
 	void executeAttack();
 
-
+	/**
+	* @Details		add cells vector to the current ship's cells, (append to the end of the vector)
+	* @param		vecCell - the vector of cells we want to add 
+	*/
 	void addCells(vector<Cell*> vecCell) { m_cellList.insert(m_cellList.end(), vecCell.begin(), vecCell.end()); }
 
 };

@@ -7,7 +7,7 @@ using namespace std;
 class BattleshipAlgoInteractive : public IBattleshipGameAlgo {
 
 private:
-	int m_id;				// unique identifier of the player (PlayerA/PlayerB)
+	int m_id;			// unique identifier of the player (PlayerA/PlayerB)
 	char**	m_board;	// The board of the player (currently not in use, for future prposes)
 	int		m_rows;		// number of rows in the board
 	int		m_cols;		// number of columns in the board

@@ -20,10 +20,10 @@ private:
 	CellStatus		m_status;				// The status of the cell according to the enum above
 	Ship*			m_pShip;				// pointer to the ship in this cell, NULL if no ship
 	PlayerIndex		m_playerIndexOwner;		// The unique identifier of the player own the ship
-	int				m_rowIndex;
-	int				m_colIndex;
-	int				m_histValue;
-	bool			m_isHitted;
+	int				m_rowIndex;				// Cell's row index
+	int				m_colIndex;				// Cell's col index
+	int				m_histValue;			// The histogram value - number of ship this cell could be part of them
+	bool			m_isHitted;				// Indicator if the cell was hitted		
 
 
 public:
@@ -91,13 +91,35 @@ public:
 	* @Details		initialize the cell: status-FREE, ship's ptr - null, owner - MAX_PLAYER
 	*/
 	void clear() { m_status = FREE; m_pShip = nullptr; m_playerIndexOwner = MAX_PLAYER; }
-
-
-
+	
+	/**
+	* @Details		getter for row index of the cell
+	* @return		cell's row index
+	*/
 	int row() const { return m_rowIndex; }
+	
+	/**
+	* @Details		getter for col index of the cell
+	* @return		cell's col index
+	*/
 	int col() const { return m_colIndex; }
+	
+	/**
+	* @Details		setter of histogram value in the cell
+	* @param		h - given hist value
+	*/
 	void setHistValue(int h) { m_histValue = h; }
+	
+	/**
+	* @Details		getter of histogram value in the cell
+	* @return		cell's histogram value
+	*/
 	int getHistValue() const { return m_histValue; }
+	
+	/**
+	* @Details		this function check if the cell is pending - in the attack queue (because one of his neighbors was discovered as part of ship)
+	* @return		cell's histogram value
+	*/
 	bool isPendingCell() const { return INT_MAX == m_histValue; }
 	double squaredDistance(Cell* oc) const {
 		return (pow(oc->row() - this->row(), 2) + pow(oc->col() - this->col(), 2));
