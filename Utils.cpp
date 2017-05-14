@@ -246,13 +246,14 @@ Direction Utils::getOppositeDirection(Direction d)
 	}
 }
 
-ReturnCode Utils::getListOfFilesInDirectoryBySuffix(const string& path, const string& suffix, vector<string>& files)
+ReturnCode Utils::getListOfFilesInDirectoryBySuffix(const string& path, const string& suffix, vector<string>& files, bool printWrongPath/*false*/)
 {
 	DWORD ftyp = GetFileAttributesA(path.c_str());
 	if ("" != path &&
 		(ftyp == INVALID_FILE_ATTRIBUTES || false == (ftyp & FILE_ATTRIBUTE_DIRECTORY)))
 	{
-		cout << "Wrong path: " << path << endl;
+		if (printWrongPath)
+			cout << "Wrong path: " << path << endl;
 		return RC_INVALID_ARG; //something is wrong with your path!
 	}
 
@@ -261,7 +262,6 @@ ReturnCode Utils::getListOfFilesInDirectoryBySuffix(const string& path, const st
 	HANDLE hFind;
 
 	string sboardFile = path + "*." + suffix;
-	wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
 	hFind = FindFirstFileA(sboardFile.c_str(), &FindFileData);
 	if (INVALID_HANDLE_VALUE == hFind)
 	{

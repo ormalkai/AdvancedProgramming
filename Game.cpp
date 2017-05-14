@@ -340,20 +340,27 @@ void Game::initErrorDataStructures()
 	m_foundAdjacentShips = false;
 }
 
-ReturnCode Game::initFilesPath(const string& filesPath, string& sboardFile, vector<string>& dllPerPlayer)
+
+ReturnCode Game::initSboardFilePath(const string& filesPath, string& sboardFile)
 {
 	vector<string> sboardFiles;
 	// load sboard file
-	auto rc = Utils::getListOfFilesInDirectoryBySuffix(filesPath, "sboard", sboardFiles);
-	if (RC_SUCCESS != rc)
+	auto rc = Utils::getListOfFilesInDirectoryBySuffix(filesPath, "sboard", sboardFiles, true);
+	// ERROR means that the path exists but there is no file
+	if (RC_ERROR == rc)
 	{
 		cout << "Missing board file (*.sboard) looking in path: " << filesPath << endl;
 		return rc;
 	}
 	sboardFile = sboardFiles[0];
 
+	return RC_SUCCESS;
+}
+
+ReturnCode Game::initDLLFilesPath(const string& filesPath, vector<string>& dllPerPlayer)
+{
 	// find dll files
-	rc = Utils::getListOfFilesInDirectoryBySuffix(filesPath, "dll", dllPerPlayer);
+	auto rc = Utils::getListOfFilesInDirectoryBySuffix(filesPath, "dll", dllPerPlayer);
 	if (RC_INVALID_ARG == rc)
 	{
 		// something bad happens, someone deleted the path between getting sboard and getting dll
@@ -379,32 +386,49 @@ ReturnCode Game::init(const string filesPath, bool isQuiet, int delay)
 {
 	string sboardFile, attackAFile, attackBFile;
 	vector<string> dllPaths;
-	ReturnCode rc = initFilesPath(filesPath, sboardFile, dllPaths);
-	if (RC_SUCCESS != rc)
+	char** initBoard;
+	bool isInitBoardInitialized = false;
+	ReturnCode sboardRc = initSboardFilePath(filesPath, sboardFile);
+	// RC_INVALID_ARG means that path is wrong
+	if (RC_INVALID_ARG == sboardRc)
 	{
-		return rc;
+		return sboardRc;
+	}
+	else if (RC_SUCCESS == sboardRc)
+	{
+		// set printOut parameters
+		m_isQuiet = isQuiet;
+		m_board.setDelay(delay);
+		m_board.setIsQuiet(isQuiet);
+
+		// init ERRORs data structures
+		initErrorDataStructures();
+
+
+		// Init board is larger by 1 from actual board in every dimension for 
+		// traversing within the board more easily
+		initBoard = new char*[m_rows + BOARD_PADDING];
+		for (int i = 0; i < m_board.rows() + BOARD_PADDING; ++i)
+		{
+			initBoard[i] = new char[m_board.cols() + BOARD_PADDING];
+		}
+		isInitBoardInitialized = true;
+		sboardRc = parseBoardFile(sboardFile, initBoard);
 	}
 
-	// set printOut parameters
-	m_isQuiet = isQuiet;
-	m_board.setDelay(delay);
-	m_board.setIsQuiet(isQuiet);
-
-	// init ERRORs data structures
-	initErrorDataStructures();
-
-
-	// Init board is larger by 1 from actual board in every dimension for 
-	// traversing within the board more easily
-	char** initBoard = new char*[m_rows + BOARD_PADDING];
-	for (int i = 0; i < m_board.rows() + BOARD_PADDING; ++i)
+	// Load algorithms from DLL
+	ReturnCode DLLRc = loadAllAlgoFromDLLs(dllPaths);
+	if (RC_SUCCESS != DLLRc || RC_SUCCESS != sboardRc)
 	{
-		initBoard[i] = new char[m_board.cols() + BOARD_PADDING];
-	}
-	rc = parseBoardFile(sboardFile, initBoard);
-	if (RC_SUCCESS != rc)
-	{
-		return rc;
+		if (isInitBoardInitialized)
+		{
+			for (int i = 0; i < m_board.rows() + BOARD_PADDING; ++i)
+			{
+				delete[] initBoard[i];
+			}
+			delete[] initBoard;
+		}
+		return RC_ERROR;
 	}
 	
 	// now the board is valid lets build our board
@@ -415,13 +439,6 @@ ReturnCode Game::init(const string filesPath, bool isQuiet, int delay)
 		delete[] initBoard[i];
 	}
 	delete[] initBoard;
-	
-	// Load algorithms from DLL
-	rc = loadAllAlgoFromDLLs(dllPaths);
-	if (RC_SUCCESS != rc)
-	{
-		return rc;
-	}
 
 	// Init player A
 	m_players[PLAYER_A] = get<1>(m_algoDLLVec[PLAYER_A])();

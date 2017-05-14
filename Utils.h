@@ -213,7 +213,7 @@ public:
 	* @Return		ReturnCode::RC_ERROR - in case loading error
 	*				ReturnCode::RC_SUCCESS - return in all dlls load successfully  
 	*/
-	static ReturnCode getListOfFilesInDirectoryBySuffix(const string& path, const string& suffix, vector<string>& files);
+	static ReturnCode getListOfFilesInDirectoryBySuffix(const string& path, const string& suffix, vector<string>& files, bool printWrongPath = false);
 
 	/*
 	* @Details		Set true for show cursor in the console or false for hide it.

@@ -118,13 +118,20 @@ private:
 	static ReturnCode getSboardFileNameFromDirectory(const string filesPath, string& sboardFileName);
 
 	/**
-	 * @Details		finds the sboard and attack files from given directory
-	 * @param		filesPath - given directory
-	 * @param		sboardFile - will contain the sboard file name
-	 * @param		dllPerPlayer - will contain the attack file per player
-	 * @return		RC_ERROR if path is wrong or files are missing, RC_SUCCESS otherwise
-	 */
-	static ReturnCode initFilesPath(const string& filesPath, string& sboardFile, vector<string>& dllPerPlayer);
+	* @Details		finds the sboard and attack files from given directory
+	* @param		filesPath - given directory
+	* @param		sboardFile - will contain the sboard file name
+	* @return		RC_ERROR if path is wrong or files are missing, RC_SUCCESS otherwise
+	*/
+	static ReturnCode initSboardFilePath(const string& filesPath, string& sboardFile);
+
+	/**
+	* @Details		finds the sboard and attack files from given directory
+	* @param		filesPath - given directory
+	* @param		dllPerPlayer - will contain the attack file per player
+	* @return		RC_ERROR if path is wrong or files are missing, RC_SUCCESS otherwise
+	*/
+	static ReturnCode initDLLFilesPath(const string& filesPath, vector<string>& dllPerPlayer);
 
 	/**
 	 * @Details		Parses the sboard file and validates it
