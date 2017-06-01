@@ -18,6 +18,7 @@ void Board::buildBoard(const BoardData& initBoard)
 	int initRowSize = initBoard.rows() + BOARD_PADDING;
 	int initColSize = initBoard.cols() + BOARD_PADDING;
 
+	// init copyBoard
 	vector<vector<vector<char>>> copyBoard;
 	for (int d = 0; d < initDepthSize; d++)
 	{
@@ -27,7 +28,18 @@ void Board::buildBoard(const BoardData& initBoard)
 			vector<char> col;
 			for (int j = 0; j < initColSize; j++)
 			{
-				copyBoard[d][i].push_back(initBoard.charAt(Coordinate(i,j,d)));
+				copyBoard[d][i].push_back(SPACE);
+			}
+		}
+	}
+	// fill board with correct values
+	for (int d = 1; d <= initBoard.depth(); d++)
+	{
+		for (int i = 1; i <= initBoard.rows(); i++)
+		{
+			for (int j = 1; j <= initBoard.cols(); j++)
+			{
+				copyBoard[d][i].push_back(initBoard.charAt(Coordinate(i, j, d)));
 			}
 		}
 	}
@@ -46,13 +58,13 @@ void Board::buildBoard(const vector<vector<vector<Cell>>>& initBoard)
 	vector<vector<vector<char>>> copyBoard;
 	for (int d = 0; d < initDepthSize; d++)
 	{
-		vector<vector<Cell>> depth;
+		vector<vector<char>> depth;
 		for (int i = 0; i < initRowSize; i++)
 		{
-			vector<Cell> col;
+			vector<char> col;
 			for (int j = 0; j < initColSize; j++)
 			{
-				copyBoard[d][i].emplace_back();
+				copyBoard[d][i].push_back(initBoard[d][i][j].getSign());
 			}
 		}
 	}

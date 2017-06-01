@@ -108,7 +108,8 @@ public:
 	void buildBoard(const vector<vector<vector<char>>>& initBoard);
 
 	void buildBoard(const BoardData& initBoard);
-	
+	void buildBoard(const vector<vector<vector<Cell>>>& initBoard);
+
 	/**
 	* @Details		receive cell's coords and returns sign of requested cell
 	* @Param		r - requested cell's row index
