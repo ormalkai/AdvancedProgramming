@@ -24,9 +24,6 @@ private:
 	
 	Coordinate		m_coord;				// Cell's coordinates
 
-	//	int				m_rowIndex;				// Cell's row index
-	//	int				m_colIndex;				// Cell's col index
-	//int				m_depthIndex;			// Cell's depth index
 	int				m_histValue;			// The histogram value - number of ship this cell could be part of them
 	bool			m_isHitted;				// Indicator if the cell was hitted		
 
@@ -144,10 +141,11 @@ public:
 	
 	/**
 	* @Details		setter for indexes of the cell
+	* @param		d - depth index
 	* @param		r - row index
 	* @param		c - column index
 	*/
-	void setIndexes(int d, int r, int c) { m_coord.row = r; m_coord.col = c; m_coord.depth = d; }
+	void setIndexes(int d, int r, int c) { m_coord.depth = d; m_coord.row = r; m_coord.col = c;}
 
 	/**
 	* @Details		check if this cell is part of ship

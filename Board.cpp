@@ -12,7 +12,7 @@
 #define INC_DEPTH(DIR, DEP, OFFSET) (((ShipDirection::DEPTH) == (DIR)) ? ((DEP) + (OFFSET)) : (DEP))
 
 
-void Board::buildBoard3D(vector<vector<vector<char>>> initBoard)
+void Board::buildBoard(vector<vector<vector<char>>> initBoard)
 {
 	m_depth = static_cast<int>(initBoard.size());
 	m_rows = static_cast<int>(initBoard[0].size());

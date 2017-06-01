@@ -23,7 +23,7 @@ public:
 
 	virtual char charAt(Coordinate c) const
 	{
-		return m_boardData.at(c.depth).at(c.row).at(c.col).getSign();
+		return m_boardData[c.depth][c.row][c.col].getSign();
 	}
 
 
@@ -105,7 +105,7 @@ public:
 	*/
 	char** Board::toCharMat(PlayerIndex playerId) const;
 
-	void buildBoard3D(vector<vector<vector<char>>> initBoard);
+	void buildBoard(vector<vector<vector<char>>> initBoard);
 	
 	/**
 	* @Details		receive cell's coords and returns sign of requested cell
