@@ -13,11 +13,16 @@ Cell* BattleshipAlgoSmart::popAttack()
 	return c;
 }
 
-void BattleshipAlgoSmart::setBoard(int player, const char** board, int numRows, int numCols)
-{
+
+void BattleshipAlgoSmart::setPlayer(int player) {
 	m_id = player;
-	m_rows = numRows;
-	m_cols = numCols;
+}
+
+void BattleshipAlgoSmart::setBoard(const BoardData& board)
+{
+	m_rows = board.rows();
+	m_cols = board.cols();
+	m_depth = board.depth();
 	int initBoardRows = m_rows + BOARD_PADDING;
 	int initBoardCols = m_cols + BOARD_PADDING;
 	char** initBoard = new char*[initBoardRows];
@@ -59,7 +64,7 @@ void BattleshipAlgoSmart::setBoard(int player, const char** board, int numRows, 
 	}
 }
 
-pair<int, int> BattleshipAlgoSmart::attack()
+Coordinate BattleshipAlgoSmart::attack()
 {
 	if (m_currentStatus == HUNT)
 	{
@@ -74,7 +79,7 @@ pair<int, int> BattleshipAlgoSmart::attack()
 			updateTargetAttackQueue(c, ShipDirection::ALL, false);
 
 			c = popTargetAttack();
-			return make_pair(c->row(), c->col());
+			return std::move(Coordinate(c->row(), c->col(), c->depth()));
 		}
 
 		return make_pair(c->row(), c->col());

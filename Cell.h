@@ -2,6 +2,7 @@
 
 #include "Ship.h"
 #include "Utils.h"
+#include "BattleshipAlgoSmart.h"
 
 class Cell {
 	
@@ -20,9 +21,12 @@ private:
 	CellStatus		m_status;				// The status of the cell according to the enum above
 	Ship*			m_pShip;				// pointer to the ship in this cell, NULL if no ship
 	PlayerIndex		m_playerIndexOwner;		// The unique identifier of the player own the ship
-	int				m_depthIndex;			// Cell's depth index
-	int				m_rowIndex;				// Cell's row index
-	int				m_colIndex;				// Cell's col index
+	
+	Coordinate		m_coord;				// Cell's coordinates
+
+	//	int				m_rowIndex;				// Cell's row index
+	//	int				m_colIndex;				// Cell's col index
+	//int				m_depthIndex;			// Cell's depth index
 	int				m_histValue;			// The histogram value - number of ship this cell could be part of them
 	bool			m_isHitted;				// Indicator if the cell was hitted		
 
@@ -97,13 +101,19 @@ public:
 	* @Details		getter for row index of the cell
 	* @return		cell's row index
 	*/
-	int row() const { return m_rowIndex; }
+	int row() const { return m_coord.row; }
 	
 	/**
 	* @Details		getter for col index of the cell
 	* @return		cell's col index
 	*/
-	int col() const { return m_colIndex; }
+	int col() const { return m_coord.col; }
+
+	/**
+	* @Details		getter for depth index of the cell
+	* @return		cell's depth index
+	*/
+	int depth() const { return m_coord.depth; }
 	
 	/**
 	* @Details		setter of histogram value in the cell
@@ -137,7 +147,7 @@ public:
 	* @param		r - row index
 	* @param		c - column index
 	*/
-	void setIndexes(int d, int r, int c) { m_depthIndex = d;  m_rowIndex = r; m_colIndex = c; }
+	void setIndexes(int d, int r, int c) { m_coord.row = r; m_coord.col = c; m_coord.depth = d; }
 
 	/**
 	* @Details		check if this cell is part of ship

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <queue>		// for attack queue
-#include "IBattleshipGameAlgo.h"
 
 using namespace std;
 

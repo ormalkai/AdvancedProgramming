@@ -6,7 +6,7 @@
 
 using std::vector;
 
-class Board
+class Board : public BoardData
 {
 private:
 	//Cell**			m_boardData;	// The board is matrix of Cells
@@ -19,6 +19,14 @@ private:
 	int								m_delay;		// delay between every attack in game simulation
 
 public:
+
+
+	virtual char charAt(Coordinate c) const
+	{
+		return m_boardData.at(c.depth).at(c.row).at(c.col).getSign();
+	}
+
+
 	/**
 	 * @Details		Constructor of board
 	 * @param		rows - number of rows in the board, default BOARD_ROW_SIZE (for future purposes)

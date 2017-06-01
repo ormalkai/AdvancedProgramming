@@ -139,6 +139,7 @@ private:
 	int m_id;				// unique identifier of the player (PlayerA/PlayerB)
 	int		m_rows;			// number of rows in the board
 	int		m_cols;			// number of columns in the board
+	int		m_depth;		// depth level of the board
 	Board	m_board;
 	PriorityQueue<Cell*, vector<Cell*>, cmp> m_attackedQueue;
 	list<Cell*> m_targetQueue;
@@ -146,7 +147,6 @@ private:
 	vector<Cell*> m_currentAttackedShipCells;
 	map<pair<int, int>, int> m_stripToPotentialShips;
 	
-
 	/**
 	* @Details		Return the next attack request in hunt mode - the cell with the highest hist value
 	* @Return		The next cell to be attacked
@@ -209,11 +209,6 @@ private:
 	*/
 	bool isAttackable(const Cell& c) const;
 
-	/**
-	* @Details		Initializion for smart algorithm
-	* @Param		path - unused
-	*/
-	bool init(const string& path) override;
 
 	/**
 	* @Details		Calculate and update hist value of cell by given 2 indexes
@@ -272,17 +267,15 @@ public:
 	/**
 	* @Details		Receive board matrix and matrix's size, and notify player on his board
 	* @Param		board - player's board
-	* @Param		board - num of rows in board
-	* @Param		board - num of cols in board
 	*/
-	void setBoard(int player, const char** board, int numRows, int numCols) override;
+	void setBoard(const BoardData& board) override;
 
 	/**
 	* @Details		Return next attack request
-	* @retrun		pair of coordinates - requested attack.
-	*				in case the queue is empty returns the pair (-1,-1)
+	* @retrun		Coordinate - requested attack.
+	*				in case the queue is empty returns nullptr
 	*/
-	std::pair<int, int> attack() override;
+	Coordinate attack() override;
 
 	/**
 	* @Details		notify player on last move result
@@ -291,8 +284,15 @@ public:
 	* @Param		col - attacked cell's col index
 	* @Param		result - attack's result (hit, miss, sink)
 	*/
-	void notifyOnAttackResult(int player, int row, int col, AttackResult result) override;
+	void notifyOnAttackResult(int player, Coordinate move, AttackResult result) override;
 	
+	/**
+	* @Details		Set player id
+	* @Param		player - player id
+	*/
+	void setPlayer(int player) override;
+
+
 };
 
 
