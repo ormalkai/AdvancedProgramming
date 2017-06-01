@@ -22,3 +22,4 @@ Debug/vc140.idb
 *.sboard
 clean_movesA.attack-a
 *.attack-b
+*.dll

@@ -170,10 +170,11 @@ void Board::printBoard() const
 void Board::printHist() const
 {
 	static int k = 1;
-	if (k++ % 2 == 0)
+	Utils::gotoxy(13, 0);
+	/*if (k++ % 2 == 0)
 		Utils::gotoxy(13,0);
 	else
-		Utils::gotoxy(27, 0);
+		Utils::gotoxy(27, 0);*/
 
 	for (int i = 1; i <= m_rows; ++i)
 	{
@@ -209,19 +210,27 @@ void Board::printAttack(int player, int i, int j, AttackResult attackResult) con
 		cout << m_boardData[i][j].getSign();
 		Sleep(100);
 	}
+	int cellOwner = m_boardData[i][j].getPlayerIndexOwner();
 	switch (attackResult)
 	{
 	case (AttackResult::Hit):
 	case (AttackResult::Sink):
 		Utils::gotoxy(i, j * 3);
-		if (player == PLAYER_A)
+		if (PLAYER_A == cellOwner)
 			cout << "*  ";
 		else
 			cout << "#  ";
 		break;
 	case (AttackResult::Miss):
 		Utils::gotoxy(i, j * 3);
-		cout << SPACE;
+		if (m_boardData[i][j].getSign() == SPACE)
+		{
+			cout << SPACE;
+		}
+		else
+		{
+			cout << (PLAYER_A == cellOwner ? "*  " : "#  ");
+		}
 		break;
 	}
 	Sleep(m_delay);

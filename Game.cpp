@@ -156,6 +156,16 @@ ReturnCode Game::readSBoardFile(const string filePath, char** const initBoard) c
 		return RC_ERROR;
 	}
 	string line;
+
+	// Read board size (ROWxCOLxDEP)
+	Utils::safeGetline(sboard, line);
+
+	int rows, cols, depth;
+
+	if (3 == std::sscanf(s, ":%dx%dx%d", &rows, &cols, &depth))
+	{
+	cin >> rows >> "x" >> cols >> "x" >> depth;
+
 	int rowIndex = 1;
 	// Line by line up to 10 line and up to 10 chars per line
 	while (Utils::safeGetline(sboard, line) && rowIndex <= m_rows)
@@ -346,6 +356,9 @@ ReturnCode Game::initSboardFilePath(const string& filesPath, string& sboardFile)
 	vector<string> sboardFiles;
 	// load sboard file
 	auto rc = Utils::getListOfFilesInDirectoryBySuffix(filesPath, "sboard", sboardFiles, true);
+	if (RC_INVALID_ARG == rc)
+		return rc;
+	
 	// ERROR means that the path exists but there is no file
 	if (RC_ERROR == rc)
 	{
@@ -417,7 +430,7 @@ ReturnCode Game::init(const string filesPath, bool isQuiet, int delay)
 	}
 
 	// Load algorithms from DLL
-	ReturnCode DLLRc = loadAllAlgoFromDLLs(dllPaths);
+	ReturnCode DLLRc = initDLLFilesPath(filesPath,dllPaths);
 	if (RC_SUCCESS != DLLRc || RC_SUCCESS != sboardRc)
 	{
 		if (isInitBoardInitialized)
@@ -431,6 +444,13 @@ ReturnCode Game::init(const string filesPath, bool isQuiet, int delay)
 		return RC_ERROR;
 	}
 	
+	// Load algorithms from DLL
+	auto rc = loadAllAlgoFromDLLs(dllPaths);
+	if (RC_SUCCESS != rc)
+	{
+		return rc;
+	}
+
 	// now the board is valid lets build our board
 	m_board.buildBoard(const_cast<const char**>(initBoard), m_rows, m_cols);
 	// initBoard is no longer relevant lets delete it
@@ -464,9 +484,6 @@ ReturnCode Game::init(const string filesPath, bool isQuiet, int delay)
 		return RC_ERROR;
 	}
 	
-	Utils::gotoxy(20, 0);
-	cout << "PlayerA algo: " << dllPaths[PLAYER_A].substr(dllPaths[PLAYER_A].find_last_of("\\") + 1) << endl;
-	cout << "PlayerB algo: " << dllPaths[PLAYER_B].substr(dllPaths[PLAYER_B].find_last_of("\\") + 1) << endl;
 	return RC_SUCCESS;
 }
 

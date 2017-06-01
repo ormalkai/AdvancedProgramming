@@ -46,6 +46,8 @@ void BattleshipAlgoSmart::setBoard(int player, const char** board, int numRows, 
 	}
 	delete[] initBoard;
 
+	initStripSizeToNumPotentialShips();
+
 	for (int i = 1; i <= m_board.rows(); ++i)
 	{
 		for (int j = 1; j <= m_board.cols(); ++j)
@@ -369,8 +371,6 @@ bool BattleshipAlgoSmart::isAttackable(const Cell& c) const
 bool BattleshipAlgoSmart::init(const string& path)
 {
 	m_currentStatus = HUNT;
-	initStripSizeToNumPotentialShips();
-
 	return true;
 }
 

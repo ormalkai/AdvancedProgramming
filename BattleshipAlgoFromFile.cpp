@@ -134,7 +134,6 @@ bool BattleshipAlgoFromFile::init(const string& path)
 	auto rc = Utils::getListOfFilesInDirectoryBySuffix(path, "attack", attackFiles);
 	if (RC_SUCCESS != rc)
 	{
-		cout << "Missing attack file for player " << Utils::getPlayerCharByIndex(m_id) << " (*.attack) looking in path: " << path << endl;
 		return false;
 	}
 	string attackFile;
