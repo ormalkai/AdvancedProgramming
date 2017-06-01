@@ -18,7 +18,6 @@ void Board::buildBoard(const BoardData& initBoard)
 	int initRowSize = initBoard.rows() + BOARD_PADDING;
 	int initColSize = initBoard.cols() + BOARD_PADDING;
 
-	// init copyBoard
 	vector<vector<vector<char>>> copyBoard;
 	for (int d = 0; d < initDepthSize; d++)
 	{
@@ -28,18 +27,7 @@ void Board::buildBoard(const BoardData& initBoard)
 			vector<char> col;
 			for (int j = 0; j < initColSize; j++)
 			{
-				copyBoard[d][i].push_back(SPACE);
-			}
-		}
-	}
-	// fill board with correct values
-	for (int d = 1; d <= initBoard.depth(); d++)
-	{
-		for (int i = 1; i <= initBoard.rows(); i++)
-		{
-			for (int j = 1; j <= initBoard.cols(); j++)
-			{
-				copyBoard[d][i].push_back(initBoard.charAt(Coordinate(i, j, d)));
+				copyBoard[d][i].push_back(initBoard.charAt(Coordinate(i,j,d)));
 			}
 		}
 	}
@@ -58,13 +46,13 @@ void Board::buildBoard(const vector<vector<vector<Cell>>>& initBoard)
 	vector<vector<vector<char>>> copyBoard;
 	for (int d = 0; d < initDepthSize; d++)
 	{
-		vector<vector<char>> depth;
+		vector<vector<Cell>> depth;
 		for (int i = 0; i < initRowSize; i++)
 		{
-			vector<char> col;
+			vector<Cell> col;
 			for (int j = 0; j < initColSize; j++)
 			{
-				copyBoard[d][i].push_back(initBoard[d][i][j].getSign());
+				copyBoard[d][i].emplace_back();
 			}
 		}
 	}
@@ -180,8 +168,8 @@ ReturnCode Board::splitToPlayersBoards(Board& boardA, Board& boardB)
 				{
 				case PLAYER_A:
 				{
-					dataA[d][r][c] = sign;
-					dataB[d][r][c] = SPACE;
+					dataA[d][r][c] = cell;
+					dataB[d][r][c].clear();
 				} break;
 
 				case PLAYER_B:
@@ -227,6 +215,12 @@ void Board::addDummyNewShipToBoard(const vector<Cell*>& shipCells)
 
 	ship->addCells(shipCells);
 }
+
+vector<int>& Board::shipsPerPlayer()
+{
+	return m_numOfShipsPerPlayer;
+}
+
 
 Board::~Board()
 {
@@ -311,7 +305,7 @@ void Board::printHist()
 	}
 }
 
-void Board::printAttack(int player, int d, int i, int j, AttackResult attackResult) const
+void Board::printAttack(int player, int i, int j, int d, AttackResult attackResult) const
 {
 	if (true == m_isQuiet)
 	{

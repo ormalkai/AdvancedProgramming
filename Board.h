@@ -18,8 +18,13 @@ private:
 	bool							m_isQuiet;		// Is quiet run, for print simulation game
 	int								m_delay;		// delay between every attack in game simulation
 
+	vector<int>						m_numOfShipsPerPlayer;
+
+	
 public:
 
+
+	vector<int>& Board::shipsPerPlayer();
 
 	virtual char charAt(Coordinate c) const
 	{

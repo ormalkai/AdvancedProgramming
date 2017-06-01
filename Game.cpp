@@ -141,6 +141,9 @@ AttackRequestCode Game::requestAttack(Coordinate& req)
 
 void Game::startGame()
 {
+
+	auto& shipsPerPlayer = m_board.shipsPerPlayer();
+
 	m_board.printBoard();
 
 	IBattleshipGameAlgo* currentPlayer;
@@ -206,7 +209,7 @@ void Game::startGame()
 				if (attackedCell.getPlayerIndexOwner() == m_currentPlayerIndex)
 				{
 					m_playerScore[m_otherPlayerIndex] += pShip->getValue();
-					m_numOfShipsPerPlayer[m_currentPlayerIndex]--;
+					shipsPerPlayer[m_currentPlayerIndex]--;
 				}
 				else
 				{
@@ -214,7 +217,7 @@ void Game::startGame()
 					m_playerScore[m_currentPlayerIndex] += pShip->getValue();
 
 					// Update number of alive ships
-					m_numOfShipsPerPlayer[m_otherPlayerIndex]--;
+					shipsPerPlayer[m_otherPlayerIndex]--;
 				}		
 			}
 		}
@@ -233,16 +236,16 @@ void Game::startGame()
 			attackResult = AttackResult::Miss;
 		}
 
-		m_board.printAttack(m_currentPlayerIndex, attackReq.first, attackReq.second, attackResult);
+		m_board.printAttack(m_currentPlayerIndex, attackReq.row, attackReq.col, attackReq.depth, attackResult);
 
 		// Notify for all players
 		for (int i = 0; i < NUM_OF_PLAYERS; i++)
 		{
-			m_players[i]->notifyOnAttackResult(m_currentPlayerIndex, attackReq.first, attackReq.second, attackResult);
+			m_players[i]->notifyOnAttackResult(m_currentPlayerIndex, attackReq, attackResult);
 		}
 
 		// If game over break
-		if (Utils::isExistInVec(m_numOfShipsPerPlayer, 0))
+		if (Utils::isExistInVec(shipsPerPlayer, 0))
 		{
 			gameOver = true;
 			DBG(Debug::DBG_DEBUG, "Game over - 0 ships remaining");

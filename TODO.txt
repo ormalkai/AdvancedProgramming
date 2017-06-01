@@ -4,7 +4,11 @@ TODO List
 -		Copy C'tor
 - 		Move C'tor
 -		Operator=
+-
 
+- לשנות את סדר הפרמטרים שdepth יהיה אחרון
 - להוסיף typedef לוקטור המשולש המשוגע
 - למחוק את הולידציה על מספר הספינות
 ולהוסיף ולידציה שיש את אותן סוגי ספינות לשחקנים
+- להוסיף פונק build ל BoardBuilder
+- לעדכן את משתנה המחלקה m_numOfShipsPerPlayer בBoard

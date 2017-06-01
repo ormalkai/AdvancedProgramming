@@ -31,6 +31,7 @@ private:
 	bool					m_finishedAttackPlayer[NUM_OF_PLAYERS] = { false }; // finished attack inidicator per player
 	vector<tuple<HINSTANCE, GetAlgoFuncType>> m_algoDLLVec;						// dll tuples <hanfle, algo func>
 
+
 	/**
 	 * @Details		game constructor
 	 */

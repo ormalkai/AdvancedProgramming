@@ -129,5 +129,7 @@ public:
 	bool checkErrors() const;
 
 	void initInitBoard();
+
+	int getNumOfShipByPlayer(PlayerIndex pi) const { return m_numOfShipsPerPlayer[pi]; }
 };
 
