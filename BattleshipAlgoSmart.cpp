@@ -23,43 +23,21 @@ void BattleshipAlgoSmart::setBoard(const BoardData& board)
 	m_rows = board.rows();
 	m_cols = board.cols();
 	m_depth = board.depth();
-	int initBoardRows = m_rows + BOARD_PADDING;
-	int initBoardCols = m_cols + BOARD_PADDING;
-	char** initBoard = new char*[initBoardRows];
-	for (int i = 0; i < initBoardRows; ++i)
-	{
-		initBoard[i] = new char[initBoardCols];
-	}
-	for (int i = 0; i < initBoardRows; i++)
-	{
-		for (int j = 0; j < initBoardCols; j++)
-		{
-			initBoard[i][j] = SPACE;
-		}
-	}
-	for (int i = 1; i <= m_rows; ++i)
-	{
-		for (int j = 1; j <= m_cols; ++j)
-		{
-			initBoard[i][j] = board[i - 1][j - 1];
-		}
-	}
-	m_board.buildBoard(const_cast<const char**>(initBoard), m_rows, m_cols);
-	for (int i = 0; i < initBoardRows; ++i)
-	{
-		delete[] initBoard[i];
-	}
-	delete[] initBoard;
+
+	m_board.buildBoard(board);
 
 	initStripSizeToNumPotentialShips();
 
-	for (int i = 1; i <= m_board.rows(); ++i)
+	for (int d = 0; d < m_depth; d++)
 	{
-		for (int j = 1; j <= m_board.cols(); ++j)
+		for (int i = 1; i <= m_board.rows(); ++i)
 		{
-			calcHist(i, j);
-			Cell* c = m_board.getCellPointer(i, j);
-			m_attackedQueue.push(c);
+			for (int j = 1; j <= m_board.cols(); ++j)
+			{
+				calcHist(Coordinate(d, i, j));
+				Cell* c = m_board.getCellPointer(d, i, j);
+				m_attackedQueue.push(c);
+			}
 		}
 	}
 }
@@ -82,12 +60,12 @@ Coordinate BattleshipAlgoSmart::attack()
 			return std::move(Coordinate(c->row(), c->col(), c->depth()));
 		}
 
-		return make_pair(c->row(), c->col());
+		return std::move(Coordinate(c->row(), c->col(), c->depth()));
 	}
 	else /*(m_currentStatus == TARGET)*/
 	{
 		Cell* c = popTargetAttack();
-		return make_pair(c->row(), c->col());
+		return std::move(Coordinate(c->row(), c->col(), c->depth()));
 	}
 }
 
@@ -115,29 +93,28 @@ void BattleshipAlgoSmart::handleTargetShipSunk(Cell* const attackedCell)
 	m_currentAttackedShipCells.clear();
 }
 
-void BattleshipAlgoSmart::notifyOnAttackResult(int player, int row, int col, AttackResult attackResult)
+void BattleshipAlgoSmart::notifyOnAttackResult(int player, Coordinate move, AttackResult result)
 {
-
-	Cell* attackedCell = m_board.getCellPointer(row, col);
+	int depth = move.depth;
+	int row = move.row;
+	int col = move.col;
+	Cell* attackedCell = m_board.getCellPointer(depth, row, col);
 	attackedCell->hitCell();
-	if (AttackResult::Hit == attackResult || AttackResult::Sink == attackResult)
+	if (AttackResult::Hit == result || AttackResult::Sink == result)
 		attackedCell->setStatus(Cell::DEAD);
 	attackedCell->setHistValue(0);
 
-
-
-	if (AttackResult::Miss == attackResult && !attackedCell->hasShip())
+	if (AttackResult::Miss == result && !attackedCell->hasShip())
 	{
 		// Update hist
 		updateHist(vector<Cell*>{attackedCell}, false);
 	}
 
-
 	if (m_id == player)
 	{
 		if (HUNT == m_currentStatus)
 		{
-			switch (attackResult)
+			switch (result)
 			{
 			case AttackResult::Sink:
 			{
@@ -159,12 +136,12 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, int row, int col, Att
 
 			} break;
 			default: ;
-				DBG(Debug::DBG_WARNING, "Unknown attack result %d in %s", attackResult, __func__);
+				DBG(Debug::DBG_WARNING, "Unknown attack result %d in %s", result, __func__);
 			}
 		}
 		else // TARGET == m_currentStatus
 		{
-			switch (attackResult)
+			switch (result)
 			{
 			case AttackResult::Hit:
 			{
@@ -175,9 +152,10 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, int row, int col, Att
 					toRemoveWrongAxis = true;
 				if (m_currentAttackedShipCells.at(0)->row() == m_currentAttackedShipCells.at(1)->row())
 					updateTargetAttackQueue(attackedCell, ShipDirection::HORIZONTAL, toRemoveWrongAxis);
-				else
+				else if (m_currentAttackedShipCells.at(0)->col() == m_currentAttackedShipCells.at(1)->col())
 					updateTargetAttackQueue(attackedCell, ShipDirection::VERTICAL, toRemoveWrongAxis);
-
+				else
+					updateTargetAttackQueue(attackedCell, ShipDirection::DEPTH, toRemoveWrongAxis);
 
 			} break;
 			case AttackResult::Sink:
@@ -185,7 +163,7 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, int row, int col, Att
 				handleTargetShipSunk(attackedCell);
 			}
 			default: 
-				DBG(Debug::DBG_WARNING, "Unknown attack result %d in %s", attackResult, __func__);
+				DBG(Debug::DBG_WARNING, "Unknown attack result %d in %s", result, __func__);
 			}
 		}
 	}
@@ -193,7 +171,7 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, int row, int col, Att
 	{
 		if (HUNT == m_currentStatus)
 		{
-			switch (attackResult)
+			switch (result)
 			{
 			case AttackResult::Sink:
 			{
@@ -206,12 +184,12 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, int row, int col, Att
 			}
 			break;
 			default: 
-				DBG(Debug::DBG_WARNING, "Unknown attack result %d in %s", attackResult, __func__);
+				DBG(Debug::DBG_WARNING, "Unknown attack result %d in %s", result, __func__);
 			}
 		}
 		else // TARGET == m_currentStatus
 		{
-			switch (attackResult)
+			switch (result)
 			{
 			case AttackResult::Hit:
 			{
@@ -231,7 +209,7 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, int row, int col, Att
 				}
 			}
 			default: 
-				DBG(Debug::DBG_WARNING, "Unknown attack result %d in %s", attackResult, __func__);
+				DBG(Debug::DBG_WARNING, "Unknown attack result %d in %s", result, __func__);
 			}
 		}
 	}
@@ -251,23 +229,34 @@ bool BattleshipAlgoSmart::isCellNeighborToTargetShip(Cell* cell)
 
 vector<Cell*> BattleshipAlgoSmart::getSunkShipByCell(Cell* const c) const
 {
+	int depth = c->depth();
 	int row = c->row();
 	int col = c->col();
 	vector<Cell*> result{};
 
 	ShipDirection d = ShipDirection::HORIZONTAL;
-	if (!m_board.getCellPointer(row + 1, col)->isEmpty() || !m_board.getCellPointer(row - 1, col)->isEmpty())
+	if (!m_board.getCellPointer(depth, row + 1, col)->isEmpty() || !m_board.getCellPointer(depth, row - 1, col)->isEmpty())
 	{
 		d = ShipDirection::VERTICAL;
+	}
+	else if (!m_board.getCellPointer(depth, row, col + 1)->isEmpty() || !m_board.getCellPointer(depth, row, col - 1)->isEmpty())
+	{
+		d = ShipDirection::HORIZONTAL;
+	}
+	else
+	{
+		d = ShipDirection::DEPTH;
 	}
 
 	Cell* p = c;
 	while (!p->isEmpty())
 	{
 		if (d == ShipDirection::HORIZONTAL)
-			p = m_board.getCellPointer(row + 1, col);
-		else /*(d == ShipDirection::VERTICAL)*/
-			p = m_board.getCellPointer(row, col + 1);
+			p = m_board.getCellPointer(depth ,row + 1, col);
+		else if (d == ShipDirection::VERTICAL)
+			p = m_board.getCellPointer(depth ,row, col + 1);
+		else /*(d == ShipDirection::DEPTH)*/
+			p = m_board.getCellPointer(depth + 1, row, col);
 		result.push_back(p);
 	}
 
@@ -275,9 +264,11 @@ vector<Cell*> BattleshipAlgoSmart::getSunkShipByCell(Cell* const c) const
 	while (!p->isEmpty())
 	{
 		if (d == ShipDirection::HORIZONTAL)
-			p = m_board.getCellPointer(row - 1, col);
-		else /*(d == ShipDirection::VERTICAL)*/
-			p = m_board.getCellPointer(row, col - 1);
+			p = m_board.getCellPointer(depth ,row - 1, col);
+		else if (d == ShipDirection::VERTICAL)
+			p = m_board.getCellPointer(depth, row, col - 1);
+		else /*(d == ShipDirection::DEPTH)*/
+			p = m_board.getCellPointer(depth - 1, row, col);
 		result.push_back(p);
 	}
 
@@ -300,21 +291,25 @@ void BattleshipAlgoSmart::updateHist(const vector<Cell*>& cells, bool createDumm
 		if (!createDummyShip)
 			pc->setHistValue(0);
 
+		int d = pc->depth();
 		int r = pc->row();
 		int c = pc->col();
 
 		for (auto i = 1; i <= MAX_SHIP_LEN; ++i)
 		{
-			calcHist(r + i, c);
-			calcHist(r - i, c);
-			calcHist(r, c + i);
-			calcHist(r, c - i);
+			calcHist(Coordinate(d + i, r, c));
+			calcHist(Coordinate(d - i, r, c));
+			calcHist(Coordinate(d, r + i, c));
+			calcHist(Coordinate(d, r - i, c));
+			calcHist(Coordinate(d, r, c + i));
+			calcHist(Coordinate(d, r, c - i));
 		}
 	}
 }
 
 void BattleshipAlgoSmart::updateTargetAttackQueue(const Cell* attackedCell, ShipDirection direction, bool toRemoveWrongAxis)
 {
+	int depthIndex = attackedCell->depth();
 	int rowIndex = attackedCell->row();
 	int colIndex = attackedCell->col();
 
@@ -322,6 +317,7 @@ void BattleshipAlgoSmart::updateTargetAttackQueue(const Cell* attackedCell, Ship
 	{
 		for (list<Cell*>::iterator it = m_targetQueue.begin(); it != m_targetQueue.end();)
 		{
+			int dIndex = (*it)->depth();
 			int rIndex = (*it)->row();
 			int cIndex = (*it)->col();
 
@@ -329,41 +325,57 @@ void BattleshipAlgoSmart::updateTargetAttackQueue(const Cell* attackedCell, Ship
 				it = m_targetQueue.erase(it);
 			if (ShipDirection::VERTICAL == direction && colIndex != cIndex)
 				it = m_targetQueue.erase(it);
+			if (ShipDirection::DEPTH == direction && depthIndex != dIndex)
+				it = m_targetQueue.erase(it);
 			else if (it != m_targetQueue.end())
 				++it;
 		}
 
 	}
 
-	int newRow, newCol;
+	int newDepth, newRow, newCol;
 
 	if (ShipDirection::ALL == direction || ShipDirection::VERTICAL == direction) {
 
 		// Down
 		newRow = rowIndex + 1;
-		while (m_board.get(newRow, colIndex).isPendingCell()) newRow++;
-		if (isAttackable(m_board.get(newRow, colIndex)))
-			m_targetQueue.push_back(&(m_board.get(newRow, colIndex)));
+		while (m_board.get(depthIndex, newRow, colIndex).isPendingCell()) newRow++;
+		if (isAttackable(m_board.get(depthIndex, newRow, colIndex)))
+			m_targetQueue.push_back(&(m_board.get(depthIndex, newRow, colIndex)));
 
 		// Up
 		newRow = rowIndex - 1;
-		while (m_board.get(newRow, colIndex).isPendingCell()) newRow--;
-		if (isAttackable(m_board.get(newRow, colIndex)))
-			m_targetQueue.push_back(&(m_board.get(newRow, colIndex)));
+		while (m_board.get(depthIndex, newRow, rowIndex).isPendingCell()) newRow--;
+		if (isAttackable(m_board.get(depthIndex, newRow, colIndex)))
+			m_targetQueue.push_back(&(m_board.get(depthIndex, newRow, colIndex)));
 	}
 	if (ShipDirection::ALL == direction || ShipDirection::HORIZONTAL == direction)
 	{
 		// Right
 		newCol = colIndex + 1;
-		while (m_board.get(rowIndex, newCol).isPendingCell()) newCol++;
-		if (isAttackable(m_board.get(rowIndex, newCol)))
-			m_targetQueue.push_back(&(m_board.get(rowIndex, newCol)));
+		while (m_board.get(depthIndex, rowIndex, newCol).isPendingCell()) newCol++;
+		if (isAttackable(m_board.get(depthIndex, rowIndex, newCol)))
+			m_targetQueue.push_back(&(m_board.get(depthIndex, rowIndex, newCol)));
 
 		// Left
 		newCol = colIndex - 1;
-		while (m_board.get(rowIndex, newCol).isPendingCell()) newCol--;
-		if (isAttackable(m_board.get(rowIndex, newCol)))
-			m_targetQueue.push_back(&(m_board.get(rowIndex, newCol)));
+		while (m_board.get(depthIndex, rowIndex, newCol).isPendingCell()) newCol--;
+		if (isAttackable(m_board.get(depthIndex, rowIndex, newCol)))
+			m_targetQueue.push_back(&(m_board.get(depthIndex, rowIndex, newCol)));
+	}
+	if (ShipDirection::ALL == direction || ShipDirection::DEPTH == direction)
+	{
+		// Right
+		newDepth = depthIndex + 1;
+		while (m_board.get(newDepth, rowIndex, rowIndex).isPendingCell()) newDepth++;
+		if (isAttackable(m_board.get(newDepth, rowIndex, rowIndex)))
+			m_targetQueue.push_back(&(m_board.get(newDepth, rowIndex, rowIndex)));
+
+		// Left
+		newCol = colIndex - 1;
+		while (m_board.get(newDepth, rowIndex, rowIndex).isPendingCell()) newDepth--;
+		if (isAttackable(m_board.get(newDepth, rowIndex, rowIndex)))
+			m_targetQueue.push_back(&(m_board.get(newDepth, rowIndex, rowIndex)));
 	}
 }
 
@@ -373,19 +385,17 @@ bool BattleshipAlgoSmart::isAttackable(const Cell& c) const
 
 }
 
-bool BattleshipAlgoSmart::init(const string& path)
+void BattleshipAlgoSmart::calcHist(Coordinate c)
 {
-	m_currentStatus = HUNT;
-	return true;
-}
+	int d = c.depth;
+	int i = c.row;
+	int j = c.col;
 
-void BattleshipAlgoSmart::calcHist(int i, int j)
-{
 
-	if (i <= 0 || i > m_rows || j <= 0 || j > m_cols)
+	if (d <= 0 || d > m_depth || i <= 0 || i > m_rows || j <= 0 || j > m_cols)
 		return;
 
-	auto& cell = m_board.get(i, j);
+	auto& cell = m_board.get(d, i, j);
 
 	if (!cell.isEmpty())
 	{
@@ -394,10 +404,12 @@ void BattleshipAlgoSmart::calcHist(int i, int j)
 	}
 
 	// Check there are no neighbors ship
-	if (!m_board.get(i + 1, j).isEmpty() ||
-		!m_board.get(i - 1, j).isEmpty() ||
-		!m_board.get(i, j + 1).isEmpty() ||
-		!m_board.get(i, j - 1).isEmpty())
+	if (!m_board.get(d + 1, i, j).isEmpty() ||
+		!m_board.get(d - 1, i, j).isEmpty() ||
+		!m_board.get(d ,i + 1, j).isEmpty() ||
+		!m_board.get(d, i - 1, j).isEmpty() ||
+		!m_board.get(d, i, j + 1).isEmpty() ||
+		!m_board.get(d, i, j - 1).isEmpty())
 	{
 		cell.setHistValue(0);
 		return;
@@ -406,6 +418,8 @@ void BattleshipAlgoSmart::calcHist(int i, int j)
 	auto numOfPotentialShips = 1;
 
 	map<Direction, int> maxIndexOfValid = {
+		{ Direction::INSIDE, MAX_SHIP_LEN - 1 },
+		{ Direction::OUTSIDE, MAX_SHIP_LEN - 1 },
 		{ Direction::UP, MAX_SHIP_LEN - 1 },
 		{ Direction::DOWN, MAX_SHIP_LEN - 1 },
 		{ Direction::LEFT, MAX_SHIP_LEN - 1 },
@@ -417,14 +431,21 @@ void BattleshipAlgoSmart::calcHist(int i, int j)
 	{
 		for (auto shipLen = 1; shipLen < MAX_SHIP_LEN; ++shipLen)
 		{
-			auto d = static_cast<Direction>(d_i);
-			auto od = Utils::getOppositeDirection(d);
+			auto dir = static_cast<Direction>(d_i);
+			auto od = Utils::getOppositeDirection(dir);
 
+			auto checkedDepthIndex = d;
 			auto checkedRowIndex = i;
 			auto checkedColIndex = j;
 
-			switch (d)
+			switch (dir)
 			{
+			case Direction::INSIDE:
+				checkedDepthIndex -= shipLen;
+				break;
+			case Direction::OUTSIDE:
+				checkedDepthIndex += shipLen;
+				break;
 			case Direction::UP:
 				checkedRowIndex -= shipLen;
 				break;
@@ -440,18 +461,18 @@ void BattleshipAlgoSmart::calcHist(int i, int j)
 			default:;
 			}
 			
-			if (!m_board.isValidCell(checkedRowIndex, checkedColIndex))
+			if (!m_board.isValidCell(checkedDepthIndex, checkedRowIndex, checkedColIndex))
 			{
-				maxIndexOfValid[d] = shipLen - 1;
+				maxIndexOfValid[dir] = shipLen - 1;
 				break;
 			}
 
-			auto& checkedCell = m_board.get(checkedRowIndex, checkedColIndex);
+			auto& checkedCell = m_board.get(checkedDepthIndex, checkedRowIndex, checkedColIndex);
 
 			if ((checkedCell.isHitted() && !checkedCell.hasShip()) ||
 				!isOtherNeighborsValid(checkedCell, od))
 			{
-				maxIndexOfValid[d] = shipLen - 1;
+				maxIndexOfValid[dir] = shipLen - 1;
 				break;
 			}
 		} // ShipLen
@@ -459,6 +480,7 @@ void BattleshipAlgoSmart::calcHist(int i, int j)
 
 
 	// Calc
+	numOfPotentialShips += m_stripToPotentialShips[{maxIndexOfValid.at(Direction::INSIDE), maxIndexOfValid.at(Direction::OUTSIDE)}];
 	numOfPotentialShips += m_stripToPotentialShips[{maxIndexOfValid.at(Direction::UP), maxIndexOfValid.at(Direction::DOWN)}];
 	numOfPotentialShips += m_stripToPotentialShips[{maxIndexOfValid.at(Direction::LEFT), maxIndexOfValid.at(Direction::RIGHT)}];
 
@@ -473,34 +495,61 @@ bool BattleshipAlgoSmart::isOtherNeighborsValid(const Cell& cell, Direction d) c
 		return false;
 
 	auto ret = false;
+	auto dIndex = cell.depth();
 	auto rIndex = cell.row();
 	auto cIndex = cell.col();
 
 	switch (d)
 	{
+	case Direction::INSIDE:
+	{
+		ret = m_board.get(dIndex - 1, rIndex, cIndex).isEmpty() &&	// Check outside 
+			m_board.get(dIndex, rIndex - 1, cIndex).isEmpty() &&	// Check up
+			m_board.get(dIndex, rIndex + 1, cIndex).isEmpty() &&	// Check down
+			m_board.get(dIndex, rIndex, cIndex + 1).isEmpty() &&	// Check right
+			m_board.get(dIndex, rIndex, cIndex - 1).isEmpty();		// Check left
+	}
+	break;
+	case Direction::OUTSIDE: {
+		ret = 
+			m_board.get(dIndex + 1, rIndex, cIndex).isEmpty() &&	// Check inside
+			m_board.get(dIndex, rIndex - 1, cIndex).isEmpty() &&	// Check up
+			m_board.get(dIndex, rIndex + 1, cIndex).isEmpty() &&	// Check down
+			m_board.get(dIndex, rIndex, cIndex + 1).isEmpty() &&	// Check right
+			m_board.get(dIndex, rIndex, cIndex - 1).isEmpty();		// Check left
+	}
+	break;
 	case Direction::UP:
 	{
-		ret = m_board.get(rIndex + 1, cIndex).isEmpty() &&	// Check down
-			m_board.get(rIndex, cIndex + 1).isEmpty() &&	// Check right
-			m_board.get(rIndex, cIndex - 1).isEmpty();		// Check left
+		ret = m_board.get(dIndex, rIndex + 1, cIndex).isEmpty() &&	// Check down
+			m_board.get(dIndex + 1, rIndex, cIndex).isEmpty() &&	// Check inside
+			m_board.get(dIndex - 1, rIndex, cIndex).isEmpty() &&	// Check outside
+			m_board.get(dIndex, rIndex, cIndex + 1).isEmpty() &&	// Check right
+			m_board.get(dIndex, rIndex, cIndex - 1).isEmpty();		// Check left
 	}
 	break;
 	case Direction::DOWN: {
-		ret = m_board.get(rIndex - 1, cIndex).isEmpty() &&	// Check up
-			m_board.get(rIndex, cIndex + 1).isEmpty() &&	// Check right
-			m_board.get(rIndex, cIndex - 1).isEmpty();		// Check left
+		ret = m_board.get(dIndex, rIndex - 1, cIndex).isEmpty() &&	// Check up
+			m_board.get(dIndex + 1, rIndex, cIndex).isEmpty() &&	// Check inside
+			m_board.get(dIndex - 1, rIndex, cIndex).isEmpty() &&	// Check outside
+			m_board.get(dIndex, rIndex, cIndex + 1).isEmpty() &&	// Check right
+			m_board.get(dIndex, rIndex, cIndex - 1).isEmpty();		// Check left
 	}
 	break;
 	case Direction::RIGHT: {
-		ret = m_board.get(rIndex - 1, cIndex).isEmpty() &&	// Check up
-			m_board.get(rIndex + 1, cIndex).isEmpty() &&	// Check down
-			m_board.get(rIndex, cIndex - 1).isEmpty();		// Check left
+		ret = m_board.get(dIndex, rIndex - 1, cIndex).isEmpty() &&	// Check up
+			m_board.get(dIndex + 1, rIndex, cIndex).isEmpty() &&	// Check inside
+			m_board.get(dIndex - 1, rIndex, cIndex).isEmpty() &&	// Check outside
+			m_board.get(dIndex, rIndex + 1, cIndex).isEmpty() &&	// Check down
+			m_board.get(dIndex, rIndex, cIndex - 1).isEmpty();		// Check left
 	}
 	break;
 	case Direction::LEFT: {
-		ret = m_board.get(rIndex - 1, cIndex).isEmpty() &&	// Check up
-			m_board.get(rIndex + 1, cIndex).isEmpty() &&	// Check down
-			m_board.get(rIndex, cIndex + 1).isEmpty();		// Check right
+		ret = m_board.get(dIndex, rIndex - 1, cIndex).isEmpty() &&	// Check up
+			m_board.get(dIndex + 1, rIndex, cIndex).isEmpty() &&	// Check inside
+			m_board.get(dIndex - 1, rIndex, cIndex).isEmpty() &&	// Check outside
+			m_board.get(dIndex, rIndex + 1, cIndex).isEmpty() &&	// Check down
+			m_board.get(dIndex, rIndex, cIndex + 1).isEmpty();		// Check right
 	}
 	break;
 	default:;

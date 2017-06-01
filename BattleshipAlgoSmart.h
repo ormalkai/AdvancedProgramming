@@ -136,7 +136,7 @@ class BattleshipAlgoSmart : public IBattleshipGameAlgo
 		}
 	};
 private:
-	int m_id;				// unique identifier of the player (PlayerA/PlayerB)
+	int		m_id;			// unique identifier of the player (PlayerA/PlayerB)
 	int		m_rows;			// number of rows in the board
 	int		m_cols;			// number of columns in the board
 	int		m_depth;		// depth level of the board
@@ -186,7 +186,7 @@ private:
 	* @Details		get vector of all cells of sunk ship by given cell is part of the ship
 	* @Param		cell - given cell in the sunk ship
 	*/
-	vector<Cell*> getSunkShipByCell(Cell*const c) const;
+	vector<Cell*> getSunkShipByCell(Cell* const c) const;
 
 	/**
 	* @Details		This function update the hist value only for the relevant cells by given ship as vector of cells
@@ -215,7 +215,7 @@ private:
 	* @Param		i - row index
 	* @Param		j - col index
 	*/
-	void calcHist(int i, int j);
+	void calcHist(Coordinate c);
 
 	/**
 	* @Details		Check if all neighbors of given cell except the neighbor in the direction d, are lagal.
@@ -242,7 +242,7 @@ public:
 	/**
 	* @Details		Constructor receives id of the player
 	*/
-	BattleshipAlgoSmart() = default;
+	BattleshipAlgoSmart(): m_id(-1), m_rows(-1), m_cols(-1), m_depth(-1), m_currentStatus(HUNT){}
 
 	/**
 	* @Details		Default destructor

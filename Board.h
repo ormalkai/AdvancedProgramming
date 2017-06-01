@@ -52,14 +52,14 @@ public:
 	* @Param		c - requested cell's col index
 	* @return		ref of cell in row r and col c
 	*/
-	const Cell& get(int d, int r, int c) const { return  m_boardData[d][r][c]; }
+	Cell& get(int d, int r, int c) const { return  const_cast<Cell&>(m_boardData[d][r][c]); }
 
 	/**
 	* @Details		Receive pair of row and col indexes and returns reference for the cell in the board
 	* @Param		i - requested cell's indexes
 	* @return		ref of cell in row r and col c
 	*/
-	const Cell& get(tuple<int, int, int> i) const { return get(std::get<0>(i), std::get<1>(i), std::get<2>(i)); }
+	Cell& get(tuple<int, int, int> i) const { return get(std::get<0>(i), std::get<1>(i), std::get<2>(i)); }
 
 	/**
 	* @Details		Returns num of rows in the board (int)
@@ -105,7 +105,9 @@ public:
 	*/
 	char** Board::toCharMat(PlayerIndex playerId) const;
 
-	void buildBoard(vector<vector<vector<char>>> initBoard);
+	void buildBoard(vector<vector<vector<char>>>& initBoard);
+
+	void buildBoard(const BoardData& initBoard);
 	
 	/**
 	* @Details		receive cell's coords and returns sign of requested cell
@@ -129,9 +131,9 @@ public:
 	* @Param		r - cell's row index
 	* @Param		c - cell's col index
 	*/
-	bool isValidCell(int i, int j) const
+	bool isValidCell(int d, int i, int j) const
 	{
-		return (i >= 1 && i <= m_rows && j >= 1 && j <= m_cols);
+		return (d >= 1 && d <= m_depth && i >= 1 && i <= m_rows && j >= 1 && j <= m_cols);
 	}
 
 	/**
@@ -154,7 +156,7 @@ public:
 	* @Param		c - cell's col index
 	* @return		cell's pointer
 	*/
-	Cell* getCellPointer(int d, int r, int c) { return  &(m_boardData[d][r][c]); }
+	Cell* getCellPointer(int d, int r, int c) const { return  const_cast<Cell*>(&(m_boardData[d][r][c])); }
 
 	/**
 	* @Details		This function prints the histogram - value of each cell, for debug and future porposes

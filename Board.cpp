@@ -12,7 +12,30 @@
 #define INC_DEPTH(DIR, DEP, OFFSET) (((ShipDirection::DEPTH) == (DIR)) ? ((DEP) + (OFFSET)) : (DEP))
 
 
-void Board::buildBoard(vector<vector<vector<char>>> initBoard)
+void Board::buildBoard(const BoardData& initBoard)
+{
+	int initDepthSize = initBoard.depth() + BOARD_PADDING;
+	int initRowSize = initBoard.rows() + BOARD_PADDING;
+	int initColSize = initBoard.cols() + BOARD_PADDING;
+
+	vector<vector<vector<char>>> copyBoard;
+	for (int d = 0; d < initDepthSize; d++)
+	{
+		vector<vector<Cell>> depth;
+		for (int i = 0; i < initRowSize; i++)
+		{
+			vector<Cell> col;
+			for (int j = 0; j < initColSize; j++)
+			{
+				copyBoard[d][i].emplace_back();
+			}
+		}
+	}
+
+	buildBoard(copyBoard);
+}
+
+void Board::buildBoard(vector<vector<vector<char>>>& initBoard)
 {
 	m_depth = static_cast<int>(initBoard.size());
 	m_rows = static_cast<int>(initBoard[0].size());
@@ -23,17 +46,17 @@ void Board::buildBoard(vector<vector<vector<char>>> initBoard)
 	int initColSize = m_cols + BOARD_PADDING;
 	// for each depth:
 	//		create matrix
-	for (int i = 0; i, initDepthSize; i++)
+	for (int d = 0; d, initDepthSize; d++)
 	{
 		vector<vector<Cell>> depth;
 		m_boardData.push_back(depth);
-		for (int j = 0; j<initRowSize; j++)
+		for (int i = 0; i<initRowSize; i++)
 		{
 			vector<Cell> col;
-			m_boardData[j].push_back(col);
-			for (int k = 0; k<initColSize; k++)
+			m_boardData[i].push_back(col);
+			for (int j = 0; j<initColSize; j++)
 			{
-				m_boardData[j][k].emplace_back();
+				m_boardData[d][i].emplace_back();
 			}
 		}
 	}

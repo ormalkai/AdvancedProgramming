@@ -27,7 +27,7 @@
 #define DEFAULT_IS_QUIET_MODE (false)
 #define DEFAULT_DELAY_ATTACK (2000)
 #define MAX_SHIP_LEN (4)
-#define NUM_OF_DIRECTIONS (4)
+#define NUM_OF_DIRECTIONS (6)
 
 using namespace std;
 
@@ -72,6 +72,8 @@ enum class ShipDirection
 
 enum class Direction
 {
+	INSIDE,
+	OUTSIDE,
 	UP,
 	DOWN,
 	RIGHT,
