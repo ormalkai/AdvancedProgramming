@@ -97,9 +97,6 @@ ReturnCode Game::init(const vector<vector<vector<char>>> board, IBattleshipGameA
 	// now the board is valid lets build our board
 	m_board.buildBoard(board);
 	
-	// Init player A
-	
-
 	Board boardA, boardB;
 	ReturnCode rc = m_board.splitToPlayersBoards(boardA, boardB);
 	if (RC_SUCCESS != rc)
@@ -107,11 +104,13 @@ ReturnCode Game::init(const vector<vector<vector<char>>> board, IBattleshipGameA
 		return RC_ERROR;
 	}
 
+	// Init player A
 	m_players[PLAYER_A] = algoA;
 	m_players[PLAYER_A]->setBoard(boardA);
 	m_players[PLAYER_A]->setPlayer(PLAYER_A);
 	
-	m_players[PLAYER_A] = algoB;
+	// Init player B
+	m_players[PLAYER_B] = algoB;
 	m_players[PLAYER_B]->setBoard(boardB);
 	m_players[PLAYER_B]->setPlayer(PLAYER_B);
 	
@@ -168,7 +167,7 @@ void Game::startGame()
 			proceedToNextPlayer();
 			continue;
 		case ARC_ERROR:
-			DBG(Debug::DBG_INFO, "Attack failed ! values: %d-%d. Skipping.. arc[%d]", attackReq.first, attackReq.second, arc);
+			DBG(Debug::DBG_INFO, "Attack failed ! values: %d-%d-%d. Skipping.. arc[%d]", attackReq.depth, attackReq.row, attackReq.col, arc);
 			break;
 		default:
 			break;

@@ -78,7 +78,7 @@ private:
 	 * @param		req - curren attacks
 	 * @return		ARC_FINISH_REQ if no attack, ARC_ERROR if attack is illegal, ARC_SUCCESS otherwise
 	 */
-	AttackRequestCode Game::requestAttack(Coordinate& req)
+	AttackRequestCode requestAttack(Coordinate& req);
 
 	/**
 	 * @Details		proceed To Next Player after attack

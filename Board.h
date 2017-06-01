@@ -54,7 +54,7 @@ public:
 	*/
 	Cell& get(int d, int r, int c) const { return  const_cast<Cell&>(m_boardData[d][r][c]); }
 
-	const Cell& get(Coordinate coord) const { return  m_boardData[coord.depth][coord.row][coord.col]; }
+	Cell& get(Coordinate coord) const { return  get(coord.depth, coord.row, coord.col); }
 
 	/**
 	* @Details		Receive pair of row and col indexes and returns reference for the cell in the board
@@ -105,9 +105,7 @@ public:
 	* @Details		revieves player index and returns player's board as matrix of chars
 	* @Param		playerId - player's index
 	*/
-	char** Board::getPlayerBoard(PlayerIndex playerId) const;
-
-	void buildBoard(vector<vector<vector<char>>>& initBoard);
+	void buildBoard(const vector<vector<vector<char>>>& initBoard);
 
 	void buildBoard(const BoardData& initBoard);
 	

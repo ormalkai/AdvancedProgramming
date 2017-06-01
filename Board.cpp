@@ -21,6 +21,31 @@ void Board::buildBoard(const BoardData& initBoard)
 	vector<vector<vector<char>>> copyBoard;
 	for (int d = 0; d < initDepthSize; d++)
 	{
+		vector<vector<char>> depth;
+		for (int i = 0; i < initRowSize; i++)
+		{
+			vector<char> col;
+			for (int j = 0; j < initColSize; j++)
+			{
+				copyBoard[d][i].push_back(initBoard.charAt(Coordinate(i,j,d)));
+			}
+		}
+	}
+
+	buildBoard(copyBoard);
+}
+
+
+void Board::buildBoard(const vector<vector<vector<Cell>>>& initBoard)
+{
+
+	int initDepthSize	= initBoard.size();
+	int initRowSize		= initBoard[0].size();
+	int initColSize		= initBoard[0][0].size();
+
+	vector<vector<vector<char>>> copyBoard;
+	for (int d = 0; d < initDepthSize; d++)
+	{
 		vector<vector<Cell>> depth;
 		for (int i = 0; i < initRowSize; i++)
 		{
@@ -35,7 +60,7 @@ void Board::buildBoard(const BoardData& initBoard)
 	buildBoard(copyBoard);
 }
 
-void Board::buildBoard(vector<vector<vector<char>>>& initBoard)
+void Board::buildBoard(const vector<vector<vector<char>>>& initBoard)
 {
 	m_depth = static_cast<int>(initBoard.size());
 	m_rows = static_cast<int>(initBoard[0].size());
@@ -143,8 +168,8 @@ ReturnCode Board::splitToPlayersBoards(Board& boardA, Board& boardB)
 				{
 				case PLAYER_A:
 				{
-					dataA[d][r][c] = cell;
-					dataB[d][r][c].clear();
+					dataA[d][r][c] = sign;
+					dataB[d][r][c] = SPACE;
 				} break;
 
 				case PLAYER_B:
@@ -153,6 +178,7 @@ ReturnCode Board::splitToPlayersBoards(Board& boardA, Board& boardB)
 					dataB[d][r][c] = cell;
 				} break;
 
+				case MAX_PLAYER:
 				default:
 				{
 					dataA[d][r][c].clear();
