@@ -7,55 +7,90 @@
 #include "Utils.h"
 #include "ShipFactory.h"
 
-#define INC_ROW(IS_VERTICAL, ROW, OFFSET) (((true) == (IS_VERTICAL)) ? ((ROW) + (OFFSET)) : (ROW))
-#define INC_COL(IS_VERTICAL, COL, OFFSET) (((false) == (IS_VERTICAL)) ? ((COL) + (OFFSET)) : (COL))
+#define INC_ROW(DIR, ROW, OFFSET) (((ShipDirection::VERTICAL) == (DIR)) ? ((ROW) + (OFFSET)) : (ROW))
+#define INC_COL(DIR, COL, OFFSET) (((ShipDirection::HORIZONTAL) == (DIR)) ? ((COL) + (OFFSET)) : (COL))
+#define INC_DEPTH(DIR, DEP, OFFSET) (((ShipDirection::DEPTH) == (DIR)) ? ((DEP) + (OFFSET)) : (DEP))
 
 
-void Board::buildBoard(const char ** initBoard, int numRows, int numCols)
+void Board::buildBoard3D(vector<vector<vector<char>>> initBoard)
 {
-	m_rows = numRows;
-	m_cols = numCols;
+	m_depth = static_cast<int>(initBoard.size());
+	m_rows = static_cast<int>(initBoard[0].size());
+	m_cols = static_cast<int>(initBoard[0][0].size());
 
+	int initDepthSize = m_depth + BOARD_PADDING;
 	int initRowSize = m_rows + BOARD_PADDING;
 	int initColSize = m_cols + BOARD_PADDING;
-	m_boardData = new Cell*[initRowSize];
-	for (int i = 0; i < initRowSize; ++i)
+	// for each depth:
+	//		create matrix
+	for (int i = 0; i, initDepthSize; i++)
 	{
-		m_boardData[i] = new Cell[initColSize];
+		vector<vector<Cell>> depth;
+		m_boardData.push_back(depth);
+		for (int j = 0; j<initRowSize; j++)
+		{
+			vector<Cell> col;
+			m_boardData[j].push_back(col);
+			for (int k = 0; k<initColSize; k++)
+			{
+				m_boardData[j][k].emplace_back();
+			}
+		}
 	}
 
-	for (int i = 0; i < initRowSize; i++)
+	for (int d = 0; d < initDepthSize; d++)
 	{
-		for (int j = 0; j < initColSize; j++)
+		for (int i = 0; i < initRowSize; i++)
 		{
-			m_boardData[i][j].setStatus(Cell::FREE);
-			m_boardData[i][j].setIndexes(i, j);
+			for (int j = 0; j < initColSize; j++)
+			{
+				m_boardData[d][i][j].setStatus(Cell::FREE);
+				m_boardData[d][i][j].setIndexes(d, i, j);
+			}
 		}
 	}
 
 	// scan from top left to right and bottom
 	// if my upper and left cells are empty I'm new ship
-	for (int i = 1; i <= m_rows; i++)
+	for (int d = 1; d <= m_depth; d++)
 	{
-		for (int j = 1; j <= m_cols; j++)
+		for (int i = 1; i <= m_rows; i++)
 		{
-			
-			// check if the is the start of ship
-			if (SPACE != initBoard[i][j] && SPACE == initBoard[i - 1][j] && SPACE == initBoard[i][j - 1])
+			for (int j = 1; j <= m_cols; j++)
 			{
-				// create the ship
-				Ship* ship = ShipFactory::instance().create(i, j, initBoard);
-				m_shipsOnBoard.push_back(ship);
-				// init ship in relevant cells and cells in the ship
-				int shipLen = Utils::getShipLen(initBoard[i][j]);
-				bool isVertical = initBoard[i][j] == initBoard[i + 1][j];
-				for (int k = 0; k < shipLen; k++)
+
+				// check if the is the start of ship
+				if (SPACE != initBoard[d][i][j] && 
+					SPACE == initBoard[d][i - 1][j] &&
+					SPACE == initBoard[d][i][j - 1] &&
+					SPACE == initBoard[d - 1][i][j])
 				{
-					int row = INC_ROW(isVertical, i, k);
-					int col = INC_COL(isVertical, j, k);
-					m_boardData[row][col].setShip(ship);
-					m_boardData[row][col].setStatus(Cell::ALIVE);
-					ship->addCell(&(m_boardData[row][col]));
+					// create the ship
+					Ship* ship = ShipFactory::instance().create(initBoard[d][i][j]);
+					m_shipsOnBoard.push_back(ship);
+					// init ship in relevant cells and cells in the ship
+					int shipLen = Utils::getShipLen(initBoard[d][i][j]);
+
+
+					// get ship direction 
+					ShipDirection dir;
+					if (initBoard[d][i][j] == initBoard[d][i + 1][j])
+						dir = ShipDirection::VERTICAL;
+					else if (initBoard[d][i][j] == initBoard[d][i][j + 1])
+						dir = ShipDirection::HORIZONTAL;
+					else /* initBoard[d][i][j] == initBoard[d + 1][i][j ] */
+						dir = ShipDirection::DEPTH;
+
+					for (int k = 0; k < shipLen; k++)
+					{
+						int depth = INC_DEPTH(dir, d, k);
+						int row = INC_ROW(dir, i, k);
+						int col = INC_COL(dir, j, k);
+						m_boardData[depth][row][col].setShip(ship);
+						m_boardData[depth][row][col].setStatus(Cell::ALIVE);
+						// TODO ORM not sure that this is working
+						ship->addCell(&(m_boardData[depth][row][col]));
+					}
 				}
 			}
 		}
@@ -63,30 +98,30 @@ void Board::buildBoard(const char ** initBoard, int numRows, int numCols)
 }
 
 
-char** Board::toCharMat(PlayerIndex playerId) const
+//char** Board::toCharMat(PlayerIndex playerId) const
+//{
+//	char** ret = new char*[m_rows];
+//
+//	for (int i = 0; i < m_rows; i++)
+//	{
+//		ret[i] = new char[m_cols];
+//
+//		for (int j = 0; j < m_cols; j++)
+//		{
+//			char c = m_boardData[i+1][j+1].getSign();
+//			if (SPACE != c && (Utils::getPlayerIdByShip(c) != playerId))
+//				c = SPACE;
+//
+//			ret[i][j] = c;
+//		}
+//	}
+//
+//	return ret;
+//}
+
+char Board::getSign(int d, int r, int c) const
 {
-	char** ret = new char*[m_rows];
-
-	for (int i = 0; i < m_rows; i++)
-	{
-		ret[i] = new char[m_cols];
-
-		for (int j = 0; j < m_cols; j++)
-		{
-			char c = m_boardData[i+1][j+1].getSign();
-			if (SPACE != c && (Utils::getPlayerIdByShip(c) != playerId))
-				c = SPACE;
-
-			ret[i][j] = c;
-		}
-	}
-
-	return ret;
-}
-
-char Board::getSign(int r, int c) const
-{
-	return get(r, c).getSign();
+	return get(d, r, c).getSign();
 }
 
 void Board::addDummyNewShipToBoard(const vector<Cell*>& shipCells)
@@ -111,16 +146,6 @@ Board::~Board()
 	{
 		delete (*it);
 	}
-
-	if (nullptr != m_boardData)
-	{
-		int initRowSize = m_rows + BOARD_PADDING;
-		for (int i = 0; i < initRowSize; ++i)
-		{
-			delete[] m_boardData[i];
-		}
-		delete[] m_boardData;
-	}
 }
 
 void Board::printBoard() const
@@ -130,67 +155,75 @@ void Board::printBoard() const
 	{
 		return;
 	}
+	int initDepthSize = m_depth + BOARD_PADDING;
 	int initRowSize = m_rows + BOARD_PADDING;
 	int initColSize = m_cols + BOARD_PADDING;
-	for (int i = 0; i < initRowSize; ++i)
+	for (int d = 0; d < initDepthSize; ++d)
 	{
-		for (int j = 0; j < initColSize; ++j)
+		for (int i = 0; i < initRowSize; ++i)
 		{
-			Utils::gotoxy(i, j*3);
-			if (SPACE == m_boardData[i][j].getSign())
+			for (int j = 0; j < initColSize; ++j)
 			{
-				Utils::setTextColor(BACKGROUND_BLUE | BACKGROUND_RED | BACKGROUND_GREEN);
-				if (0 == i && j >= 1 && j <= m_cols)
+				Utils::gotoxy(i, j * 3);
+				if (SPACE == m_boardData[d][i][j].getSign())
 				{
-					if (m_cols == j)
-						cout << j << " ";
+					Utils::setTextColor(BACKGROUND_BLUE | BACKGROUND_RED | BACKGROUND_GREEN);
+					if (0 == i && j >= 1 && j <= m_cols)
+					{
+						if (m_cols == j)
+							cout << j << " ";
+						else
+							cout << j << "  ";
+					}
+					else if (0 == j && i >= 1 && i <= m_cols)
+					{
+						if (m_rows == i)
+							cout << i << " ";
+						else
+							cout << i << "  ";
+					}
 					else
-						cout << j << "  ";
-				}
-				else if (0 == j && i >= 1 && i <= m_cols)
-				{
-					if (m_rows == i)
-						cout << i << " ";
-					else
-						cout << i << "  ";
+						cout << "   ";
 				}
 				else
-					cout << "   ";
+				{
+					Utils::setTextColor(m_boardData[d][i][j].getShip()->getColor());
+					cout << m_boardData[d][i][j].getSign() << "  ";
+				}
 			}
-			else
-			{
-				Utils::setTextColor(m_boardData[i][j].getShip()->getColor());
-				cout <<  m_boardData[i][j].getSign() << "  ";
-			}
+			cout << endl;
 		}
-		cout << endl;
+		cout << endl << endl;
 	}
+	
 }
 
-void Board::printHist() const
+void Board::printHist()
 {
 	static int k = 1;
-	Utils::gotoxy(13, 0);
-	/*if (k++ % 2 == 0)
+	if (k++ % 2 == 0)
 		Utils::gotoxy(13,0);
 	else
-		Utils::gotoxy(27, 0);*/
-
-	for (int i = 1; i <= m_rows; ++i)
+		Utils::gotoxy(27, 0);
+	for (int d = 0; d < m_depth; ++d)
 	{
-		for (int j = 1; j <= m_cols; ++j)
+		for (int i = 1; i <= m_rows; ++i)
 		{
+			for (int j = 1; j <= m_cols; ++j)
+			{
 
-			Cell* c = getCellPointer(i, j);
-			int h = c->getHistValue();
-			
-			printf("%2d ", h);
+				Cell* c = getCellPointer(d, i, j);
+				int h = c->getHistValue();
+
+				printf("%2d ", h);
+			}
+			cout << endl;
 		}
-		cout << endl;
+		cout << endl << endl;
 	}
 }
 
-void Board::printAttack(int player, int i, int j, AttackResult attackResult) const
+void Board::printAttack(int player, int d, int i, int j, AttackResult attackResult) const
 {
 	if (true == m_isQuiet)
 	{
@@ -207,30 +240,22 @@ void Board::printAttack(int player, int i, int j, AttackResult attackResult) con
 			cout << "&  ";
 		Sleep(100);
 		Utils::gotoxy(i, j * 3);
-		cout << m_boardData[i][j].getSign();
+		cout << m_boardData[d][i][j].getSign();
 		Sleep(100);
 	}
-	int cellOwner = m_boardData[i][j].getPlayerIndexOwner();
 	switch (attackResult)
 	{
 	case (AttackResult::Hit):
 	case (AttackResult::Sink):
 		Utils::gotoxy(i, j * 3);
-		if (PLAYER_A == cellOwner)
+		if (player == PLAYER_A)
 			cout << "*  ";
 		else
 			cout << "#  ";
 		break;
 	case (AttackResult::Miss):
 		Utils::gotoxy(i, j * 3);
-		if (m_boardData[i][j].getSign() == SPACE)
-		{
-			cout << SPACE;
-		}
-		else
-		{
-			cout << (PLAYER_A == cellOwner ? "*  " : "#  ");
-		}
+		cout << SPACE;
 		break;
 	}
 	Sleep(m_delay);

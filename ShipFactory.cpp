@@ -11,9 +11,8 @@ ShipFactory& ShipFactory::instance()
 	return  instance;
 }
 
-Ship* ShipFactory::create(int i, int j, const char ** initBoard) const
+Ship* ShipFactory::create(char ship) const
 {
-	char ship = initBoard[i][j];
 	int shipLen = Utils::getShipLen(ship);
 	int shipValue = Utils::getShipValue(ship);
 	_In_ WORD shipColor = Utils::getShipColor(ship);

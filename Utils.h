@@ -4,6 +4,7 @@
 #include <windows.h>
 
 #define NUM_OF_PLAYERS (2)
+#define BOARD_DEPTH_SIZE (10)
 #define BOARD_ROW_SIZE (10)
 #define BOARD_COL_SIZE (10)
 #define BOARD_PADDING (2)
@@ -65,6 +66,7 @@ enum class ShipDirection
 {
 	VERTICAL,
 	HORIZONTAL,
+	DEPTH,
 	ALL
 };
 

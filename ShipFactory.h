@@ -19,7 +19,7 @@ public:
 	 * @param		j - column in initBoard
 	 * @param		initBoard - as recievd in input
 	 */
-	Ship* create(int i, int j, const char ** initBoard) const;
+	Ship* create(char ship) const;
 
 	/**
 	* @Details		create dummy ship by given vector cells

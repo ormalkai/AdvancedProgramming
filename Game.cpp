@@ -10,8 +10,6 @@
 #include "BattleshipAlgoFromFile.h"
 #include <codecvt>
 
-#define SHIPS_PER_PLAYER (5)
-
 using namespace std;
 
 Game::Game(int rows, int cols) : m_rows(rows), m_cols(cols),
@@ -34,159 +32,18 @@ Game::~Game()
 	}
 }
 
-bool Game::checkWrongSizeOrShape() const
+ReturnCode Game::initSboardFilePath(const string& filesPath, string& sboardFilePath)
 {
-	bool result = true;
-	for (int i = 0; i < PlayerIndex::MAX_PLAYER; i++)
+	vector<string> sboardFiles;
+	// load sboard file
+	auto rc = Utils::getListOfFilesInDirectoryBySuffix(filesPath, "sboard", sboardFiles, true);
+	// ERROR means that the path exists but there is no file
+	if (RC_ERROR == rc)
 	{
-		char player = Utils::getPlayerCharByIndex(i);
-		for (int j = 0; j < ShipType::MAX_SHIP; j++)
-		{
-			if (true == m_wrongSizeOrShapePerPlayer[i][j])
-			{
-				char ship = Utils::getShipByIndexAndPlayer(j, i);
-				cout << "Wrong size or shape for ship " << ship << " for player " << player << endl;
-				result = false;
-			}
-		}
+		cout << "Missing board file (*.sboard) looking in path: " << filesPath << endl;
+		return rc;
 	}
-	return result;
-}
-
-bool Game::checkNumberOfShips() const
-{
-	bool result = true;
-	for (int i = 0; i < PlayerIndex::MAX_PLAYER; i++)
-	{
-		char player = Utils::getPlayerCharByIndex(i);
-		if (SHIPS_PER_PLAYER < m_numOfShipsPerPlayer[i])
-		{
-			cout << "Too many ships for player " << player << endl;
-			result = false;
-		}
-		else if (SHIPS_PER_PLAYER > m_numOfShipsPerPlayer[i])
-		{
-			cout << "Too few ships for player " << player << endl;
-			result = false;
-		}
-	}
-	return result;
-}
-
-bool Game::checkAdjacentShips() const
-{
-	bool result = true;
-	if (true == m_foundAdjacentShips)
-	{
-		cout << "Adjacent Ships on Board" << endl;
-		result = false;
-	}
-	return result;
-}
-
-bool Game::checkErrors() const
-{
-	bool result = true;
-	// Wrong size or shape for ship errors
-
-	result = checkWrongSizeOrShape() && result;
-	// Too many/few ships for player errors
-
-	result = checkNumberOfShips() && result;
-	// Adjacent Ships on board error
-
-	result = checkAdjacentShips() && result;
-	return result;
-}
-
-void Game::validateBoard(const char** initBoard)
-{
-	// for each char
-	for (int i = 1; i <= m_rows; ++i)
-	{
-		for (int j = 1; j <= m_cols; ++j)
-		{
-			if (SPACE == initBoard[i][j])
-			{
-				// ignore spaces
-				continue;
-			}
-			char currentShip = initBoard[i][j];
-			int horizontalShipLen = getShipLength(initBoard, currentShip, i, j, ShipDirection::HORIZONTAL);
-			int verticalShipLen = getShipLength(initBoard, currentShip, i, j, ShipDirection::VERTICAL);
-			int expectedLen = Utils::getShipLen(currentShip);
-
-			PlayerIndex playerIndex = Utils::getPlayerIdByShip(currentShip);
-			int shipIndex = Utils::getIndexByShip(currentShip);
-			if (((expectedLen != horizontalShipLen) || (expectedLen == horizontalShipLen && 1 != verticalShipLen)) &&
-				((expectedLen != verticalShipLen)   || (expectedLen == verticalShipLen && 1 != horizontalShipLen)))
-			{
-				// ERROR - wrong size or shape for currentShip(player too)
-				m_wrongSizeOrShapePerPlayer[playerIndex][shipIndex] = true;
-			}
-			else
-			{
-				// we need to count every ship only once.
-				// therefore any ship can be represented by its first char, direction and length
-				// hence we need to check the cell left and the cell up if one of them is like me
-				// that means that we have already counted that ship, otherwise this is a new ship
-				if (currentShip != initBoard[i-1][j] && currentShip != initBoard[i][j-1])
-				{
-					m_numOfShipsPerPlayer[playerIndex]++;
-				}
-			}
-			
-
-			//check Adjacency
-			if (false == Game::isAdjacencyValid(initBoard, i, j))
-			{
-				// ERROR Adjacency
-				m_foundAdjacentShips = true;
-			}
-		}
-	}
-}
-
-ReturnCode Game::readSBoardFile(const string filePath, char** const initBoard) const
-{
-	ifstream sboard(filePath);
-	if (!sboard.is_open())
-	{
-		DBG(Debug::DBG_ERROR, "Could not open board file: %s", filePath);
-		return RC_ERROR;
-	}
-	string line;
-
-	// Read board size (ROWxCOLxDEP)
-	Utils::safeGetline(sboard, line);
-
-	int rows, cols, depth;
-
-	if (3 == std::sscanf(s, ":%dx%dx%d", &rows, &cols, &depth))
-	{
-	cin >> rows >> "x" >> cols >> "x" >> depth;
-
-	int rowIndex = 1;
-	// Line by line up to 10 line and up to 10 chars per line
-	while (Utils::safeGetline(sboard, line) && rowIndex <= m_rows)
-	{
-		int colIndex = 1;
-		for (std::string::size_type i = 0; i < line.size() && colIndex <= 10; i++)
-		{
-			char c = line[i];
-			// If not allowed chars skip, otherwise insert it to board
-			if (PlayerIndex::MAX_PLAYER != Utils::getPlayerIdByShip(c))
-			{
-				initBoard[rowIndex][colIndex] = c;
-			}
-			// parse nex char
-			colIndex++;
-		}
-		// parse next line
-		rowIndex++;
-	}
-	// close sboard file
-	sboard.close();
+	sboardFilePath = sboardFiles[0];
 
 	return RC_SUCCESS;
 }
@@ -209,166 +66,7 @@ ReturnCode Game::getSboardFileNameFromDirectory(const string filesPath, string& 
 	return RC_SUCCESS;
 }
 
-/**
- * @Details		parses sboard file and initializes the game board
- * @Param		sboardFileName		- path to sboard file
- * @Param		initBoard			- 2d array for initialize game board
- * @Return		ReturnCode
- */
-ReturnCode Game::parseBoardFile(const string sboardFileName, char** initBoard)
-{
-	// Init board file with spaces
-	for (int i = 0; i < m_board.rows() + BOARD_PADDING; ++i)
-	{
-		for (int j = 0; j < m_cols + BOARD_PADDING; ++j)
-		{
-			initBoard[i][j] = SPACE;
-		}
-	}
-	// Read from file 
-	ReturnCode result = readSBoardFile(sboardFileName, initBoard);
-	if (RC_SUCCESS != result)
-	{
-		return result;
-	}
 
-	// input validation
-	validateBoard(const_cast<const char**>(initBoard));
-	// Print errors and return ERROR if needed
-	if (false == checkErrors())
-	{
-		result = RC_ERROR;
-	}
-	return result;
-}
-
-/**
- * @Details		Receives init board and specific cell,
- *				verifies that there no overlapped ships
- * @Param		initBoard		- board contains only legal ships characters and spaces
- * @Param		i				- row of the cell to test
- * @Param		j				- column of the cell to test
- */
-bool Game::isAdjacencyValid(const char** initBoard, int i/*row*/, int j/*col*/)
-{
-	char expectedShip = initBoard[i][j];
-	if (SPACE == expectedShip)
-	{
-		return true;
-	}
-	// neighbors can be like me or spaces only!
-	if ((SPACE != initBoard[i + 1][j] && expectedShip != initBoard[i + 1][j]) ||
-		(SPACE != initBoard[i - 1][j] && expectedShip != initBoard[i - 1][j]) ||
-		(SPACE != initBoard[i][j + 1] && expectedShip != initBoard[i][j + 1]) ||
-		(SPACE != initBoard[i][j - 1] && expectedShip != initBoard[i][j - 1]))
-	{
-		return false;
-	}
-
-	return true;
-}
-
-int Game::getShipLengthHorizontal(const char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction)
-{
-	// stop condition
-	if (expectedShip != initBoard[i][j])
-	{
-		return 0;
-	}
-	if (ShipLengthSecondDirection::FORWARD == direction)
-	{
-		return (1 + Game::getShipLengthHorizontal(initBoard, expectedShip, i, j + 1, direction));
-	}
-	else /*GetShipLengthDirection::BACKWORD == direction*/
-	{
-		return (1 + Game::getShipLengthHorizontal(initBoard, expectedShip, i, j - 1, direction));
-	}
-}
-
-int Game::getShipLengthVertical(const char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction)
-{
-	// stop condition
-	if (expectedShip != initBoard[i][j])
-	{
-		return 0;
-	}
-	if (ShipLengthSecondDirection::FORWARD == direction)
-	{
-		return (1 + Game::getShipLengthVertical(initBoard, expectedShip, i + 1, j, direction));
-	}
-	else /*GetShipLengthDirection::BACKWORD == direction*/
-	{
-		return (1 + Game::getShipLengthVertical(initBoard, expectedShip, i - 1, j, direction));
-	}
-}
-
-/**
- * @Details		This is a recursive function which calculates the largest sequence of chars
- *				in specific dimmension, basically this is the length of the ship in the dimension.
- * @Param		initBoard		- board contains only legal ships characters and spaces
- * @Param		expectedShip	- the char of the ship to calculate (for stop condition)
- * @Param		i				- row of the cell to test
- * @Param		j				- column of the cell to test
- * @Param		direction		- direction to calculate in current flow
- */
-int Game::getShipLength(const char** initBoard, char expectedShip, int i/*row*/, int j/*col*/, ShipDirection direction)
-{
-	// sanity
-	if (expectedShip != initBoard[i][j])
-	{
-		return 0;
-	}
-
-	if (ShipDirection::HORIZONTAL == direction)
-	{
-		return (1 + getShipLengthHorizontal(initBoard, expectedShip, i, j - 1, ShipLengthSecondDirection::BACKWORD) +
-			Game::getShipLengthHorizontal(initBoard, expectedShip, i, j + 1, ShipLengthSecondDirection::FORWARD));
-
-
-	}
-	else /*GetShipLengthDirection::VERTICAL == direction*/
-	{
-		return (1 + Game::getShipLengthVertical(initBoard, expectedShip, i - 1, j, ShipLengthSecondDirection::BACKWORD) +
-			Game::getShipLengthVertical(initBoard, expectedShip, i + 1, j, ShipLengthSecondDirection::FORWARD));
-
-
-	}
-}
-
-void Game::initErrorDataStructures()
-{
-	vector<bool> wrongSizeOrShapePerPlayer;
-	for (int j = 0; j < ShipType::MAX_SHIP; j++)
-	{
-		wrongSizeOrShapePerPlayer.push_back(false);
-	}
-	for (int i = 0; i < PlayerIndex::MAX_PLAYER; i++)
-	{
-		m_numOfShipsPerPlayer.push_back(0);
-		m_wrongSizeOrShapePerPlayer.push_back(wrongSizeOrShapePerPlayer);
-	}
-	m_foundAdjacentShips = false;
-}
-
-
-ReturnCode Game::initSboardFilePath(const string& filesPath, string& sboardFile)
-{
-	vector<string> sboardFiles;
-	// load sboard file
-	auto rc = Utils::getListOfFilesInDirectoryBySuffix(filesPath, "sboard", sboardFiles, true);
-	if (RC_INVALID_ARG == rc)
-		return rc;
-	
-	// ERROR means that the path exists but there is no file
-	if (RC_ERROR == rc)
-	{
-		cout << "Missing board file (*.sboard) looking in path: " << filesPath << endl;
-		return rc;
-	}
-	sboardFile = sboardFiles[0];
-
-	return RC_SUCCESS;
-}
 
 ReturnCode Game::initDLLFilesPath(const string& filesPath, vector<string>& dllPerPlayer)
 {
@@ -430,7 +128,7 @@ ReturnCode Game::init(const string filesPath, bool isQuiet, int delay)
 	}
 
 	// Load algorithms from DLL
-	ReturnCode DLLRc = initDLLFilesPath(filesPath,dllPaths);
+	ReturnCode DLLRc = loadAllAlgoFromDLLs(dllPaths);
 	if (RC_SUCCESS != DLLRc || RC_SUCCESS != sboardRc)
 	{
 		if (isInitBoardInitialized)
@@ -444,13 +142,6 @@ ReturnCode Game::init(const string filesPath, bool isQuiet, int delay)
 		return RC_ERROR;
 	}
 	
-	// Load algorithms from DLL
-	auto rc = loadAllAlgoFromDLLs(dllPaths);
-	if (RC_SUCCESS != rc)
-	{
-		return rc;
-	}
-
 	// now the board is valid lets build our board
 	m_board.buildBoard(const_cast<const char**>(initBoard), m_rows, m_cols);
 	// initBoard is no longer relevant lets delete it
@@ -484,6 +175,9 @@ ReturnCode Game::init(const string filesPath, bool isQuiet, int delay)
 		return RC_ERROR;
 	}
 	
+	Utils::gotoxy(20, 0);
+	cout << "PlayerA algo: " << dllPaths[PLAYER_A].substr(dllPaths[PLAYER_A].find_last_of("\\") + 1) << endl;
+	cout << "PlayerB algo: " << dllPaths[PLAYER_B].substr(dllPaths[PLAYER_B].find_last_of("\\") + 1) << endl;
 	return RC_SUCCESS;
 }
 

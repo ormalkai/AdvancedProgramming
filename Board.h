@@ -9,12 +9,14 @@ using std::vector;
 class Board
 {
 private:
-	Cell**			m_boardData;	// The board is matrix of Cells
-	vector<Ship*>	m_shipsOnBoard;	// Pointer to every ship on the board
-	int				m_rows;			// Number of rows in the board
-	int				m_cols;			// Number of columns in the board
-	bool			m_isQuiet;		// Is quiet run, for print simulation game
-	int				m_delay;		// delay between every attack in game simulation
+	//Cell**			m_boardData;	// The board is matrix of Cells
+	vector<vector<vector<Cell>>>	m_boardData;	// The board is matrix of Cells
+	vector<Ship*>					m_shipsOnBoard;	// Pointer to every ship on the board
+	int								m_depth;		// Number of matrixes in depth
+	int								m_rows;			// Number of rows in the board
+	int								m_cols;			// Number of columns in the board
+	bool							m_isQuiet;		// Is quiet run, for print simulation game
+	int								m_delay;		// delay between every attack in game simulation
 
 public:
 	/**
@@ -22,7 +24,7 @@ public:
 	 * @param		rows - number of rows in the board, default BOARD_ROW_SIZE (for future purposes)
 	 * @param		cols - number of Columns in the board, default BOARD_COL_SIZE (for future purposes)
 	 */
-	Board(int rows = BOARD_ROW_SIZE, int cols = BOARD_COL_SIZE) : m_boardData(nullptr), m_rows(rows), m_cols(cols) , m_isQuiet(false), m_delay(2000) {}
+	Board(int depth = BOARD_DEPTH_SIZE, int rows = BOARD_ROW_SIZE, int cols = BOARD_COL_SIZE) : m_depth(depth), m_rows(rows), m_cols(cols) , m_isQuiet(false), m_delay(2000) {}
 
 	/**
 	 * @Details		Destructor of board, releases all related memory (i.e ships on board)
@@ -42,14 +44,14 @@ public:
 	* @Param		c - requested cell's col index
 	* @return		ref of cell in row r and col c
 	*/
-	Cell& get(int r, int c) const { return  m_boardData[r][c]; }
+	const Cell& get(int d, int r, int c) const { return  m_boardData[d][r][c]; }
 
 	/**
 	* @Details		Receive pair of row and col indexes and returns reference for the cell in the board
 	* @Param		i - requested cell's indexes
 	* @return		ref of cell in row r and col c
 	*/
-	Cell& get(pair<int, int> i) const { return get(i.first, i.second); }
+	const Cell& get(tuple<int, int, int> i) const { return get(std::get<0>(i), std::get<1>(i), std::get<2>(i)); }
 
 	/**
 	* @Details		Returns num of rows in the board (int)
@@ -75,7 +77,7 @@ public:
 	* @Param		j - attacked cell's col index
 	* @return		attackResult - attack restult (hit, miss, sink)
 	*/
-	void printAttack(int player, int i, int j, AttackResult attackResult) const;
+	void printAttack(int player, int d, int i, int j, AttackResult attackResult) const;
 
 	/**
 	* @Details		set true for disable game simulation
@@ -95,27 +97,23 @@ public:
 	*/
 	char** Board::toCharMat(PlayerIndex playerId) const;
 
-	/**
-	* @Details		build board by given input (matrix of chars)
-	* @Param		initBoard - input board matrix 
-	*/
-	void buildBoard(const char ** initBoard, int numRows, int numCols);
+	void buildBoard3D(vector<vector<vector<char>>> initBoard);
 	
 	/**
 	* @Details		receive cell's coords and returns sign of requested cell
 	* @Param		r - requested cell's row index
 	* @Param		c - requested cell's col index
 	*/
-	char getSign(int r, int c) const;
+	char getSign(int d, int r, int c) const;
 
 	/**
 	* @Details		receive cell's coords and clear the cell (status=FREE and sign=SPACE)
 	* @Param		r - requested cell's row index
 	* @Param		c - requested cell's col index
 	*/
-	void clearCell(int r, int c) const
+	void clearCell(int d, int r, int c)
 	{
-		m_boardData[r][c].clear();
+		m_boardData[d][r][c].clear();
 	}
 
 	/**
@@ -148,10 +146,10 @@ public:
 	* @Param		c - cell's col index
 	* @return		cell's pointer
 	*/
-	Cell* getCellPointer(int r, int c) const { return  &(m_boardData[r][c]); }
+	Cell* getCellPointer(int d, int r, int c) { return  &(m_boardData[d][r][c]); }
 
 	/**
 	* @Details		This function prints the histogram - value of each cell, for debug and future porposes
 	*/
-	void printHist() const;
+	void printHist();
 };

@@ -20,6 +20,7 @@ private:
 	CellStatus		m_status;				// The status of the cell according to the enum above
 	Ship*			m_pShip;				// pointer to the ship in this cell, NULL if no ship
 	PlayerIndex		m_playerIndexOwner;		// The unique identifier of the player own the ship
+	int				m_depthIndex;			// Cell's depth index
 	int				m_rowIndex;				// Cell's row index
 	int				m_colIndex;				// Cell's col index
 	int				m_histValue;			// The histogram value - number of ship this cell could be part of them
@@ -136,7 +137,7 @@ public:
 	* @param		r - row index
 	* @param		c - column index
 	*/
-	void setIndexes(int r, int c) { m_rowIndex = r; m_colIndex = c; }
+	void setIndexes(int d, int r, int c) { m_depthIndex = d;  m_rowIndex = r; m_colIndex = c; }
 
 	/**
 	* @Details		check if this cell is part of ship
