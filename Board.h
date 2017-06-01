@@ -42,8 +42,8 @@ public:
 	/**
 	 * @Details		Copy constructor, default.
 	 */
-	Board(const Board &) = delete;
-	Board &operator=(const Board &) = delete;
+	Board(const Board &) = default;
+	Board& operator=(const Board &) = default;
 	Board(Board &&) = delete;
 
 	/**
@@ -53,6 +53,8 @@ public:
 	* @return		ref of cell in row r and col c
 	*/
 	Cell& get(int d, int r, int c) const { return  const_cast<Cell&>(m_boardData[d][r][c]); }
+
+	const Cell& get(Coordinate coord) const { return  m_boardData[coord.depth][coord.row][coord.col]; }
 
 	/**
 	* @Details		Receive pair of row and col indexes and returns reference for the cell in the board
@@ -103,7 +105,7 @@ public:
 	* @Details		revieves player index and returns player's board as matrix of chars
 	* @Param		playerId - player's index
 	*/
-	char** Board::toCharMat(PlayerIndex playerId) const;
+	char** Board::getPlayerBoard(PlayerIndex playerId) const;
 
 	void buildBoard(vector<vector<vector<char>>>& initBoard);
 
@@ -162,4 +164,7 @@ public:
 	* @Details		This function prints the histogram - value of each cell, for debug and future porposes
 	*/
 	void printHist();
+
+
+	ReturnCode splitToPlayersBoards(Board& boardA, Board& boardB);
 };

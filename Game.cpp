@@ -7,13 +7,12 @@
 #include "Utils.h"
 #include "Debug.h"
 #include "Board.h"
-#include "BattleshipAlgoFromFile.h"
 #include <codecvt>
 
 using namespace std;
 
-Game::Game(int rows, int cols) : m_rows(rows), m_cols(cols),
-m_foundAdjacentShips(false), m_isQuiet(false), m_currentPlayerIndex(MAX_PLAYER), m_otherPlayerIndex(MAX_PLAYER)
+Game::Game(int depth, int rows, int cols) : m_depth(depth), m_rows(rows), m_cols(cols),
+ m_isQuiet(false), m_currentPlayerIndex(MAX_PLAYER), m_otherPlayerIndex(MAX_PLAYER)
 {
 	for (int i = 0; i< MAX_PLAYER; i++)
 	{
@@ -78,7 +77,7 @@ ReturnCode Game::initDLLFilesPath(const string& filesPath, vector<string>& dllPe
 		DBG(Debug::DBG_ERROR, "Failed in finding dll files");
 		return rc;
 	}
-	else if (RC_ERROR == rc || (RC_SUCCESS == rc && dllPerPlayer.size() < MAX_PLAYER)) // no dlls in path or less then 2 dlls
+	if (RC_ERROR == rc || (RC_SUCCESS == rc && dllPerPlayer.size() < MAX_PLAYER)) // no dlls in path or less then 2 dlls
 	{
 		cout << "Missing an algorithm (dll) file looking in path : " + filesPath << endl;
 		return RC_ERROR;
@@ -93,118 +92,46 @@ ReturnCode Game::initDLLFilesPath(const string& filesPath, vector<string>& dllPe
  *				players, board etc
  * @Param		filesPath - location of sboard and attack files
  */
-ReturnCode Game::init(const string filesPath, bool isQuiet, int delay)
+ReturnCode Game::init(const vector<vector<vector<char>>> board, IBattleshipGameAlgo* algoA, IBattleshipGameAlgo* algoB)
 {
-	string sboardFile, attackAFile, attackBFile;
-	vector<string> dllPaths;
-	char** initBoard;
-	bool isInitBoardInitialized = false;
-	ReturnCode sboardRc = initSboardFilePath(filesPath, sboardFile);
-	// RC_INVALID_ARG means that path is wrong
-	if (RC_INVALID_ARG == sboardRc)
-	{
-		return sboardRc;
-	}
-	else if (RC_SUCCESS == sboardRc)
-	{
-		// set printOut parameters
-		m_isQuiet = isQuiet;
-		m_board.setDelay(delay);
-		m_board.setIsQuiet(isQuiet);
-
-		// init ERRORs data structures
-		initErrorDataStructures();
-
-
-		// Init board is larger by 1 from actual board in every dimension for 
-		// traversing within the board more easily
-		initBoard = new char*[m_rows + BOARD_PADDING];
-		for (int i = 0; i < m_board.rows() + BOARD_PADDING; ++i)
-		{
-			initBoard[i] = new char[m_board.cols() + BOARD_PADDING];
-		}
-		isInitBoardInitialized = true;
-		sboardRc = parseBoardFile(sboardFile, initBoard);
-	}
-
-	// Load algorithms from DLL
-	ReturnCode DLLRc = loadAllAlgoFromDLLs(dllPaths);
-	if (RC_SUCCESS != DLLRc || RC_SUCCESS != sboardRc)
-	{
-		if (isInitBoardInitialized)
-		{
-			for (int i = 0; i < m_board.rows() + BOARD_PADDING; ++i)
-			{
-				delete[] initBoard[i];
-			}
-			delete[] initBoard;
-		}
-		return RC_ERROR;
-	}
-	
 	// now the board is valid lets build our board
-	m_board.buildBoard(const_cast<const char**>(initBoard), m_rows, m_cols);
-	// initBoard is no longer relevant lets delete it
-	for (int i = 0; i < m_board.rows() + BOARD_PADDING; ++i)
-	{
-		delete[] initBoard[i];
-	}
-	delete[] initBoard;
-
-	// Init player A
-	m_players[PLAYER_A] = get<1>(m_algoDLLVec[PLAYER_A])();
-	char** playerABoard = m_board.toCharMat(PLAYER_A);
-	m_players[PLAYER_A]->setBoard(PLAYER_A, const_cast<const char **>(playerABoard), m_rows, m_cols);
-	freePlayerBoard(playerABoard);
-	bool ret = m_players[PLAYER_A]->init(filesPath);
-	if (false == ret)
-	{
-		cout << "Algorithm initialization failed for dll: " << dllPaths[PLAYER_A] << endl;
-		return RC_ERROR;
-	}
-
-	// Init player B
-	m_players[PLAYER_B] = get<1>(m_algoDLLVec[PLAYER_B])();
-	char** playerBBoard = m_board.toCharMat(PLAYER_B);
-	m_players[PLAYER_B]->setBoard(PLAYER_B, const_cast<const char **>(playerBBoard), m_rows, m_cols);
-	freePlayerBoard(playerBBoard);
-	ret = m_players[PLAYER_B]->init(filesPath);
-	if (false == ret)
-	{
-		cout << "Algorithm initialization failed for dll: " << dllPaths[PLAYER_B] << endl;
-		return RC_ERROR;
-	}
+	m_board.buildBoard(board);
 	
-	Utils::gotoxy(20, 0);
-	cout << "PlayerA algo: " << dllPaths[PLAYER_A].substr(dllPaths[PLAYER_A].find_last_of("\\") + 1) << endl;
-	cout << "PlayerB algo: " << dllPaths[PLAYER_B].substr(dllPaths[PLAYER_B].find_last_of("\\") + 1) << endl;
+	// Init player A
+	
+
+	Board boardA, boardB;
+	ReturnCode rc = m_board.splitToPlayersBoards(boardA, boardB);
+	if (RC_SUCCESS != rc)
+	{
+		return RC_ERROR;
+	}
+
+	m_players[PLAYER_A] = algoA;
+	m_players[PLAYER_A]->setBoard(boardA);
+	m_players[PLAYER_A]->setPlayer(PLAYER_A);
+	
+	m_players[PLAYER_A] = algoB;
+	m_players[PLAYER_B]->setBoard(boardB);
+	m_players[PLAYER_B]->setPlayer(PLAYER_B);
+	
 	return RC_SUCCESS;
 }
 
-void Game::freePlayerBoard(char** board) const
-{
-	if (nullptr == board)
-		return;
 
-	for (int i = 0; i < m_rows; i++)
-	{
-		delete[] board[i];
-	}
-	delete[] board;
-}
-
-AttackRequestCode Game::requestAttack(const pair<int, int>& req)
+AttackRequestCode Game::requestAttack(Coordinate& req)
 {
 
-	if (ARC_FINISH_REQ == req.first && ARC_FINISH_REQ == req.second)
+	if (ARC_FINISH_REQ == req.depth && ARC_FINISH_REQ == req.row && ARC_FINISH_REQ == req.col)
 		if (true == m_finishedAttackPlayer[m_otherPlayerIndex])
 			return ARC_GAME_OVER;
 		else {
 			m_finishedAttackPlayer[m_currentPlayerIndex] = true;
 			return ARC_FINISH_REQ;
 		}
-	else if (	req.first < 0 || req.first > m_rows ||
-				req.second < 0 || req.second > m_cols)
+	else if (	req.depth < 0 || req.depth > m_rows ||
+				req.row   < 0 || req.row   > m_rows ||
+				req.col   < 0 || req.col   > m_cols)
 		return ARC_ERROR;
 	else
 		return ARC_SUCCESS;
@@ -217,7 +144,6 @@ void Game::startGame()
 {
 	m_board.printBoard();
 
-	pair<int, int> attackReq;
 	IBattleshipGameAlgo* currentPlayer;
 	m_currentPlayerIndex = PLAYER_A;
 	m_otherPlayerIndex = PLAYER_B;
@@ -228,7 +154,7 @@ void Game::startGame()
 	{
 		currentPlayer = m_players[m_currentPlayerIndex];
 
-		attackReq = currentPlayer->attack();
+		Coordinate attackReq = currentPlayer->attack();
 
 		// Check attack request 
 		AttackRequestCode arc = requestAttack(attackReq);

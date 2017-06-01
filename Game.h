@@ -20,6 +20,7 @@ private:
 	Board					m_board;						// current board of the game
 	int						m_rows;							// number of rows in the board
 	int						m_cols;							// number of columns in the board
+	int						m_depth;						// number of depth in the board
 	int						m_currentPlayerIndex;			// he id of the next player to attack
 	int						m_otherPlayerIndex;				// the id of the other playre to attack
 	IBattleshipGameAlgo*	m_players[MAX_PLAYER];			// the players
@@ -33,7 +34,7 @@ private:
 	/**
 	 * @Details		game constructor
 	 */
-	Game(int rows = BOARD_ROW_SIZE, int cols = BOARD_ROW_SIZE);
+	Game(int depth = BOARD_DEPTH_SIZE,  int rows = BOARD_ROW_SIZE, int cols = BOARD_COL_SIZE);
 
 	/**
 	* @Details		game destructor
@@ -77,7 +78,7 @@ private:
 	 * @param		req - curren attacks
 	 * @return		ARC_FINISH_REQ if no attack, ARC_ERROR if attack is illegal, ARC_SUCCESS otherwise
 	 */
-	AttackRequestCode requestAttack(const pair<int, int>& req);
+	AttackRequestCode Game::requestAttack(Coordinate& req)
 
 	/**
 	 * @Details		proceed To Next Player after attack
@@ -93,12 +94,9 @@ private:
 public:
 	/**
 	 * @Details		Parse files and build board matrix
-	 * @param		filesPath - path to search for input files
-	 * @param		isQuiet - print simulation ot not
-	 * @param		delay - delay between attacks in simulations
+	 *
 	 */
-	ReturnCode init(const string filesPath, bool isQuiet, int delay);
-	
+	ReturnCode Game::init(const vector<vector<vector<char>>> board, IBattleshipGameAlgo* algoA, IBattleshipGameAlgo* algoB);
 
 	/**
 	 * @Details		start current game
@@ -122,12 +120,7 @@ public:
 	*/
 	ReturnCode loadAllAlgoFromDLLs(const vector<string>& dllPaths);
 
-	/**
-	* @Details		Free board resources
-	* @param		board - board to free
-	*/
-	void freePlayerBoard(char** board) const;
-
+	
 	/**
 	* @Details		finds the sboard and attack files from given directory
 	* @return		RC_ERROR if path is wrong or files are missing, RC_SUCCESS otherwise

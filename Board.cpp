@@ -121,26 +121,53 @@ void Board::buildBoard(vector<vector<vector<char>>>& initBoard)
 }
 
 
-//char** Board::toCharMat(PlayerIndex playerId) const
-//{
-//	char** ret = new char*[m_rows];
-//
-//	for (int i = 0; i < m_rows; i++)
-//	{
-//		ret[i] = new char[m_cols];
-//
-//		for (int j = 0; j < m_cols; j++)
-//		{
-//			char c = m_boardData[i+1][j+1].getSign();
-//			if (SPACE != c && (Utils::getPlayerIdByShip(c) != playerId))
-//				c = SPACE;
-//
-//			ret[i][j] = c;
-//		}
-//	}
-//
-//	return ret;
-//}
+ReturnCode Board::splitToPlayersBoards(Board& boardA, Board& boardB)
+{
+
+	auto dataA = m_boardData;
+	auto dataB = m_boardData;
+	
+
+	for(int d = 0; d < depth(); d++)
+	{
+		for (int r = 0; r < rows(); r++)
+		{
+			for (int c = 0; c < cols(); c++)
+			{
+				Coordinate coord(d, r, c);
+				char sign = this->charAt(coord);
+				Cell cell = m_boardData[d][r][c];
+
+				PlayerIndex pi = Utils::getPlayerIdByShip(sign);
+				switch (pi)
+				{
+				case PLAYER_A:
+				{
+					dataA[d][r][c] = cell;
+					dataB[d][r][c].clear();
+				} break;
+
+				case PLAYER_B:
+				{
+					dataA[d][r][c].clear();
+					dataB[d][r][c] = cell;
+				} break;
+
+				default:
+				{
+					dataA[d][r][c].clear();
+					dataB[d][r][c].clear();
+				}
+				} // Switch
+			}
+		}
+	}
+
+	boardA.buildBoard(dataA);
+	boardB.buildBoard(dataB);
+
+	return RC_SUCCESS;
+}
 
 char Board::getSign(int d, int r, int c) const
 {
