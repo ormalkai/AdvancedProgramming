@@ -2,7 +2,7 @@
 
 #include "Ship.h"
 #include "Utils.h"
-#include "BattleshipAlgoSmart.h"
+#include "IBattleshipGameAlgo.h"
 
 class Cell {
 	
@@ -135,7 +135,7 @@ public:
 	* @return		oc - other cell to calc distance
 	* @return		the squared distance
 	*/
-	double squaredDistance(Cell* oc) const {
+	double squaredDistance(shared_ptr<Cell> oc) const {
 		return (pow(oc->row() - this->row(), 2) + pow(oc->col() - this->col(), 2));
 	}
 	

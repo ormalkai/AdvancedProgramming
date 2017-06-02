@@ -1,16 +1,16 @@
 #pragma once
 
-#include "Cell.h"
 #include <vector>
+#include <memory>
 #include "IBattleshipGameAlgo.h"
+#include "Cell.h"
 
 using std::vector;
 
 class Board : public BoardData
 {
 private:
-	//Cell**			m_boardData;	// The board is matrix of Cells
-	vector<vector<vector<Cell>>>	m_boardData;	// The board is matrix of Cells
+	vector<vector<vector<shared_ptr<Cell>>>>	m_boardData;	// The board is matrix of Cells
 	vector<Ship*>					m_shipsOnBoard;	// Pointer to every ship on the board
 	int								m_depth;		// Number of matrixes in depth
 	int								m_rows;			// Number of rows in the board
@@ -28,7 +28,7 @@ public:
 
 	virtual char charAt(Coordinate c) const
 	{
-		return m_boardData[c.depth][c.row][c.col].getSign();
+		return m_boardData[c.depth][c.row][c.col]->getSign();
 	}
 
 
@@ -57,28 +57,28 @@ public:
 	* @Param		c - requested cell's col index
 	* @return		ref of cell in row r and col c
 	*/
-	Cell& get(int d, int r, int c) const { return  const_cast<Cell&>(m_boardData[d][r][c]); }
+	shared_ptr<Cell> get(int d, int r, int c) const { return  m_boardData[d][r][c]; }
 
-	Cell& get(Coordinate coord) const { return  get(coord.depth, coord.row, coord.col); }
+	shared_ptr<Cell> get(Coordinate coord) const { return  get(coord.depth, coord.row, coord.col); }
 
 	/**
 	* @Details		Receive pair of row and col indexes and returns reference for the cell in the board
 	* @Param		i - requested cell's indexes
 	* @return		ref of cell in row r and col c
 	*/
-	Cell& get(tuple<int, int, int> i) const { return get(std::get<0>(i), std::get<1>(i), std::get<2>(i)); }
+	shared_ptr<Cell> get(tuple<int, int, int> i) const { return get(std::get<0>(i), std::get<1>(i), std::get<2>(i)); }
 
 	/**
 	* @Details		Returns num of rows in the board (int)
 	* @return		num of rows in the board
 	*/
-	int rows() const { return m_rows; }
+	virtual int rows() const { return m_rows; }
 	
 	/**
 	* @Details		Returns num of cols in the board (int)
 	* @return		num of cols in the board
 	*/
-	int cols() const { return m_cols; }
+	virtual int cols() const { return m_cols; }
 	
 	/**
 	* @Details		Prints the board in with sign color for each player's ship
@@ -129,7 +129,7 @@ public:
 	*/
 	void clearCell(int d, int r, int c)
 	{
-		m_boardData[d][r][c].clear();
+		m_boardData[d][r][c]->clear();
 	}
 
 	/**
@@ -147,22 +147,14 @@ public:
 	* @Param		r - cell's row index
 	* @Param		c - cell's col index
 	*/
-	bool isPaddingCell(const Cell& cell) const { return cell.row() == 0 || cell.row() == m_rows + 1 || cell.col() == 0 || cell.col() == m_cols + 1; }
+	bool isPaddingCell(const shared_ptr<Cell> cell) const { return cell->row() == 0 || cell->row() == m_rows + 1 || cell->col() == 0 || cell->col() == m_cols + 1; }
 
 	/**
 	* @Details		This function adds a dummy ship to the board by given cells
 	*				The func expected that all the cells in the vector is legal ship
 	* @Param		shipCells - cells of the dummy ship
 	*/
-	void addDummyNewShipToBoard(const vector<Cell*>& shipCells);
-
-	/**
-	* @Details		Get pointer for specific cell in the board by given row and col indexes
-	* @Param		r - cell's row index
-	* @Param		c - cell's col index
-	* @return		cell's pointer
-	*/
-	Cell* getCellPointer(int d, int r, int c) const { return  const_cast<Cell*>(&(m_boardData[d][r][c])); }
+	void addDummyNewShipToBoard(const vector<shared_ptr<Cell>>& shipCells);
 
 	/**
 	* @Details		This function prints the histogram - value of each cell, for debug and future porposes
@@ -170,5 +162,5 @@ public:
 	void printHist();
 
 
-	ReturnCode splitToPlayersBoards(Board& boardA, Board& boardB);
+	void splitToPlayersBoards(Board& boardA, Board& boardB) const;
 };

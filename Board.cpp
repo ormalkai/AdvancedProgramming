@@ -41,9 +41,9 @@ void Board::buildBoard(const BoardData& initBoard)
 void Board::buildBoard(const vector<vector<vector<Cell>>>& initBoard)
 {
 
-	int initDepthSize	= initBoard.size();
-	int initRowSize		= initBoard[0].size();
-	int initColSize		= initBoard[0][0].size();
+	size_t initDepthSize	= initBoard.size();
+	size_t initRowSize		= initBoard[0].size();
+	size_t initColSize		= initBoard[0][0].size();
 
 	vector<vector<vector<char>>> copyBoard;
 	for (int d = 0; d < initDepthSize; d++)
@@ -77,15 +77,15 @@ void Board::buildBoard(const vector<vector<vector<char>>>& initBoard)
 	//		create matrix
 	for (int d = 0; d, initDepthSize; d++)
 	{
-		vector<vector<Cell>> depth;
+		vector<vector<shared_ptr<Cell>>> depth;
 		m_boardData.push_back(depth);
 		for (int i = 0; i<initRowSize; i++)
 		{
-			vector<Cell> col;
+			vector<shared_ptr<Cell>> col;
 			m_boardData[d].push_back(col);
 			for (int j = 0; j<initColSize; j++)
 			{
-				m_boardData[d][i].emplace_back();
+				m_boardData[d][i].push_back(make_shared<Cell>());
 			}
 		}
 	}
@@ -96,8 +96,8 @@ void Board::buildBoard(const vector<vector<vector<char>>>& initBoard)
 		{
 			for (int j = 0; j < initColSize; j++)
 			{
-				m_boardData[d][i][j].setStatus(Cell::FREE);
-				m_boardData[d][i][j].setIndexes(d, i, j);
+				m_boardData[d][i][j]->setStatus(Cell::FREE);
+				m_boardData[d][i][j]->setIndexes(d, i, j);
 			}
 		}
 	}
@@ -138,10 +138,9 @@ void Board::buildBoard(const vector<vector<vector<char>>>& initBoard)
 						int depth = INC_DEPTH(dir, d, k);
 						int row = INC_ROW(dir, i, k);
 						int col = INC_COL(dir, j, k);
-						m_boardData[depth][row][col].setShip(ship);
-						m_boardData[depth][row][col].setStatus(Cell::ALIVE);
-						// TODO ORM not sure that this is working
-						ship->addCell(&(m_boardData[depth][row][col]));
+						m_boardData[depth][row][col]->setShip(ship);
+						m_boardData[depth][row][col]->setStatus(Cell::ALIVE);
+						ship->addCell(m_boardData[depth][row][col]);
 					}
 				}
 			}
@@ -150,61 +149,65 @@ void Board::buildBoard(const vector<vector<vector<char>>>& initBoard)
 }
 
 
-ReturnCode Board::splitToPlayersBoards(Board& boardA, Board& boardB)
+void Board::splitToPlayersBoards(Board& boardA, Board& boardB) const
 {
+	int initDepthSize = depth();
+	int initRowSize = rows();
+	int initColSize = cols();
 
-	auto dataA = m_boardData;
-	auto dataB = m_boardData;
-	
-
-	for(int d = 0; d < depth(); d++)
+	vector<vector<vector<char>>> copyBoardA;
+	vector<vector<vector<char>>> copyBoardB;
+	for (int d = 0; d < initDepthSize; d++)
 	{
-		for (int r = 0; r < rows(); r++)
+		vector<vector<char>> depth;
+		copyBoardA.push_back(depth);
+		copyBoardB.push_back(depth);
+		for (int r = 0; r < initRowSize; r++)
 		{
-			for (int c = 0; c < cols(); c++)
+			vector<char> col;
+			copyBoardA[d].push_back(col);
+			copyBoardB[d].push_back(col);
+			for (int c = 0; c < initColSize; c++)
 			{
 				Coordinate coord(d, r, c);
 				char sign = this->charAt(coord);
-				Cell cell = m_boardData[d][r][c];
 
 				PlayerIndex pi = Utils::getPlayerIdByShip(sign);
 				switch (pi)
 				{
 				case PLAYER_A:
 				{
-					dataA[d][r][c] = cell;
-					dataB[d][r][c].clear();
+					copyBoardA[d][r][c] = sign;
+					copyBoardB[d][r][c] = SPACE;
 				} break;
 
 				case PLAYER_B:
 				{
-					dataA[d][r][c].clear();
-					dataB[d][r][c] = cell;
+					copyBoardA[d][r][c] = SPACE;
+					copyBoardB[d][r][c] = sign;
 				} break;
 
 				case MAX_PLAYER:
 				default:
 				{
-					dataA[d][r][c].clear();
-					dataB[d][r][c].clear();
+					copyBoardA[d][r][c] = SPACE;
+					copyBoardB[d][r][c] = SPACE;
 				}
 				} // Switch
 			}
 		}
 	}
 
-	boardA.buildBoard(dataA);
-	boardB.buildBoard(dataB);
-
-	return RC_SUCCESS;
+	boardA.buildBoard(copyBoardA);
+	boardB.buildBoard(copyBoardB);
 }
 
 char Board::getSign(int d, int r, int c) const
 {
-	return get(d, r, c).getSign();
+	return get(d, r, c)->getSign();
 }
 
-void Board::addDummyNewShipToBoard(const vector<Cell*>& shipCells)
+void Board::addDummyNewShipToBoard(const vector<shared_ptr<Cell>>& shipCells)
 {
 	Ship* ship = ShipFactory::instance().createDummyShipByCellsVector(shipCells);
 
@@ -251,7 +254,7 @@ void Board::printBoard() const
 			for (int j = 0; j < initColSize; ++j)
 			{
 				Utils::gotoxy(i, j * 3);
-				if (SPACE == m_boardData[d][i][j].getSign())
+				if (SPACE == m_boardData[d][i][j]->getSign())
 				{
 					Utils::setTextColor(BACKGROUND_BLUE | BACKGROUND_RED | BACKGROUND_GREEN);
 					if (0 == i && j >= 1 && j <= m_cols)
@@ -273,8 +276,8 @@ void Board::printBoard() const
 				}
 				else
 				{
-					Utils::setTextColor(m_boardData[d][i][j].getShip()->getColor());
-					cout << m_boardData[d][i][j].getSign() << "  ";
+					Utils::setTextColor(m_boardData[d][i][j]->getShip()->getColor());
+					cout << m_boardData[d][i][j]->getSign() << "  ";
 				}
 			}
 			cout << endl;
@@ -298,7 +301,7 @@ void Board::printHist()
 			for (int j = 1; j <= m_cols; ++j)
 			{
 
-				Cell* c = getCellPointer(d, i, j);
+				shared_ptr<Cell> c = get(d, i, j);
 				int h = c->getHistValue();
 
 				printf("%2d ", h);
@@ -326,7 +329,7 @@ void Board::printAttack(int player, int i, int j, int d, AttackResult attackResu
 			cout << "&  ";
 		Sleep(100);
 		Utils::gotoxy(i, j * 3);
-		cout << m_boardData[d][i][j].getSign();
+		cout << m_boardData[d][i][j]->getSign();
 		Sleep(100);
 	}
 	switch (attackResult)

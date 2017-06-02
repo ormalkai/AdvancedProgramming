@@ -98,11 +98,7 @@ ReturnCode Game::init(const vector<vector<vector<char>>> board, IBattleshipGameA
 	m_board.buildBoard(board);
 	
 	Board boardA, boardB;
-	ReturnCode rc = m_board.splitToPlayersBoards(boardA, boardB);
-	if (RC_SUCCESS != rc)
-	{
-		return RC_ERROR;
-	}
+	m_board.splitToPlayersBoards(boardA, boardB);
 
 	// Init player A
 	m_players[PLAYER_A] = algoA;
@@ -176,25 +172,25 @@ void Game::startGame()
 			break;
 		}
 
-		Cell& attackedCell = m_board.get(attackReq);
-		attackedCell.hitCell();
+		shared_ptr<Cell> attackedCell = m_board.get(attackReq);
+		attackedCell->hitCell();
 
 		AttackResult attackResult;
 
 		// Check attack result
-		switch (attackedCell.getStatus())
+		switch (attackedCell->getStatus())
 		{
 		case Cell::ALIVE:
 		{
-			attackedCell.setStatus(Cell::DEAD);
+			attackedCell->setStatus(Cell::DEAD);
 
 			// Notify the user his ridiculous mistake
-			if (attackedCell.getPlayerIndexOwner() == m_currentPlayerIndex)
+			if (attackedCell->getPlayerIndexOwner() == m_currentPlayerIndex)
 			{
 				DBG(Debug::DBG_INFO, "You bombed youself, U R probably an idiot..");
 			}
 
-			Ship* pShip = attackedCell.getShip();
+			Ship* pShip = attackedCell->getShip();
 			pShip->executeAttack();
 
 			if (pShip->isShipAlive())
@@ -206,7 +202,7 @@ void Game::startGame()
 				attackResult = AttackResult::Sink;
 
 				// Hit myself
-				if (attackedCell.getPlayerIndexOwner() == m_currentPlayerIndex)
+				if (attackedCell->getPlayerIndexOwner() == m_currentPlayerIndex)
 				{
 					m_playerScore[m_otherPlayerIndex] += pShip->getValue();
 					shipsPerPlayer[m_currentPlayerIndex]--;
@@ -225,7 +221,7 @@ void Game::startGame()
 		case Cell::DEAD:
 		{
 			DBG(Debug::DBG_INFO, "This cell was already bombed, go to sleep bro...");
-			if (attackedCell.getShip()->isShipAlive())
+			if (attackedCell->getShip()->isShipAlive())
 				attackResult = AttackResult::Hit;
 			else
 				attackResult = AttackResult::Miss;
@@ -255,7 +251,7 @@ void Game::startGame()
 
 		// Update next turn
 		if (AttackResult::Miss == attackResult ||
-			attackedCell.getPlayerIndexOwner() == m_currentPlayerIndex)
+			attackedCell->getPlayerIndexOwner() == m_currentPlayerIndex)
 		{
 			proceedToNextPlayer();
 		}

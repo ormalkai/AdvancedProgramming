@@ -26,7 +26,7 @@ public:
 	* @param		vec - vector of cells (Cell*) of the dummy ship
 	* @return		Pointer to requested dummy ship
 	*/
-	Ship* createDummyShipByCellsVector(const vector<Cell*>& vec) const;
+	static Ship* createDummyShipByCellsVector(const vector<shared_ptr<Cell>>& vec);
 
 private:
 	/**

@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <windows.h>
+#include <memory>
 
 using namespace std;
 
@@ -16,7 +17,7 @@ private:
 	char m_sign;				// Player 
 	int m_numOfAliveCells;
 	_In_ WORD m_color;			// Color
-	vector<Cell*> m_cellList;
+	vector<shared_ptr<Cell>> m_cellList;
 
 public:
 
@@ -88,7 +89,7 @@ public:
 	* @Details		add new cell pointer to cell list of the ship
 	* @param		cell - new cell of the ship
 	*/
-	void addCell(Cell* cell) { m_cellList.push_back(cell); }
+	void addCell(shared_ptr<Cell> cell) { m_cellList.push_back(cell); }
 
 	/**
 	* @Details		check if ship is Alive 
@@ -105,6 +106,6 @@ public:
 	* @Details		add cells vector to the current ship's cells, (append to the end of the vector)
 	* @param		vecCell - the vector of cells we want to add 
 	*/
-	void addCells(vector<Cell*> vecCell) { m_cellList.insert(m_cellList.end(), vecCell.begin(), vecCell.end()); }
+	void addCells(vector<shared_ptr<Cell>> vecCell) { m_cellList.insert(m_cellList.end(), vecCell.begin(), vecCell.end()); }
 
 };

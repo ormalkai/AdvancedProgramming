@@ -1,8 +1,9 @@
 #pragma once
 
-#include "Board.h"
 #include <list>
 #include "PriorityQueue.h"
+#include "IBattleshipGameAlgo.h"
+#include "Board.h"
 
 /**
  *
@@ -130,7 +131,7 @@ class BattleshipAlgoSmart : public IBattleshipGameAlgo
 
 	struct cmp
 	{
-		bool operator()(Cell* a, Cell* b) const
+		bool operator()(shared_ptr<Cell> a, shared_ptr<Cell> b) const
 		{
 			return a->getHistValue() < b->getHistValue();
 		}
@@ -141,25 +142,25 @@ private:
 	int		m_cols;			// number of columns in the board
 	int		m_depth;		// depth level of the board
 	Board	m_board;
-	PriorityQueue<Cell*, vector<Cell*>, cmp> m_attackedQueue;
-	list<Cell*> m_targetQueue;
+	PriorityQueue<shared_ptr<Cell>, vector<shared_ptr<Cell>>, cmp> m_attackedQueue;
+	list<shared_ptr<Cell>> m_targetQueue;
 	SmartAlgoStautus m_currentStatus;
-	vector<Cell*> m_currentAttackedShipCells;
+	vector<shared_ptr<Cell>> m_currentAttackedShipCells;
 	map<pair<int, int>, int> m_stripToPotentialShips;
 	
 	/**
 	* @Details		Return the next attack request in hunt mode - the cell with the highest hist value
 	* @Return		The next cell to be attacked
 	*/
-	Cell* popAttack();
+	shared_ptr<Cell> popAttack();
 
 	/**
 	* @Details		Return the next attack request in target mode - the cell is negihbor on the last attack
 	* @Return		The next cell to be attacked
 	*/
-	Cell* popTargetAttack()
+	shared_ptr<Cell> popTargetAttack()
 	{
-		Cell* c = m_targetQueue.front();
+		shared_ptr<Cell> c = m_targetQueue.front();
 		m_targetQueue.pop_front();
 		return c;
 	}
@@ -168,32 +169,32 @@ private:
 	* @Details		Handle case (update hist value for relevent cells) sink not it target mode - for example: we hit ship of one cell
 	* @param		attackedCell - The attacked cell's pointer
 	*/
-	void handleUntargetShipSunk(Cell*const attackedCell);
+	void handleUntargetShipSunk(shared_ptr<Cell> const attackedCell);
 	
 	/**
 	* @Details		Handle case sink not it target mode - for example: we hit ship of one cell
 	* @param		attackedCell - The attacked cell's pointer
 	*/
-	void handleTargetShipSunk(Cell*const attackedCell);
+	void handleTargetShipSunk(shared_ptr<Cell> const attackedCell);
 
 	/**
 	* @Details		check if a given cell is neighbor of one of the cells in attack target queue
 	* @Param		cell - given cell to check
 	*/
-	bool isCellNeighborToTargetShip(Cell* cell);
+	bool isCellNeighborToTargetShip(shared_ptr<Cell> cell);
 
 	/**
 	* @Details		get vector of all cells of sunk ship by given cell is part of the ship
 	* @Param		cell - given cell in the sunk ship
 	*/
-	vector<Cell*> getSunkShipByCell(Cell* const c) const;
+	vector<shared_ptr<Cell>> getSunkShipByCell(shared_ptr<Cell> const c) const;
 
 	/**
 	* @Details		This function update the hist value only for the relevant cells by given ship as vector of cells
 	* @Param		cells - vector of ship cells to update their neigbors
 	* @Param		createDummyShip - true if create dummy ship
 	*/
-	void updateHist(const vector<Cell*>& cells, bool createDummyShip = true);
+	void updateHist(const vector<shared_ptr<Cell>>& cells, bool createDummyShip = true);
 
 	/**
 	* @Details		This function update the attack target queue by given cell and ship direction
@@ -201,13 +202,13 @@ private:
 	* @Param		direction - ship is direction vertical \ horizontal
 	* @Param		toRemoveWrongAxis - true if need to remove irrelevant cells from the attacked queue
 	*/
-	void updateTargetAttackQueue(const Cell* attackedCell, ShipDirection direction, bool toRemoveWrongAxis);
+	void updateTargetAttackQueue(const shared_ptr<Cell> attackedCell, ShipDirection direction, bool toRemoveWrongAxis);
 
 	/**
 	* @Details		Return true if the cell is attackable - not padding, empty and legal cell
 	* @Param		Cell - cell to check attackable
 	*/
-	bool isAttackable(const Cell& c) const;
+	bool isAttackable(const shared_ptr<Cell> c) const;
 
 
 	/**
@@ -222,7 +223,7 @@ private:
 	* @Param		cell - cell to check his neighbors
 	* @Param		d - the only direction we do not have to check
 	*/
-	bool isOtherNeighborsValid(const Cell& cell, Direction d) const;
+	bool isOtherNeighborsValid(const shared_ptr<Cell> cell, Direction d) const;
 
 	/**
 	* @Details		Internal function for check is ship is legal is specific offset.

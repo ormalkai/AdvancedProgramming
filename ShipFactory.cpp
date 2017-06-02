@@ -43,7 +43,7 @@ Ship* ShipFactory::create(char ship) const
 
 }
 
-Ship* ShipFactory::createDummyShipByCellsVector(const vector<Cell*>& vec) const
+Ship* ShipFactory::createDummyShipByCellsVector(const vector<shared_ptr<Cell>>& vec)
 {
 	return new DummyShip(static_cast<int>(vec.size()));
 }
