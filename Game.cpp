@@ -144,7 +144,7 @@ void Game::startGame()
 	while (!gameOver)
 	{
 		Coordinate attackReq = m_players[m_currentPlayerIndex]->attack();
-		
+
 		// Check attack request 
 		AttackRequestCode arc = requestAttack(attackReq);
 		switch (arc)

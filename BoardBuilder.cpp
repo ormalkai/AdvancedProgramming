@@ -6,14 +6,13 @@
 
 #define SHIPS_PER_PLAYER (5)
 
-BoardBuilder::BoardBuilder(const string filesPath) : 
-			m_filesPath(filesPath), 
+BoardBuilder::BoardBuilder(const string sboardPath) : 
 			m_cols(-1), 
 			m_rows(-1),
 			m_depth(-1),
 			m_foundAdjacentShips(false), 
 			m_wrongSizeOrShapePerPlayer(false), 
-			m_sboardFilePath("")
+			m_sboardFilePath(sboardPath)
 {
 }
 
@@ -42,14 +41,14 @@ void BoardBuilder::initErrorDataStructures()
 * @Details		parses sboard file and initializes the game board
 * @Return		ReturnCode
 */
-vector<vector<vector<char>>> BoardBuilder::parseBoardFile()
+ReturnCode BoardBuilder::parseBoardFile(vector<vector<vector<char>>>& board)
 {
 	// Read from file 
 	ifstream sboard(m_sboardFilePath);
 	if (!sboard.is_open())
 	{
 		DBG(Debug::DBG_ERROR, "Could not open board file: %s", m_sboardFilePath);
-		//return RC_ERROR;
+		return RC_ERROR;
 	}
 
 	ReturnCode result = getBoardDimensionsFromFile(sboard);
@@ -57,7 +56,7 @@ vector<vector<vector<char>>> BoardBuilder::parseBoardFile()
 	{
 		// close sboard file
 		sboard.close();
-		//return result;
+		return result;
 	}
 
 	initInitBoard();
@@ -66,33 +65,37 @@ vector<vector<vector<char>>> BoardBuilder::parseBoardFile()
 	// close sboard file
 	sboard.close();
 
+	// init errors DS
+	initErrorDataStructures();
+
 	// input validation
 	validateBoard();
 	// Print errors and return ERROR if needed
 	if (false == checkErrors())
 	{
-		//return RC_ERROR;
+		return RC_ERROR;
 	}
-	//return RC_SUCCESS;
-	return m_initBoard;
+	board = m_initBoard;
+	return RC_SUCCESS;
 }
 
 ReturnCode BoardBuilder::getBoardDimensionsFromFile(ifstream& sboard)
 {
 	string line;
 	Utils::safeGetline(sboard, line);
-	regex regex("^([0-9]+)x([0-9]+)x([0-9]+)$");
+	regex regex("^([0-9]+)X([0-9]+)X([0-9]+)");
 	smatch m;
-	if (m.size() != 3)
+	regex_match(line, m, regex);
+	if (m.size() != 4)
 	{
-		DBG(Debug::DBG_ERROR, "Failed to parse first line[%s] from: %s", line.c_str(), m_sboardFilePath);
+		DBG(Debug::DBG_ERROR, "Failed to parse first line[%s] from: %s", line.c_str(), m_sboardFilePath.c_str());
 		return RC_ERROR;
 	}
 	try
 	{
-		m_cols = stoi(m[0]);
-		m_rows = stoi(m[1]);
-		m_depth = stoi(m[2]);
+		m_cols = stoi(m[1]);
+		m_rows = stoi(m[2]);
+		m_depth = stoi(m[3]);
 	}
 	catch (const std::exception&)
 	{
@@ -109,11 +112,12 @@ void BoardBuilder::readSBoardFile(ifstream& sboard)
 	Utils::safeGetline(sboard, line);
 
 	// Line by line up to 10 line and up to 10 chars per line
+	int depthIndex = 1;
 	for (int l=0; l<m_depth; l++)
 	{
 		int rowIndex = 1;
 		// read line by line until EOF, empty line or done reading rows
-		while (Utils::safeGetline(sboard, line) && (line == "" || line == "\r") && rowIndex <= m_rows)
+		while (Utils::safeGetline(sboard, line) && (line != "" && line != "\r") && rowIndex <= m_rows)
 		{
 			int colIndex = 1;
 			for (string::size_type i = 0; i < line.size() && colIndex <= m_cols; i++)
@@ -122,7 +126,7 @@ void BoardBuilder::readSBoardFile(ifstream& sboard)
 				// If not allowed chars skip, otherwise insert it to board
 				if (MAX_PLAYER != Utils::getPlayerIdByShip(c))
 				{
-					m_initBoard[l][rowIndex][colIndex] = c;
+					m_initBoard[depthIndex][rowIndex][colIndex] = c;
 				}
 				// parse nex char
 				colIndex++;
@@ -136,6 +140,7 @@ void BoardBuilder::readSBoardFile(ifstream& sboard)
 		{
 			Utils::safeGetline(sboard, line);
 		}
+		depthIndex++;
 	}
 }
 
@@ -379,17 +384,17 @@ void BoardBuilder::initInitBoard()
 {
 	// for each depth:
 	//		create matrix
-	for (int i=0; i,m_depth + BOARD_PADDING; i++)
+	for (int i=0; i<m_depth + BOARD_PADDING; i++)
 	{
 		vector<vector<char>> depth;
 		m_initBoard.push_back(depth);
 		for (int j=0; j<m_rows + BOARD_PADDING; j++)
 		{
 			vector<char> col;
-			m_initBoard[j].push_back(col);
+			m_initBoard[i].push_back(col);
 			for (int k=0; k<m_cols + BOARD_PADDING; k++)
 			{
-				m_initBoard[j][k].push_back(SPACE);
+				m_initBoard[i][j].push_back(SPACE);
 			}
 		}
 	}

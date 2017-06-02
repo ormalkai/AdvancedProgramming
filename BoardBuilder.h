@@ -15,7 +15,6 @@ private:
 		BACKWORD
 	};
 
-	string					m_filesPath;
 	string					m_sboardFilePath;
 
 	vector<int>				m_numOfShipsPerPlayer;			// how many ships each player has
@@ -29,7 +28,7 @@ private:
 
 
 public:
-	BoardBuilder(const string filesPath);
+	BoardBuilder(const string sboardPath);
 	~BoardBuilder();
 
 	/**
@@ -41,7 +40,7 @@ public:
 	* @Details		Parses the sboard file and validates it
 	* @return		RC_ERROR if one of the valdiations according to Spec failed, RC_SUCCESS otherwise
 	*/
-	vector<vector<vector<char>>> parseBoardFile();
+	ReturnCode parseBoardFile(vector<vector<vector<char>>>& board);
 
 	/**
 	* @Details		read board from file and fill initBoard

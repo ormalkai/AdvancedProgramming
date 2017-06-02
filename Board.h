@@ -37,7 +37,7 @@ public:
 	 * @param		rows - number of rows in the board, default BOARD_ROW_SIZE (for future purposes)
 	 * @param		cols - number of Columns in the board, default BOARD_COL_SIZE (for future purposes)
 	 */
-	Board(int depth = BOARD_DEPTH_SIZE, int rows = BOARD_ROW_SIZE, int cols = BOARD_COL_SIZE) : m_depth(depth), m_rows(rows), m_cols(cols) , m_isQuiet(false), m_delay(2000) {}
+	Board(int depth = BOARD_DEPTH_SIZE, int rows = BOARD_ROW_SIZE, int cols = BOARD_COL_SIZE) : m_depth(depth), m_rows(rows), m_cols(cols) , m_isQuiet(true), m_delay(2000) {}
 
 	/**
 	 * @Details		Destructor of board, releases all related memory (i.e ships on board)
@@ -67,18 +67,6 @@ public:
 	* @return		ref of cell in row r and col c
 	*/
 	shared_ptr<Cell> get(tuple<int, int, int> i) const { return get(std::get<0>(i), std::get<1>(i), std::get<2>(i)); }
-
-	/**
-	* @Details		Returns num of rows in the board (int)
-	* @return		num of rows in the board
-	*/
-	virtual int rows() const { return m_rows; }
-	
-	/**
-	* @Details		Returns num of cols in the board (int)
-	* @return		num of cols in the board
-	*/
-	virtual int cols() const { return m_cols; }
 	
 	/**
 	* @Details		Prints the board in with sign color for each player's ship
@@ -147,7 +135,7 @@ public:
 	* @Param		r - cell's row index
 	* @Param		c - cell's col index
 	*/
-	bool isPaddingCell(const shared_ptr<Cell> cell) const { return cell->row() == 0 || cell->row() == m_rows + 1 || cell->col() == 0 || cell->col() == m_cols + 1; }
+	bool isPaddingCell(const shared_ptr<Cell> cell) const { return cell->row() == 0 || cell->row() == m_rows + 1 || cell->col() == 0 || cell->col() == m_cols + 1 || cell->depth() == 0 || cell->depth() == m_depth + 1; }
 
 	/**
 	* @Details		This function adds a dummy ship to the board by given cells

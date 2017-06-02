@@ -66,16 +66,22 @@ void Board::buildBoard(const vector<vector<vector<Cell>>>& initBoard)
 
 void Board::buildBoard(const vector<vector<vector<char>>>& initBoard)
 {
-	m_depth = static_cast<int>(initBoard.size());
-	m_rows = static_cast<int>(initBoard[0].size());
-	m_cols = static_cast<int>(initBoard[0][0].size());
+	m_depth = _depth = static_cast<int>(initBoard.size() - BOARD_PADDING);
+	m_rows = _rows = static_cast<int>(initBoard[0].size() - BOARD_PADDING);
+	m_cols = _cols = static_cast<int>(initBoard[0][0].size() - BOARD_PADDING);
+
+	// init num of ships per player
+	for (int i = 0; i < PlayerIndex::MAX_PLAYER; i++)
+	{
+		m_numOfShipsPerPlayer.push_back(0);
+	}
 
 	int initDepthSize = m_depth + BOARD_PADDING;
 	int initRowSize = m_rows + BOARD_PADDING;
 	int initColSize = m_cols + BOARD_PADDING;
 	// for each depth:
 	//		create matrix
-	for (int d = 0; d, initDepthSize; d++)
+	for (int d = 0; d < initDepthSize; d++)
 	{
 		vector<vector<shared_ptr<Cell>>> depth;
 		m_boardData.push_back(depth);
@@ -120,6 +126,8 @@ void Board::buildBoard(const vector<vector<vector<char>>>& initBoard)
 					// create the ship
 					shared_ptr<Ship> ship = ShipFactory::instance().create(initBoard[d][i][j]);
 					m_shipsOnBoard.push_back(ship);
+					PlayerIndex pi = Utils::getPlayerIdByShip(initBoard[d][i][j]);
+					m_numOfShipsPerPlayer[pi]++;
 					// init ship in relevant cells and cells in the ship
 					int shipLen = Utils::getShipLen(initBoard[d][i][j]);
 
@@ -151,10 +159,10 @@ void Board::buildBoard(const vector<vector<vector<char>>>& initBoard)
 
 void Board::splitToPlayersBoards(Board& boardA, Board& boardB) const
 {
-	int initDepthSize = depth();
-	int initRowSize = rows();
-	int initColSize = cols();
-
+	int initDepthSize = depth() + BOARD_PADDING;
+	int initRowSize = rows() + BOARD_PADDING;
+	int initColSize = cols() + BOARD_PADDING;
+	cout << initDepthSize;
 	vector<vector<vector<char>>> copyBoardA;
 	vector<vector<vector<char>>> copyBoardB;
 	for (int d = 0; d < initDepthSize; d++)
@@ -169,7 +177,7 @@ void Board::splitToPlayersBoards(Board& boardA, Board& boardB) const
 			copyBoardB[d].push_back(col);
 			for (int c = 0; c < initColSize; c++)
 			{
-				Coordinate coord(d, r, c);
+				Coordinate coord(r, c, d);
 				char sign = this->charAt(coord);
 
 				PlayerIndex pi = Utils::getPlayerIdByShip(sign);
@@ -177,21 +185,21 @@ void Board::splitToPlayersBoards(Board& boardA, Board& boardB) const
 				{
 				case PLAYER_A:
 				{
-					copyBoardA[d][r][c] = sign;
-					copyBoardB[d][r][c] = SPACE;
+					copyBoardA[d][r].push_back(sign);
+					copyBoardB[d][r].push_back(SPACE);
 				} break;
 
 				case PLAYER_B:
 				{
-					copyBoardA[d][r][c] = SPACE;
-					copyBoardB[d][r][c] = sign;
+					copyBoardA[d][r].push_back(SPACE);
+					copyBoardB[d][r].push_back(sign);
 				} break;
 
 				case MAX_PLAYER:
 				default:
 				{
-					copyBoardA[d][r][c] = SPACE;
-					copyBoardB[d][r][c] = SPACE;
+					copyBoardA[d][r].push_back(SPACE);
+					copyBoardB[d][r].push_back(SPACE);
 				}
 				} // Switch
 			}
@@ -248,7 +256,7 @@ void Board::printBoard() const
 		{
 			for (int j = 0; j < initColSize; ++j)
 			{
-				Utils::gotoxy(i, j * 3);
+				Utils::gotoxy(i + (initRowSize * d) + 2, j * 3);
 				if (SPACE == m_boardData[d][i][j]->getSign())
 				{
 					Utils::setTextColor(BACKGROUND_BLUE | BACKGROUND_RED | BACKGROUND_GREEN);
@@ -309,6 +317,7 @@ void Board::printHist()
 
 void Board::printAttack(int player, int i, int j, int d, AttackResult attackResult) const
 {
+	int initRowSize = m_rows + BOARD_PADDING;
 	if (true == m_isQuiet)
 	{
 		return;
@@ -317,13 +326,13 @@ void Board::printAttack(int player, int i, int j, int d, AttackResult attackResu
 	// animation of attack
 	for (int k = 0; k < 3; k++)
 	{
-		Utils::gotoxy(i, j * 3);
+		Utils::gotoxy(i + (initRowSize * d) + 2, j * 3);
 		if (player == PLAYER_A)
 			cout << "@  ";
 		else
 			cout << "&  ";
 		Sleep(100);
-		Utils::gotoxy(i, j * 3);
+		Utils::gotoxy(i + (initRowSize * d) + 2, j * 3);
 		cout << m_boardData[d][i][j]->getSign();
 		Sleep(100);
 	}
@@ -331,14 +340,14 @@ void Board::printAttack(int player, int i, int j, int d, AttackResult attackResu
 	{
 	case (AttackResult::Hit):
 	case (AttackResult::Sink):
-		Utils::gotoxy(i, j * 3);
+		Utils::gotoxy(i + (initRowSize * d) + 2, j * 3);
 		if (player == PLAYER_A)
 			cout << "*  ";
 		else
 			cout << "#  ";
 		break;
 	case (AttackResult::Miss):
-		Utils::gotoxy(i, j * 3);
+		Utils::gotoxy(i + (initRowSize * d) + 2, j * 3);
 		cout << SPACE;
 		break;
 	}

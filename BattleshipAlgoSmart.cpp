@@ -34,7 +34,7 @@ void BattleshipAlgoSmart::setBoard(const BoardData& board)
 		{
 			for (int j = 1; j <= m_board.cols(); ++j)
 			{
-				calcHist(Coordinate(d, i, j));
+				calcHist(Coordinate(i, j, d));
 				shared_ptr<Cell> c = m_board.get(d, i, j);
 				m_attackedQueue.push(c);
 			}
@@ -65,6 +65,7 @@ Coordinate BattleshipAlgoSmart::attack()
 	else /*(m_currentStatus == TARGET)*/
 	{
 		shared_ptr<Cell> c = popTargetAttack();
+
 		return std::move(Coordinate(c->row(), c->col(), c->depth()));
 	}
 }
@@ -297,12 +298,12 @@ void BattleshipAlgoSmart::updateHist(const vector<shared_ptr<Cell>>& cells, bool
 
 		for (auto i = 1; i <= MAX_SHIP_LEN; ++i)
 		{
-			calcHist(Coordinate(d + i, r, c));
-			calcHist(Coordinate(d - i, r, c));
-			calcHist(Coordinate(d, r + i, c));
-			calcHist(Coordinate(d, r - i, c));
-			calcHist(Coordinate(d, r, c + i));
-			calcHist(Coordinate(d, r, c - i));
+			calcHist(Coordinate(r, c, d + i));
+			calcHist(Coordinate(r, c, d - i));
+			calcHist(Coordinate(r + i, c, d));
+			calcHist(Coordinate(r - i, c, d));
+			calcHist(Coordinate(r, c + i, d));
+			calcHist(Coordinate(r, c - i, d));
 		}
 	}
 }
@@ -345,7 +346,7 @@ void BattleshipAlgoSmart::updateTargetAttackQueue(const shared_ptr<Cell> attacke
 
 		// Up
 		newRow = rowIndex - 1;
-		while (m_board.get(depthIndex, newRow, rowIndex)->isPendingCell()) newRow--;
+		while (m_board.get(depthIndex, newRow, colIndex)->isPendingCell()) newRow--;
 		if (isAttackable(m_board.get(depthIndex, newRow, colIndex)))
 			m_targetQueue.push_back(m_board.get(depthIndex, newRow, colIndex));
 	}
@@ -367,15 +368,15 @@ void BattleshipAlgoSmart::updateTargetAttackQueue(const shared_ptr<Cell> attacke
 	{
 		// Right
 		newDepth = depthIndex + 1;
-		while (m_board.get(newDepth, rowIndex, rowIndex)->isPendingCell()) newDepth++;
-		if (isAttackable(m_board.get(newDepth, rowIndex, rowIndex)))
-			m_targetQueue.push_back(m_board.get(newDepth, rowIndex, rowIndex));
+		while (m_board.get(newDepth, rowIndex, colIndex)->isPendingCell()) newDepth++;
+		if (isAttackable(m_board.get(newDepth, rowIndex, colIndex)))
+			m_targetQueue.push_back(m_board.get(newDepth, rowIndex, colIndex));
 
 		// Left
-		newCol = colIndex - 1;
-		while (m_board.get(newDepth, rowIndex, rowIndex)->isPendingCell()) newDepth--;
-		if (isAttackable(m_board.get(newDepth, rowIndex, rowIndex)))
-			m_targetQueue.push_back(m_board.get(newDepth, rowIndex, rowIndex));
+		newDepth = depthIndex - 1;
+		while (m_board.get(newDepth, rowIndex, colIndex)->isPendingCell()) newDepth--;
+		if (isAttackable(m_board.get(newDepth, rowIndex, colIndex)))
+			m_targetQueue.push_back(m_board.get(newDepth, rowIndex, colIndex));
 	}
 }
 

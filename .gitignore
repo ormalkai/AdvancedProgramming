@@ -23,3 +23,11 @@ Debug/vc140.idb
 clean_movesA.attack-a
 *.attack-b
 *.dll
+*.exp
+x64/Debug/AlgoSmart.lib
+*.idb
+x64/Release/AlgoSmart.exp
+*.cache
+x64/Debug/vc140.idb
+*.idb
+x64/Release/AlgoSmart.exp

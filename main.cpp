@@ -44,7 +44,7 @@ void parseArgs(int argc, char* argv[], string& filesLocation, bool& isQuiet, int
 int main(int argc, char* argv[])
 {
 	// init log
-	Debug::instance().init("game.log", false, true, Debug::DBG_ERROR);
+	Debug::instance().init("game.log", true, false, Debug::DBG_INFO);
 
 	Game& game = Game::instance();
 
@@ -55,8 +55,13 @@ int main(int argc, char* argv[])
 
 	system("cls");
 	
-	BoardBuilder* bb = new BoardBuilder(filesLocation);
-	auto v = bb->parseBoardFile();
+	BoardBuilder* bb = new BoardBuilder(filesLocation + "board.sboard");
+	vector<vector<vector<char>>> v; 
+	ReturnCode rc = bb->parseBoardFile(v);
+	if (RC_SUCCESS != rc)
+	{
+		return rc;
+	}
 	
 	game.loadAllAlgoFromDLLs({ filesLocation + "or.dll", filesLocation + "gal.dll" });
 	IBattleshipGameAlgo* ibg1 = get<1>(game.m_algoDLLVec[PLAYER_A])();
@@ -65,7 +70,7 @@ int main(int argc, char* argv[])
 	IBattleshipGameAlgo* ibg2 = get<1>(game.m_algoDLLVec[PLAYER_B])();
 	unique_ptr<IBattleshipGameAlgo> p2(ibg2);
 
-	ReturnCode rc = game.init(v,move(p1), move(p2));
+	rc = game.init(v,move(p1), move(p2));
 	game.startGame();
 	
 	/*ReturnCode rc = game.init(filesLocation, isQuiet, delay);
