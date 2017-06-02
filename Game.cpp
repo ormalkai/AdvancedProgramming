@@ -12,23 +12,19 @@
 using namespace std;
 
 Game::Game(int depth, int rows, int cols) : m_depth(depth), m_rows(rows), m_cols(cols),
- m_isQuiet(false), m_currentPlayerIndex(MAX_PLAYER), m_otherPlayerIndex(MAX_PLAYER)
+m_isQuiet(false), m_currentPlayerIndex(MAX_PLAYER), m_otherPlayerIndex(MAX_PLAYER)
 {
-	for (int i = 0; i< MAX_PLAYER; i++)
-	{
-		m_players[i] = nullptr;
-	}
 }
 
 Game::~Game()
 {
-	for (int i=0; i< MAX_PLAYER ;i++)
+	/*for (int i=0; i< MAX_PLAYER ;i++)
 	{
 		if (nullptr != m_players[i])
 		{
 			delete m_players[i];
 		}
-	}
+	}*/
 }
 
 ReturnCode Game::initSboardFilePath(const string& filesPath, string& sboardFilePath)
@@ -92,7 +88,7 @@ ReturnCode Game::initDLLFilesPath(const string& filesPath, vector<string>& dllPe
  *				players, board etc
  * @Param		filesPath - location of sboard and attack files
  */
-ReturnCode Game::init(const vector<vector<vector<char>>> board, IBattleshipGameAlgo* algoA, IBattleshipGameAlgo* algoB)
+ReturnCode Game::init(const vector<vector<vector<char>>> board, unique_ptr<IBattleshipGameAlgo> algoA, unique_ptr<IBattleshipGameAlgo> algoB)
 {
 	// now the board is valid lets build our board
 	m_board.buildBoard(board);
@@ -101,13 +97,13 @@ ReturnCode Game::init(const vector<vector<vector<char>>> board, IBattleshipGameA
 	m_board.splitToPlayersBoards(boardA, boardB);
 
 	// Init player A
-	m_players[PLAYER_A] = algoA;
+	m_players.push_back(move(algoA));
+	m_players.push_back(move(algoB));
+
 	m_players[PLAYER_A]->setBoard(boardA);
-	m_players[PLAYER_A]->setPlayer(PLAYER_A);
-	
-	// Init player B
-	m_players[PLAYER_B] = algoB;
 	m_players[PLAYER_B]->setBoard(boardB);
+
+	m_players[PLAYER_A]->setPlayer(PLAYER_A);
 	m_players[PLAYER_B]->setPlayer(PLAYER_B);
 	
 	return RC_SUCCESS;
@@ -133,8 +129,6 @@ AttackRequestCode Game::requestAttack(Coordinate& req)
 }
 
 
-
-
 void Game::startGame()
 {
 
@@ -142,7 +136,6 @@ void Game::startGame()
 
 	m_board.printBoard();
 
-	IBattleshipGameAlgo* currentPlayer;
 	m_currentPlayerIndex = PLAYER_A;
 	m_otherPlayerIndex = PLAYER_B;
 	bool gameOver = false;
@@ -150,10 +143,8 @@ void Game::startGame()
 	// Game loop
 	while (!gameOver)
 	{
-		currentPlayer = m_players[m_currentPlayerIndex];
-
-		Coordinate attackReq = currentPlayer->attack();
-
+		Coordinate attackReq = m_players[m_currentPlayerIndex]->attack();
+		
 		// Check attack request 
 		AttackRequestCode arc = requestAttack(attackReq);
 		switch (arc)
@@ -190,7 +181,7 @@ void Game::startGame()
 				DBG(Debug::DBG_INFO, "You bombed youself, U R probably an idiot..");
 			}
 
-			Ship* pShip = attackedCell->getShip();
+			shared_ptr<Ship> pShip = attackedCell->getShip();
 			pShip->executeAttack();
 
 			if (pShip->isShipAlive())

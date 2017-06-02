@@ -11,28 +11,28 @@ ShipFactory& ShipFactory::instance()
 	return  instance;
 }
 
-Ship* ShipFactory::create(char ship) const
+shared_ptr<Ship> ShipFactory::create(char ship) const
 {
 	int shipLen = Utils::getShipLen(ship);
 	int shipValue = Utils::getShipValue(ship);
 	_In_ WORD shipColor = Utils::getShipColor(ship);
-	Ship* result;
+	shared_ptr<Ship> result;
 	switch (ship) {
 	case 'b':
 	case 'B':
-		result = new RubberShip(ship, shipLen, shipValue, shipColor);
+		result = make_shared<RubberShip>(ship, shipLen, shipValue, shipColor);
 		break;
 	case 'p':
 	case 'P':
-		result = new RocketShip(ship, shipLen, shipValue, shipColor);
+		result = make_shared<RocketShip>(ship, shipLen, shipValue, shipColor);
 		break;
 	case 'm':
 	case 'M':
-		result = new Submarine(ship, shipLen, shipValue, shipColor);
+		result = make_shared<Submarine>(ship, shipLen, shipValue, shipColor);
 		break;
 	case 'd':
 	case 'D':
-		result = new Destroyer(ship, shipLen, shipValue, shipColor);
+		result = make_shared<Destroyer>(ship, shipLen, shipValue, shipColor);
 		break;
 	default:
 		DBG(Debug::DBG_ERROR, "Invalid ship type %c", ship);
@@ -43,8 +43,8 @@ Ship* ShipFactory::create(char ship) const
 
 }
 
-Ship* ShipFactory::createDummyShipByCellsVector(const vector<shared_ptr<Cell>>& vec)
+shared_ptr<Ship> ShipFactory::createDummyShipByCellsVector(const vector<shared_ptr<Cell>>& vec)
 {
-	return new DummyShip(static_cast<int>(vec.size()));
+	return make_shared<DummyShip>(static_cast<int>(vec.size()));
 }
 

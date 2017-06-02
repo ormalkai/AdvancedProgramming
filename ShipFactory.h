@@ -19,14 +19,14 @@ public:
 	 * @param		j - column in initBoard
 	 * @param		initBoard - as recievd in input
 	 */
-	Ship* create(char ship) const;
+	shared_ptr<Ship> create(char ship) const;
 
 	/**
 	* @Details		create dummy ship by given vector cells
 	* @param		vec - vector of cells (Cell*) of the dummy ship
 	* @return		Pointer to requested dummy ship
 	*/
-	static Ship* createDummyShipByCellsVector(const vector<shared_ptr<Cell>>& vec);
+	static shared_ptr<Ship> createDummyShipByCellsVector(const vector<shared_ptr<Cell>>& vec);
 
 private:
 	/**

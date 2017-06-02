@@ -11,7 +11,6 @@ BoardBuilder::BoardBuilder(const string filesPath) :
 			m_cols(-1), 
 			m_rows(-1),
 			m_depth(-1),
-			m_numOfShipsPerPlayer(-1),
 			m_foundAdjacentShips(false), 
 			m_wrongSizeOrShapePerPlayer(false), 
 			m_sboardFilePath("")
@@ -43,14 +42,14 @@ void BoardBuilder::initErrorDataStructures()
 * @Details		parses sboard file and initializes the game board
 * @Return		ReturnCode
 */
-ReturnCode BoardBuilder::parseBoardFile()
+vector<vector<vector<char>>> BoardBuilder::parseBoardFile()
 {
 	// Read from file 
 	ifstream sboard(m_sboardFilePath);
 	if (!sboard.is_open())
 	{
 		DBG(Debug::DBG_ERROR, "Could not open board file: %s", m_sboardFilePath);
-		return RC_ERROR;
+		//return RC_ERROR;
 	}
 
 	ReturnCode result = getBoardDimensionsFromFile(sboard);
@@ -58,7 +57,7 @@ ReturnCode BoardBuilder::parseBoardFile()
 	{
 		// close sboard file
 		sboard.close();
-		return result;
+		//return result;
 	}
 
 	initInitBoard();
@@ -72,9 +71,10 @@ ReturnCode BoardBuilder::parseBoardFile()
 	// Print errors and return ERROR if needed
 	if (false == checkErrors())
 	{
-		return RC_ERROR;
+		//return RC_ERROR;
 	}
-	return RC_SUCCESS;
+	//return RC_SUCCESS;
+	return m_initBoard;
 }
 
 ReturnCode BoardBuilder::getBoardDimensionsFromFile(ifstream& sboard)

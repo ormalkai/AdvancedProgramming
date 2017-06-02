@@ -18,14 +18,14 @@ public:
 	}CellStatus;
 
 private:
-	CellStatus		m_status;				// The status of the cell according to the enum above
-	Ship*			m_pShip;				// pointer to the ship in this cell, NULL if no ship
-	PlayerIndex		m_playerIndexOwner;		// The unique identifier of the player own the ship
+	CellStatus			m_status;				// The status of the cell according to the enum above
+	shared_ptr<Ship>	m_pShip;				// pointer to the ship in this cell, NULL if no ship
+	PlayerIndex			m_playerIndexOwner;		// The unique identifier of the player own the ship
 	
-	Coordinate		m_coord;				// Cell's coordinates
+	Coordinate			m_coord;				// Cell's coordinates
 
-	int				m_histValue;			// The histogram value - number of ship this cell could be part of them
-	bool			m_isHitted;				// Indicator if the cell was hitted		
+	int					m_histValue;			// The histogram value - number of ship this cell could be part of them
+	bool				m_isHitted;				// Indicator if the cell was hitted		
 
 
 public:
@@ -63,13 +63,13 @@ public:
 	* @Details		returns cell's ship pointer
 	* @Return		If cell is part of ship returns ship's pointer otherwise nullptr
 	*/
-	Ship* getShip() const { return m_pShip; }
+	shared_ptr<Ship> getShip() const { return m_pShip; }
 
 	/**
 	* @Details		receives ship pointer and update cell's ship 
   	* @param		ship - pointer to ship
 	*/
-	void setShip(Ship* ship);
+	void setShip(shared_ptr<Ship> ship);
 	
 	/**
 	* @Details		receives cell status and update cell's status

@@ -118,7 +118,7 @@ void Board::buildBoard(const vector<vector<vector<char>>>& initBoard)
 					SPACE == initBoard[d - 1][i][j])
 				{
 					// create the ship
-					Ship* ship = ShipFactory::instance().create(initBoard[d][i][j]);
+					shared_ptr<Ship> ship = ShipFactory::instance().create(initBoard[d][i][j]);
 					m_shipsOnBoard.push_back(ship);
 					// init ship in relevant cells and cells in the ship
 					int shipLen = Utils::getShipLen(initBoard[d][i][j]);
@@ -209,7 +209,7 @@ char Board::getSign(int d, int r, int c) const
 
 void Board::addDummyNewShipToBoard(const vector<shared_ptr<Cell>>& shipCells)
 {
-	Ship* ship = ShipFactory::instance().createDummyShipByCellsVector(shipCells);
+	shared_ptr<Ship> ship = ShipFactory::instance().createDummyShipByCellsVector(shipCells);
 
 	m_shipsOnBoard.push_back(ship);
 	// init ship in relevant cells and cells in the ship
@@ -230,12 +230,7 @@ vector<int>& Board::shipsPerPlayer()
 
 
 Board::~Board()
-{
-	for (vector<Ship*>::iterator it = m_shipsOnBoard.begin(); it != m_shipsOnBoard.end(); ++it)
-	{
-		delete (*it);
-	}
-}
+{ }
 
 void Board::printBoard() const
 {

@@ -2,6 +2,7 @@
 #include "Debug.h"
 #include <iostream>
 #include <locale>
+#include "BoardBuilder.h"
 
 void parseArgs(int argc, char* argv[], string& filesLocation, bool& isQuiet, int& delay)
 {
@@ -53,12 +54,25 @@ int main(int argc, char* argv[])
 	parseArgs(argc, argv, filesLocation, isQuiet, delay);
 
 	system("cls");
+	
+	BoardBuilder* bb = new BoardBuilder(filesLocation);
+	auto v = bb->parseBoardFile();
+	
+	game.loadAllAlgoFromDLLs({ filesLocation + "or.dll", filesLocation + "gal.dll" });
+	IBattleshipGameAlgo* ibg1 = get<1>(game.m_algoDLLVec[PLAYER_A])();
+	unique_ptr<IBattleshipGameAlgo> p1(ibg1);
 
-	ReturnCode rc = game.init(filesLocation, isQuiet, delay);
+	IBattleshipGameAlgo* ibg2 = get<1>(game.m_algoDLLVec[PLAYER_B])();
+	unique_ptr<IBattleshipGameAlgo> p2(ibg2);
+
+	ReturnCode rc = game.init(v,move(p1), move(p2));
+	game.startGame();
+	
+	/*ReturnCode rc = game.init(filesLocation, isQuiet, delay);
 	if (RC_SUCCESS != rc)
 		return RC_ERROR;
 
 	game.startGame();
-	
+	*/
 	return 0;
 }

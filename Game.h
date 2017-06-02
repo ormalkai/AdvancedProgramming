@@ -16,19 +16,21 @@ class Game
 private:
 	
 
-	bool					m_isQuiet;						// Is quiet run, for print simulation game
-	Board					m_board;						// current board of the game
-	int						m_rows;							// number of rows in the board
-	int						m_cols;							// number of columns in the board
-	int						m_depth;						// number of depth in the board
-	int						m_currentPlayerIndex;			// he id of the next player to attack
-	int						m_otherPlayerIndex;				// the id of the other playre to attack
-	IBattleshipGameAlgo*	m_players[MAX_PLAYER];			// the players
-	
+	bool							m_isQuiet;						// Is quiet run, for print simulation game
+	Board							m_board;						// current board of the game
+	int								m_rows;							// number of rows in the board
+	int								m_cols;							// number of columns in the board
+	int								m_depth;						// number of depth in the board
+	int								m_currentPlayerIndex;			// he id of the next player to attack
+	int								m_otherPlayerIndex;				// the id of the other playre to attack
+	vector<unique_ptr<IBattleshipGameAlgo>> m_players;			// the players
 	
 	int						m_playerScore[NUM_OF_PLAYERS] = { 0 };				// player's score
 	int						m_victoriesPerPlayer[NUM_OF_PLAYERS] = { 0 };		// player's num of victories
 	bool					m_finishedAttackPlayer[NUM_OF_PLAYERS] = { false }; // finished attack inidicator per player
+
+	// Giant comment
+public:
 	vector<tuple<HINSTANCE, GetAlgoFuncType>> m_algoDLLVec;						// dll tuples <hanfle, algo func>
 
 
@@ -97,8 +99,7 @@ public:
 	 * @Details		Parse files and build board matrix
 	 *
 	 */
-	ReturnCode Game::init(const vector<vector<vector<char>>> board, IBattleshipGameAlgo* algoA, IBattleshipGameAlgo* algoB);
-
+	ReturnCode init(const vector<vector<vector<char>>> board, unique_ptr<IBattleshipGameAlgo> algoA, unique_ptr<IBattleshipGameAlgo> algoB);
 	/**
 	 * @Details		start current game
 	 */

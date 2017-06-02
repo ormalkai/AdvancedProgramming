@@ -11,7 +11,7 @@ class Board : public BoardData
 {
 private:
 	vector<vector<vector<shared_ptr<Cell>>>>	m_boardData;	// The board is matrix of Cells
-	vector<Ship*>					m_shipsOnBoard;	// Pointer to every ship on the board
+	vector<shared_ptr<Ship>>		m_shipsOnBoard;	// Pointer to every ship on the board
 	int								m_depth;		// Number of matrixes in depth
 	int								m_rows;			// Number of rows in the board
 	int								m_cols;			// Number of columns in the board

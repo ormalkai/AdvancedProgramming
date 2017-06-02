@@ -8,7 +8,7 @@ Cell::Cell() :	m_status(CellStatus::FREE),
 				m_isHitted(false)
 {}
 
-void Cell::setShip(Ship* ship) {
+void Cell::setShip(shared_ptr<Ship> ship) {
 	m_pShip = ship; 
 	m_playerIndexOwner = Utils::getPlayerIdByShip(ship->getSign());
 }

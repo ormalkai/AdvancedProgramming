@@ -41,7 +41,7 @@ public:
 	* @Details		Parses the sboard file and validates it
 	* @return		RC_ERROR if one of the valdiations according to Spec failed, RC_SUCCESS otherwise
 	*/
-	ReturnCode parseBoardFile();
+	vector<vector<vector<char>>> parseBoardFile();
 
 	/**
 	* @Details		read board from file and fill initBoard
