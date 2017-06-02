@@ -22,9 +22,11 @@ void Board::buildBoard(const BoardData& initBoard)
 	for (int d = 0; d < initDepthSize; d++)
 	{
 		vector<vector<char>> depth;
+		copyBoard.push_back(depth);
 		for (int i = 0; i < initRowSize; i++)
 		{
 			vector<char> col;
+			copyBoard[d].push_back(col);
 			for (int j = 0; j < initColSize; j++)
 			{
 				copyBoard[d][i].push_back(initBoard.charAt(Coordinate(i,j,d)));
@@ -46,13 +48,15 @@ void Board::buildBoard(const vector<vector<vector<Cell>>>& initBoard)
 	vector<vector<vector<char>>> copyBoard;
 	for (int d = 0; d < initDepthSize; d++)
 	{
-		vector<vector<Cell>> depth;
+		vector<vector<char>> depth;
+		copyBoard.push_back(depth);
 		for (int i = 0; i < initRowSize; i++)
 		{
-			vector<Cell> col;
+			vector<char> col;
+			copyBoard[d].push_back(col);
 			for (int j = 0; j < initColSize; j++)
 			{
-				copyBoard[d][i].emplace_back();
+				copyBoard[d][i].push_back(initBoard[d][i][j].getSign());
 			}
 		}
 	}
@@ -78,7 +82,7 @@ void Board::buildBoard(const vector<vector<vector<char>>>& initBoard)
 		for (int i = 0; i<initRowSize; i++)
 		{
 			vector<Cell> col;
-			m_boardData[i].push_back(col);
+			m_boardData[d].push_back(col);
 			for (int j = 0; j<initColSize; j++)
 			{
 				m_boardData[d][i].emplace_back();
