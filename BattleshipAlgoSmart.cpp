@@ -28,7 +28,7 @@ void BattleshipAlgoSmart::setBoard(const BoardData& board)
 
 	initStripSizeToNumPotentialShips();
 
-	for (int d = 0; d < m_depth; d++)
+	for (int d = 1; d <= m_board.depth(); d++)
 	{
 		for (int i = 1; i <= m_board.rows(); ++i)
 		{

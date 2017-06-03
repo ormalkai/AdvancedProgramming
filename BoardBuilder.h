@@ -128,6 +128,7 @@ public:
 	bool checkErrors() const;
 
 	void initInitBoard();
+	ReturnCode getBoardFromFile(string& boardPath);
 
 	int getNumOfShipByPlayer(PlayerIndex pi) const { return m_numOfShipsPerPlayer[pi]; }
 };

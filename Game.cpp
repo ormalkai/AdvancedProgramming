@@ -1,4 +1,5 @@
 
+#include <codecvt>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -7,13 +8,15 @@
 #include "Utils.h"
 #include "Debug.h"
 #include "Board.h"
-#include <codecvt>
+
 
 using namespace std;
 
-Game::Game(int depth, int rows, int cols) : m_depth(depth), m_rows(rows), m_cols(cols),
-m_isQuiet(false), m_currentPlayerIndex(MAX_PLAYER), m_otherPlayerIndex(MAX_PLAYER)
+
+Game::Game(Board& board, unique_ptr<IBattleshipGameAlgo> algoA, unique_ptr<IBattleshipGameAlgo> algoB) : m_isQuiet(false),
+m_currentPlayerIndex(MAX_PLAYER), m_otherPlayerIndex(MAX_PLAYER), m_isGameOver(false)
 {
+	init(board, move(algoA), move(algoB));
 }
 
 Game::~Game()
@@ -88,10 +91,18 @@ ReturnCode Game::initDLLFilesPath(const string& filesPath, vector<string>& dllPe
  *				players, board etc
  * @Param		filesPath - location of sboard and attack files
  */
-ReturnCode Game::init(const vector<vector<vector<char>>> board, unique_ptr<IBattleshipGameAlgo> algoA, unique_ptr<IBattleshipGameAlgo> algoB)
+void Game::init(const vector<vector<vector<char>>> board, unique_ptr<IBattleshipGameAlgo> algoA, unique_ptr<IBattleshipGameAlgo> algoB)
 {
 	// now the board is valid lets build our board
 	m_board.buildBoard(board);
+	
+	init(m_board, move(algoA), move(algoB));
+}
+
+void Game::init(const Board& board, unique_ptr<IBattleshipGameAlgo> algoA, unique_ptr<IBattleshipGameAlgo> algoB)
+{
+
+	m_board = board;
 	
 	Board boardA, boardB;
 	m_board.splitToPlayersBoards(boardA, boardB);
@@ -105,8 +116,6 @@ ReturnCode Game::init(const vector<vector<vector<char>>> board, unique_ptr<IBatt
 
 	m_players[PLAYER_A]->setPlayer(PLAYER_A);
 	m_players[PLAYER_B]->setPlayer(PLAYER_B);
-	
-	return RC_SUCCESS;
 }
 
 
@@ -120,7 +129,7 @@ AttackRequestCode Game::requestAttack(Coordinate& req)
 			m_finishedAttackPlayer[m_currentPlayerIndex] = true;
 			return ARC_FINISH_REQ;
 		}
-	else if (	req.depth < 0 || req.depth > m_rows ||
+	else if (	req.depth < 0 || req.depth > m_depth ||
 				req.row   < 0 || req.row   > m_rows ||
 				req.col   < 0 || req.col   > m_cols)
 		return ARC_ERROR;
@@ -138,10 +147,9 @@ void Game::startGame()
 
 	m_currentPlayerIndex = PLAYER_A;
 	m_otherPlayerIndex = PLAYER_B;
-	bool gameOver = false;
 
 	// Game loop
-	while (!gameOver)
+	while (!m_isGameOver)
 	{
 		Coordinate attackReq = m_players[m_currentPlayerIndex]->attack();
 
@@ -151,7 +159,7 @@ void Game::startGame()
 		{
 		case ARC_GAME_OVER:
 			DBG(Debug::DBG_INFO, "For both players - No more attack requests");
-			gameOver = true;
+			m_isGameOver = true;
 			continue;
 		case ARC_FINISH_REQ:
 			proceedToNextPlayer();
@@ -234,7 +242,7 @@ void Game::startGame()
 		// If game over break
 		if (Utils::isExistInVec(shipsPerPlayer, 0))
 		{
-			gameOver = true;
+			m_isGameOver = true;
 			DBG(Debug::DBG_DEBUG, "Game over - 0 ships remaining");
 		}
 		// If attack failed - iter.next
@@ -249,7 +257,6 @@ void Game::startGame()
 
 	} // Game Loop
 	
-
 	printSummary();
 }
 

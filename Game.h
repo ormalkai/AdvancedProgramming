@@ -15,7 +15,7 @@ class Game
 {
 private:
 	
-
+	bool							m_isGameOver;
 	bool							m_isQuiet;						// Is quiet run, for print simulation game
 	Board							m_board;						// current board of the game
 	int								m_rows;							// number of rows in the board
@@ -33,12 +33,12 @@ private:
 public:
 	vector<tuple<HINSTANCE, GetAlgoFuncType>> m_algoDLLVec;						// dll tuples <hanfle, algo func>
 
-
 	/**
 	 * @Details		game constructor
 	 */
-	Game(int depth = BOARD_DEPTH_SIZE,  int rows = BOARD_ROW_SIZE, int cols = BOARD_COL_SIZE);
+	Game(int rows = BOARD_ROW_SIZE, int cols = BOARD_COL_SIZE, int depth = BOARD_DEPTH_SIZE);
 
+	Game(Board& board, unique_ptr<IBattleshipGameAlgo> algoA, unique_ptr<IBattleshipGameAlgo> algoB);
 	/**
 	* @Details		game destructor
 	*/
@@ -99,7 +99,8 @@ public:
 	 * @Details		Parse files and build board matrix
 	 *
 	 */
-	ReturnCode init(const vector<vector<vector<char>>> board, unique_ptr<IBattleshipGameAlgo> algoA, unique_ptr<IBattleshipGameAlgo> algoB);
+	void init(const vector<vector<vector<char>>> board, unique_ptr<IBattleshipGameAlgo> algoA, unique_ptr<IBattleshipGameAlgo> algoB);
+	void init(const Board& board, unique_ptr<IBattleshipGameAlgo> algoA, unique_ptr<IBattleshipGameAlgo> algoB);
 	/**
 	 * @Details		start current game
 	 */
@@ -108,11 +109,11 @@ public:
 	/**
 	 * @Details		singleton class, get current instance.
 	 */
-	static Game& instance()
-	{
-		static Game gameInstance;
-		return gameInstance;
-	}
+//	static Game& instance()
+//	{
+//		static Game gameInstance;
+//		return gameInstance;
+//	}
 
 	/**
 	* @Details		Load dlls by given pathes to data memberes (tuples of handle and pointer to function)

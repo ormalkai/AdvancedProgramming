@@ -83,7 +83,7 @@ ReturnCode BoardBuilder::getBoardDimensionsFromFile(ifstream& sboard)
 {
 	string line;
 	Utils::safeGetline(sboard, line);
-	regex regex("^([0-9]+)X([0-9]+)X([0-9]+)");
+	regex regex("^([0-9]+)x([0-9]+)x([0-9]+)");
 	smatch m;
 	regex_match(line, m, regex);
 	if (m.size() != 4)
@@ -147,7 +147,7 @@ void BoardBuilder::readSBoardFile(ifstream& sboard)
 void BoardBuilder::validateBoard()
 {
 	// for each char
-	for (int d = 1; d< m_depth; ++d)
+	for (int d = 1; d <= m_depth; ++d)
 	{
 		for (int i = 1; i <= m_rows; ++i)
 		{

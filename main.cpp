@@ -3,6 +3,7 @@
 #include <iostream>
 #include <locale>
 #include "BoardBuilder.h"
+#include "Tournament.h"
 
 void parseArgs(int argc, char* argv[], string& filesLocation, bool& isQuiet, int& delay)
 {
@@ -43,15 +44,24 @@ void parseArgs(int argc, char* argv[], string& filesLocation, bool& isQuiet, int
 
 int main(int argc, char* argv[])
 {
+	bool isQuiet;
+	int delay;
+	string filesLocation;
+	parseArgs(argc, argv, filesLocation, isQuiet, delay);
+
 	// init log
 	Debug::instance().init("game.log", true, false, Debug::DBG_INFO);
 
+	Tournament& tournament = Tournament::instance();
+	
+	tournament.init(filesLocation, 4);
+	tournament.startTournament();
+	
+	
 	Game& game = Game::instance();
 
-	string filesLocation;
-	bool isQuiet;
-	int delay;
-	parseArgs(argc, argv, filesLocation, isQuiet, delay);
+	
+	
 
 	system("cls");
 	
@@ -63,7 +73,8 @@ int main(int argc, char* argv[])
 		return rc;
 	}
 	
-	game.loadAllAlgoFromDLLs({ filesLocation + "or.dll", filesLocation + "gal.dll" });
+	string dllFolder = "C:\\Users\\USER\\Documents\\GitHub\\Ex1\\Proj\\Ex1\\x64\\Debug\\";
+	game.loadAllAlgoFromDLLs({ dllFolder + "or.dll", dllFolder + "gal.dll" });
 	IBattleshipGameAlgo* ibg1 = get<1>(game.m_algoDLLVec[PLAYER_A])();
 	unique_ptr<IBattleshipGameAlgo> p1(ibg1);
 
@@ -79,5 +90,7 @@ int main(int argc, char* argv[])
 
 	game.startGame();
 	*/
+	int a;
+	cin >> a;
 	return 0;
 }
