@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
 	// init log
 	Debug::instance().init("game.log", true, false, Debug::DBG_INFO);
 
-	Tournament& tournament = Tournament::instance();
+	/*Tournament& tournament = Tournament::instance();
 	
 	tournament.init(filesLocation, 4);
 	tournament.startTournament();

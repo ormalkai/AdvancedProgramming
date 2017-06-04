@@ -260,6 +260,15 @@ void Game::startGame()
 	printSummary();
 }
 
+bool Game::isGameOver() const
+{
+	return m_isGameOver;
+}
+
+pair<int,int> Game::getScore()
+{
+	return make_pair(m_playerScore[PLAYER_A], m_playerScore[PLAYER_B]);
+}
 ReturnCode Game::loadAllAlgoFromDLLs(const vector<string>& dllPaths)
 {
 	GetAlgoFuncType getAlgoFunc;

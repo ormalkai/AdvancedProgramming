@@ -226,4 +226,6 @@ public:
 	* @Param		showFlag - cursor show flag
 	*/
 	static void ShowConsoleCursor(bool showFlag);
+
+	static ReturnCode getPlayerNameByDllPath(const string& path, string& playerName);
 };

@@ -5,6 +5,7 @@
 #include "Debug.h"
 #include <thread>
 #include <cassert>
+#include "PriorityQueue.h"
 
 
 ReturnCode Tournament::init(const string& directoryPath, int numOfThreads)
@@ -27,7 +28,6 @@ ReturnCode Tournament::init(const string& directoryPath, int numOfThreads)
 		return rc;
 	}
 	
-
 	// Load boards
 	thread thrBoardLoading(&Tournament::loadBoards, this, boardsFilesPaths);
 	thread thrDllLoading(&Tournament::loadAllAlgoFromDLLs, this, dllsFilesPaths);
@@ -36,10 +36,8 @@ ReturnCode Tournament::init(const string& directoryPath, int numOfThreads)
 	thrBoardLoading.join();
 	thrDllLoading.join();
 
-	// TODO 
 	// Load games to data structure
-	// And sort, Build games order
-
+	buildGameSchedule();
 
 	return RC_SUCCESS;
 }
@@ -48,26 +46,101 @@ ReturnCode Tournament::init(const string& directoryPath, int numOfThreads)
 ReturnCode Tournament::startTournament(int numOfThreads)
 {
 
-	
+
+	m_isRoundFinished = false;
+	m_isTournamentFinished = false;
+
 
 	return RC_SUCCESS;
 
 }
 
-void Tournament::executeGame() {
+void Tournament::printResult() const
+{
+	// Lock
+	vector<PlayerStatistics> statToPrint = m_playerStat;
+	// Unlock
+
+
+	sort(statToPrint.begin(), statToPrint.end(), SortByAge());
+	
+	// TODO: Print in the format
+
+	/*
+#       Team Name               Wins    Losses  %       Pts For Pts Against
+
+1.      oribarel.smart          1530    270     85      34930   18353
+2.      galtzafri.smart         1487    313     82.61   41157   28268
+3.      danielkozlov.smart      1465    335     81.39   35369   26544
+4.      gelbart1.smart          1353    447     75.17   32802   26553
+5.      danachernov.smart       1329    471     73.83   34534   22008
+6.      shiranmazor.smart       1295    505     71.94   48695   25508
+7.      ormalkai.smart          1278    522     71      34798   25337
+8.      itamark.smart           1268    532     70.44   42776   33455
+9.      nivk.smart              1198    602     66.56   32553   26301
+10.     danielf1.smart          1013    787     56.28   38101   34543
+11.     ronnysivan.smart        976     824     54.22   37333   36036
+12.     amitmarcus.smart        975     825     54.17   28339   28585
+13.     itayroll.smart          974     826     54.11   40821   37034
+14.     inbarm1.smart           962     838     53.44   41708   38733
+15.     ofirg1.smart            940     860     52.22   36013   35334
+	 */
+
+
+
+}
+
+void Tournament::executeGame(int workerId) {
 
 	// There is more game to play
 
 	int currentGameIndex = m_nextGameIndex++;
 	while (currentGameIndex < m_totalGamesToPlay)
 	{
-		m_gameList[currentGameIndex].startGame();
+		Game& currentGame = m_gameList[currentGameIndex];
+		currentGame.startGame();
+		
+		// Notify result
+		notifyGameResult(currentGame, currentGameIndex);
+	
+
+		// TODO: Fix !! Mistake !! - The last game maybe will over before the pervious game,
+		// and then the round is not over
+		// Notify end of round
+		if (lastGameInRound(currentGameIndex))
+		{
+			m_cvRound.notify_one();
+		}
+
+
 		currentGameIndex = m_nextGameIndex++;
 	}
 
-
+	DBG(Debug::DBG_INFO, "Worker %d complete job", workerId);
 }
 
+bool Tournament::lastGameInRound(int gameIndex) const
+{
+	static size_t gamesInRound = m_algoDLLVec.size() / 2;
+	return gameIndex % gamesInRound == 0;
+}
+
+void Tournament::notifyGameResult(Game& game, int gameIndex)
+{
+	assert(game.isGameOver());
+
+	pair <int, int> playersIndexes = m_gamePlayerIndexes[gameIndex];
+	int playerAIndex = playersIndexes.first;
+	int playerBIndex = playersIndexes.second;
+
+	pair<int, int> s = game.getScore();
+	int playerAScore = s.first;
+	int playerBScore = s.second;
+	
+	lock_guard<mutex> guard(m_statMutex);
+	m_playerStat[playerAIndex].update(make_pair(playerAScore, playerBScore));
+	m_playerStat[playerBIndex].update(make_pair(playerBScore, playerAScore));
+}
 
 
 ReturnCode Tournament::initSboardFiles(const string& directoryPath, vector<string>& sboardFiles)
@@ -108,6 +181,8 @@ ReturnCode Tournament::initDLLFilesPath(const string& directoryPath, vector<stri
 ReturnCode Tournament::loadAllAlgoFromDLLs(const vector<string>& dllPaths)
 {
 	GetAlgoFuncType getAlgoFunc;
+	
+	int playerIndex = 0;
 
 	for (string path : dllPaths)
 	{
@@ -127,7 +202,17 @@ ReturnCode Tournament::loadAllAlgoFromDLLs(const vector<string>& dllPaths)
 			continue;
 		}
 
+		// Extract player name for the dll path
+		string playerName;
+		ReturnCode rc = Utils::getPlayerNameByDllPath(path, playerName);
+		if (RC_SUCCESS != rc)
+		{
+			continue;
+		}
+		
 		m_algoDLLVec.push_back(make_tuple(hDll, getAlgoFunc));
+		m_playerStat.emplace_back(playerIndex, playerName);
+		playerIndex++;
 	}
 
 	return RC_SUCCESS;
@@ -154,7 +239,7 @@ ReturnCode Tournament::loadBoards(vector<string>& boardsPaths)
 	return RC_SUCCESS;
 }
 
-ReturnCode Tournament::buildGameSchedule()
+void Tournament::buildGameSchedule()
 {
 	size_t numOfBoards = m_boards.size();
 	size_t numOfAlgos = m_algoDLLVec.size();
@@ -171,6 +256,9 @@ ReturnCode Tournament::buildGameSchedule()
 				int playerAIndex = p.first;
 				int playerBIndex = p.second;
 
+				if (playerAIndex == -1 || playerBIndex == -1)
+					continue;
+
 				Board b = m_boards[boardIndex];
 				
 				// TODO: Change to unique ptr
@@ -180,10 +268,9 @@ ReturnCode Tournament::buildGameSchedule()
 				//IBattleshipGameAlgo* ibg1 = get<1>(m_algoDLLVec[playerAIndex])();
 				//IBattleshipGameAlgo* ibg2 = get<1>(m_algoDLLVec[playerBIndex])();
 				m_gameList.emplace_back(b, ibg1, ibg2);
-				
+				m_gamePlayerIndexes.emplace_back(make_pair(playerAIndex, playerBIndex));
 			}
 		}
-		
 	}
 }
 
@@ -206,7 +293,7 @@ vector<vector<pair<int, int>>> Tournament::createSchedule(int numOfAlgos)
 
 	for (int i = 0; i < list.size() - 1; i++)
 	{
-		int mid = list.size() / 2;
+		size_t mid = list.size() / 2;
 		vector<int> l1(list.begin(), list.begin() + mid);
 		vector<int> l2(list.begin() + mid, list.end());
 		l2.reserve(l2.size());
@@ -259,7 +346,21 @@ vector<pair<int, int>> Tournament::zip(vector<int> first, vector<int> second)
 
 void Tournament::reportResult()
 {
+	static size_t gamesInRound = m_algoDLLVec.size() / 2;
 
+	
+	while (m_isTournamentFinished)
+	{
+		int indexLastGameInRound = ((m_nextRoundToReport + 1) * gamesInRound) - 1;
+		Game& lastGameInRound = m_gameList[indexLastGameInRound];
+	
+		unique_lock<mutex> lk(m_statMutex);
+		m_cvRound.wait(lk, lastGameInRound.isGameOver());
+
+		if (!m_isTournamentFinished)
+			this->printResult();
+
+	}
 }
 
 

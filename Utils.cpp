@@ -4,6 +4,8 @@
 #include <locale>
 #include <codecvt>
 #include <algorithm>
+#include <regex>
+#include "Debug.h"
 
 
 map<char, int> Utils::m_shipLenBySign = {
@@ -291,4 +293,20 @@ void Utils::ShowConsoleCursor(bool showFlag)
 	GetConsoleCursorInfo(out, &cursorInfo);
 	cursorInfo.bVisible = showFlag; // set the cursor visibility
 	SetConsoleCursorInfo(out, &cursorInfo);
+}
+
+ReturnCode Utils::getPlayerNameByDllPath(const string& path, string& playerName)
+{
+	regex regex("ex3\.(\S+\.smart)\.dll$");
+	smatch m;
+	regex_match(path, m, regex);
+	if (m.size() != 2)
+	{
+		DBG(Debug::DBG_ERROR, "Failed to extract player name from dll path: %s", path.c_str());
+		return RC_ERROR;
+	}
+	
+	playerName = m[1];
+
+	return RC_SUCCESS;
 }

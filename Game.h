@@ -105,6 +105,8 @@ public:
 	 * @Details		start current game
 	 */
 	void startGame();
+	bool isGameOver() const;
+	pair<int, int> getScore();
 
 	/**
 	 * @Details		singleton class, get current instance.
