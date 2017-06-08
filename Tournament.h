@@ -38,6 +38,10 @@ private:
 	ReturnCode init(const string& directoryPath, int numOfThreads);
 	ReturnCode startTournament(int numOfThreads);
 	void printResult() const;
+	
+	template <class T>
+	static void printElement(T t, const int& width);
+	
 	void executeGame(int workerId);
 	bool lastGameInRound(int gameIndex) const;
 	void notifyGameResult(Game& game, int gameIndex);

@@ -18,10 +18,10 @@ void PlayerStatistics::update(std::pair<int, int> result)
 	}
 	else
 	{
-		++m_loses;
+		++m_losses;
 	}
 	
-	assert(m_gamesPlayed == m_wins + m_loses);
+	assert(m_gamesPlayed == m_wins + m_losses);
 
 	m_ptsFor += myScore;
 	m_ptsAgainst += otherScore;

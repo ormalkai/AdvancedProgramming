@@ -6,6 +6,7 @@
 #include <thread>
 #include <cassert>
 #include "PriorityQueue.h"
+#include <iomanip>
 
 
 ReturnCode Tournament::init(const string& directoryPath, int numOfThreads)
@@ -58,12 +59,41 @@ ReturnCode Tournament::startTournament(int numOfThreads)
 void Tournament::printResult() const
 {
 	// Lock
-	vector<PlayerStatistics> statToPrint = m_playerStat;
+	vector<PlayerStatistics> playerStatVec = m_playerStat;
 	// Unlock
-
-
-	sort(statToPrint.begin(), statToPrint.end(), SortByAge());
 	
+	sort(playerStatVec.begin(), playerStatVec.end(), SortByAge());
+	
+	const int nameWidth = 24;
+	const int colWidth = 8;
+	
+	printElement("#", colWidth);
+	printElement("Team Name", nameWidth);
+	printElement("Wins", colWidth);
+	printElement("Losses", colWidth);
+	printElement("%", colWidth);
+	printElement("Pts For", colWidth);
+	printElement("Pts Against", colWidth);
+	cout << endl;
+	
+	for (int i = 0; i < playerStatVec.size(); i++) {
+
+		PlayerStatistics& ps = playerStatVec[i];
+		int playerIndex = ps.getPlayerIndex();
+		
+		int wins = ps.getWins();
+		int losses = ps.getLosses();
+		double prec = ((double)wins / (wins + losses)) * 100;
+	
+		printElement(i + 1, colWidth);
+		printElement(ps.getPlayerName(), colWidth);
+		printElement(wins, colWidth);
+		printElement(losses, colWidth);
+		printElement(prec, colWidth);
+		printElement(ps.getPointsFor(), colWidth);
+		printElement(ps.getPointsAgainst(), colWidth);
+	}
+
 	// TODO: Print in the format
 
 	/*
@@ -86,9 +116,13 @@ void Tournament::printResult() const
 15.     ofirg1.smart            940     860     52.22   36013   35334
 	 */
 
-
-
 }
+
+template<typename T> void Tournament::printElement(T t, const int& width)
+{
+	cout << left << setw(width) << setfill(' ') << t;
+}
+
 
 void Tournament::executeGame(int workerId) {
 
