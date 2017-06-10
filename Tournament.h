@@ -40,6 +40,11 @@ private:
 		vector<GameResult>	m_results;			// holds all the results in this round
 		mutex				m_roundMutex;		// lock for each round between workers and reporter
 		RoundResults() : m_playersFinished(0) {}
+		RoundResults(const RoundResults &other) : m_roundMutex()
+		{
+			m_playersFinished = other.m_playersFinished;
+			m_results = other.m_results;
+		}
 	};
 
 	vector<RoundResults>	m_playersResultsPerRound; // the main database of the tournament
@@ -66,9 +71,9 @@ private:
 	};
 
 
-	ReturnCode init(const string& directoryPath, int numOfThreads);
+	
 	void initPlayerResultsPerRound();
-	void startTournament(int numOfThreads);
+	
 	void printResult() const;
 	
 	template <class T>
@@ -96,7 +101,8 @@ private:
 	void updateStatAndPrintRound();
 
 public:
-
+	ReturnCode init(const string& directoryPath);
+	void startTournament(int numOfThreads);
 	static Tournament& instance()
 	{
 		static Tournament tournamentInstance;

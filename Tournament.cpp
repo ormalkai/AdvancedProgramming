@@ -9,7 +9,7 @@
 #include <iomanip>
 
 
-ReturnCode Tournament::init(const string& directoryPath, int numOfThreads)
+ReturnCode Tournament::init(const string& directoryPath)
 {
 	vector<string> boardsFilesPaths;
 	
@@ -328,8 +328,7 @@ ReturnCode Tournament::loadBoards(vector<string>& boardsPaths)
 			return rc;
 		}
 		
-		// TODO: using emplace for copy c'tor
-		m_boards.emplace_back(b);
+		m_boards.push_back(b);
 	}
 	
 	DBG(Debug::DBG_INFO, "Finished to load dlls, total wad loaded: %d", m_boards.size());
@@ -379,7 +378,7 @@ vector<vector<pair<int, int>>> Tournament::createSchedule(int numOfAlgos)
 	vector<int> list(numOfAlgos);
 	for (int i = 0; i < numOfAlgos; i++)
 	{
-		list[i] = i;
+		list.push_back(i);
 	}
 
 	vector<vector<pair<int,int>>> result;

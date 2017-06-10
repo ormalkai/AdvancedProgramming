@@ -11,14 +11,14 @@ class Board : public BoardData
 {
 private:
 	vector<vector<vector<shared_ptr<Cell>>>>	m_boardData;	// The board is matrix of Cells
-	vector<shared_ptr<Ship>>		m_shipsOnBoard;	// Pointer to every ship on the board
-	int								m_depth;		// Number of matrixes in depth
-	int								m_rows;			// Number of rows in the board
-	int								m_cols;			// Number of columns in the board
-	bool							m_isQuiet;		// Is quiet run, for print simulation game
-	int								m_delay;		// delay between every attack in game simulation
+	vector<shared_ptr<Ship>>					m_shipsOnBoard;	// Pointer to every ship on the board
+	int											m_depth;		// Number of matrixes in depth
+	int											m_rows;			// Number of rows in the board
+	int											m_cols;			// Number of columns in the board
+	bool										m_isQuiet;		// Is quiet run, for print simulation game
+	int											m_delay;		// delay between every attack in game simulation
 
-	vector<int>						m_numOfShipsPerPlayer;
+	vector<int>									m_numOfShipsPerPlayer;
 
 
 	class BoardBuilder
@@ -181,7 +181,7 @@ public:
 	 */
 	Board(const Board &);
 	Board& operator=(const Board &);
-	Board(Board &&) = delete;
+	Board(Board &&) = default; // TODO ORM working?
 
 	/**
 	* @Details		Receive row and col indexes and returns reference for the cell in the board

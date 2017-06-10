@@ -16,12 +16,17 @@
 
 Board::Board(const Board & other)
 {
+	// TODO not me
 	this->buildBoard(other);
 }
 Board& Board::operator=(const Board & other)
 {
-	Board b;
-	return b.buildBoard(other);
+	if (&other != this)
+	{
+		this->buildBoard(other);
+	}
+	
+	return *this;
 }
 
 

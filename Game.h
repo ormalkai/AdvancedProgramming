@@ -53,7 +53,7 @@ public:
 	/**
 	* @Details		ignore = operator
 	*/
-	Game(Game&&) = delete;
+	Game(Game&&) = default;
 
 	/**
 	* @Details		find sboard file by given directory, search first file with extension *.sboard
