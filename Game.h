@@ -31,13 +31,9 @@ private:
 
 	// Giant comment
 public:
-	vector<tuple<HINSTANCE, GetAlgoFuncType>> m_algoDLLVec;						// dll tuples <hanfle, algo func>
-
 	/**
 	 * @Details		game constructor
 	 */
-	Game(int rows = BOARD_ROW_SIZE, int cols = BOARD_COL_SIZE, int depth = BOARD_DEPTH_SIZE);
-
 	Game(Board& board, unique_ptr<IBattleshipGameAlgo> algoA, unique_ptr<IBattleshipGameAlgo> algoB);
 	/**
 	* @Details		game destructor
@@ -116,14 +112,6 @@ public:
 //		static Game gameInstance;
 //		return gameInstance;
 //	}
-
-	/**
-	* @Details		Load dlls by given pathes to data memberes (tuples of handle and pointer to function)
-	* @param		dllPaths - vector of paths of the dlls
-	* @Return		ReturnCode::RC_ERROR - in case loading error
-	*				ReturnCode::RC_SUCCESS - return in all dlls load successfully  
-	*/
-	ReturnCode loadAllAlgoFromDLLs(const vector<string>& dllPaths);
 
 	
 	/**

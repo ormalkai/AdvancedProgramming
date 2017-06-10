@@ -25,7 +25,7 @@ void BattleshipAlgoSmart::setBoard(const BoardData& board)
 	m_depth = board.depth();
 
 	m_board.buildBoard(board);
-
+	m_board.getOtherPlayerShips(m_otherPlayerShips);
 	initStripSizeToNumPotentialShips();
 
 	for (int d = 1; d <= m_board.depth(); d++)
@@ -74,6 +74,9 @@ void BattleshipAlgoSmart::handleUntargetShipSunk(shared_ptr<Cell> const attacked
 {
 	vector<shared_ptr<Cell>> attackedShipCells = getSunkShipByCell(attackedCell);
 
+	// erase this ship from others list
+	removeOtherPlayerSunkShip(static_cast<int>(attackedShipCells.size()));
+
 	// Update hist
 	updateHist(attackedShipCells);
 }
@@ -86,6 +89,9 @@ void BattleshipAlgoSmart::handleTargetShipSunk(shared_ptr<Cell> const attackedCe
 
 	// Add the cell was attacked for update the neighbors
 	m_currentAttackedShipCells.push_back(attackedCell);
+
+	// erase this ship from others list
+	removeOtherPlayerSunkShip(static_cast<int>(m_currentAttackedShipCells.size()));
 
 	// Update hist
 	updateHist(m_currentAttackedShipCells);
@@ -110,7 +116,7 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, Coordinate move, Atta
 		// Update hist
 		updateHist(vector<shared_ptr<Cell>>{attackedCell}, false);
 	}
-
+	// attack is mine
 	if (m_id == player)
 	{
 		if (HUNT == m_currentStatus)
@@ -121,7 +127,9 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, Coordinate move, Atta
 			{
 				// Add the cell was attacked for update the neighbors
 				m_currentAttackedShipCells.push_back(attackedCell);
-
+				
+				// erase this ship from others list
+				removeOtherPlayerSunkShip(static_cast<int>(m_currentAttackedShipCells.size()));
 				// Update hist
 				updateHist(m_currentAttackedShipCells);
 
@@ -168,7 +176,7 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, Coordinate move, Atta
 			}
 		}
 	}
-	else if (attackedCell->getPlayerIndexOwner() != getId())
+	else if (attackedCell->getPlayerIndexOwner() != getId()) // other player attacked himself
 	{
 		if (HUNT == m_currentStatus)
 		{
@@ -481,9 +489,9 @@ void BattleshipAlgoSmart::calcHist(Coordinate c)
 
 
 	// Calc
-	numOfPotentialShips += m_stripToPotentialShips[{maxIndexOfValid.at(Direction::INSIDE), maxIndexOfValid.at(Direction::OUTSIDE)}];
-	numOfPotentialShips += m_stripToPotentialShips[{maxIndexOfValid.at(Direction::UP), maxIndexOfValid.at(Direction::DOWN)}];
-	numOfPotentialShips += m_stripToPotentialShips[{maxIndexOfValid.at(Direction::LEFT), maxIndexOfValid.at(Direction::RIGHT)}];
+	numOfPotentialShips += getPotentialShipsByStrip({maxIndexOfValid.at(Direction::INSIDE), maxIndexOfValid.at(Direction::OUTSIDE)});
+	numOfPotentialShips += getPotentialShipsByStrip({maxIndexOfValid.at(Direction::UP), maxIndexOfValid.at(Direction::DOWN)});
+	numOfPotentialShips += getPotentialShipsByStrip({maxIndexOfValid.at(Direction::LEFT), maxIndexOfValid.at(Direction::RIGHT)});
 
 	cell->setHistValue(numOfPotentialShips);
 }
@@ -591,6 +599,72 @@ void BattleshipAlgoSmart::initStripSizeToNumPotentialShips()
 			m_stripToPotentialShips.emplace(make_pair(make_pair(i, j), numPotentialShips));
 		}
 	}
+}
+
+void BattleshipAlgoSmart::initStripSizeToNumPotentialShipsPerShip()
+{
+	// init maps
+	for (int shipLen = 0; shipLen <= MAX_SHIP_LEN; shipLen++)
+	{
+		m_stripToPotentialShipsPerShip.push_back(map<pair<int, int>, int>());
+	}
+
+	// calc maps
+	for (int shipLen = 2; shipLen <= MAX_SHIP_LEN; shipLen++)
+	{
+		// has right
+		for (int i = 0; i < MAX_SHIP_LEN; i++)
+		{
+			// has left
+			for (int j = 0; j < MAX_SHIP_LEN; j++)
+			{
+				int numPotentialShips = 0;
+				for (int offset = 0; offset < shipLen; offset++)
+				{
+					if (isShipValidInOffset(shipLen, offset, i, j))
+					{
+						numPotentialShips++;
+					}
+				}
+				m_stripToPotentialShipsPerShip[shipLen].emplace(make_pair(make_pair(i, j), numPotentialShips));
+			}
+		}
+	}
+}
+
+int BattleshipAlgoSmart::getPotentialShipsByStrip(pair<int, int>strip)
+{
+	int numOfPotentialShips = 0;
+	if (m_shipAwarenessStatus)
+	{
+		for (auto const& ship : m_otherPlayerShips)
+		{
+			numOfPotentialShips += m_stripToPotentialShipsPerShip[Utils::getShipLen(ship)][strip];
+		}
+	}
+	else
+	{
+		numOfPotentialShips = m_stripToPotentialShips[strip];
+	}
+	
+	return numOfPotentialShips;
+}
+
+void BattleshipAlgoSmart::removeOtherPlayerSunkShip(int len)
+{
+	for (auto it = m_otherPlayerShips.begin(); it < m_otherPlayerShips.end(); ++it)
+	{
+		if (*it == len)
+		{
+			m_otherPlayerShips.erase(it);
+			return;
+		}
+	}
+	// NOTE: if we got here that means that someone delivered illegal board
+	// but the game manager decided to continue playing. illegal board means
+	// that the number of ships and the type of ships is not equal for both players
+	// in order to continue playing we need to disable ship awareness feature
+	m_shipAwarenessStatus = false;
 }
 
 IBattleshipGameAlgo* GetAlgorithm()

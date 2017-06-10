@@ -101,7 +101,7 @@ void Game::init(const vector<vector<vector<char>>> board, unique_ptr<IBattleship
 
 void Game::init(const Board& board, unique_ptr<IBattleshipGameAlgo> algoA, unique_ptr<IBattleshipGameAlgo> algoB)
 {
-
+	// invoke copy constructor!
 	m_board = board;
 	
 	Board boardA, boardB;
@@ -269,33 +269,7 @@ pair<int,int> Game::getScore()
 {
 	return make_pair(m_playerScore[PLAYER_A], m_playerScore[PLAYER_B]);
 }
-ReturnCode Game::loadAllAlgoFromDLLs(const vector<string>& dllPaths)
-{
-	GetAlgoFuncType getAlgoFunc;
 
-	for (string path : dllPaths)
-	{
-		// Load dynamic library
-		HINSTANCE hDll = LoadLibraryA(path.c_str()); // Notice: Unicode compatible version of LoadLibrary
-		if (!hDll)
-		{
-			cout << "Cannot load dll: " << path << endl;
-			return RC_ERROR;
-		}
-		
-		// Get GetAlgorithm function pointerm
-		getAlgoFunc = (GetAlgoFuncType)GetProcAddress(hDll, "GetAlgorithm");
-		if (!getAlgoFunc)
-		{
-			cout << "Cannot load dll: " << path << endl;		
-			return RC_ERROR;
-		}
-
-		m_algoDLLVec.push_back(make_tuple(hDll, getAlgoFunc));
-	}
-
-	return RC_SUCCESS;
-}
 
 void Game::printSummary() const
 {

@@ -8,13 +8,13 @@ using namespace std;
 class PlayerStatistics
 {
 private:
-	atomic<int>  m_playerIndex;
-	string m_playerName;
-	atomic<int>  m_gamesPlayed;
-	atomic<int>  m_wins;
-	atomic<int>  m_losses;
-	atomic<int> m_ptsFor;
-	atomic<int> m_ptsAgainst;
+	int		m_playerIndex;
+	string	m_playerName;
+	int		m_gamesPlayed;
+	int		m_wins;
+	int		m_losses;
+	int		m_ptsFor;
+	int		m_ptsAgainst;
 
 	
 public:
@@ -26,7 +26,7 @@ public:
 		return this->m_wins < other.m_wins;
 	}
 
-	void update(pair<int, int> result);
+	void update(const pair<int, int> result);
 
 	int getWins() const { return m_wins; }
 	int getLosses() const { return m_losses; }

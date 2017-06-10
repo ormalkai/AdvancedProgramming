@@ -179,8 +179,8 @@ public:
 	/**
 	 * @Details		Copy constructor, default.
 	 */
-	Board(const Board &) = default;
-	Board& operator=(const Board &) = default;
+	Board(const Board &);
+	Board& operator=(const Board &);
 	Board(Board &&) = delete;
 
 	/**
@@ -284,5 +284,7 @@ public:
 
 	void splitToPlayersBoards(Board& boardA, Board& boardB) const;
 	ReturnCode loadBoardFromFile(string& boardPath);
+
+	void getOtherPlayerShips(vector<int>& ships);
 
 };

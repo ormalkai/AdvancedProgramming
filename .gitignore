@@ -31,3 +31,7 @@ x64/Release/AlgoSmart.exp
 x64/Debug/vc140.idb
 *.idb
 x64/Release/AlgoSmart.exp
+/x64/Release/Common.lib
+/x64/Release/AlgoSmart.lib
+/x64/Release/AlgoSmart.ipdb
+/x64/Release/AlgoSmart.iobj

@@ -14,6 +14,16 @@
 #define INC_COL(DIR, COL, OFFSET) (((ShipDirection::HORIZONTAL) == (DIR)) ? ((COL) + (OFFSET)) : (COL))
 #define INC_DEPTH(DIR, DEP, OFFSET) (((ShipDirection::DEPTH) == (DIR)) ? ((DEP) + (OFFSET)) : (DEP))
 
+Board::Board(const Board & other)
+{
+	this->buildBoard(other);
+}
+Board& Board::operator=(const Board & other)
+{
+	Board b;
+	return b.buildBoard(other);
+}
+
 
 void Board::buildBoard(const BoardData& initBoard)
 {
@@ -767,5 +777,13 @@ void Board::BoardBuilder::initInitBoard()
 				m_initBoard[i][j].push_back(SPACE);
 			}
 		}
+	}
+}
+
+void Board::getOtherPlayerShips(vector<int>& ships)
+{
+	for (auto const& ship : m_shipsOnBoard)
+	{
+		ships.push_back(ship->getLength());
 	}
 }

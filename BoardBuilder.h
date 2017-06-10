@@ -18,6 +18,7 @@ private:
 	string					m_sboardFilePath;
 
 	vector<int>				m_numOfShipsPerPlayer;			// how many ships each player has
+	vector<vector<char>>	m_shipsPerPlayer;				// for equal ships validation
 	bool					m_foundAdjacentShips;			// need to print Adjacency error per player
 	vector<vector<bool>>	m_wrongSizeOrShapePerPlayer;	// 2 players X 4 ships
 
@@ -111,9 +112,8 @@ public:
 
 	/**
 	* @Details		check each player has exactly number of ship as expected
-	* @return		false if at least one player has a unexpected ships amount, o/w true
 	*/
-	bool checkNumberOfShips() const;
+	void checkIntegrityOfShips() const;
 
 	/**
 	* @Details		check if there is adjacent ships [ships w/o space cell between them]

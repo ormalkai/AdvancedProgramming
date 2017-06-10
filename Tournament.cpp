@@ -40,29 +40,72 @@ ReturnCode Tournament::init(const string& directoryPath, int numOfThreads)
 	// Load games to data structure
 	buildGameSchedule();
 
+	// init main database - result per player in round
+	initPlayerResultsPerRound();
+
 	return RC_SUCCESS;
 }
 
 
-ReturnCode Tournament::startTournament(int numOfThreads)
+void Tournament::initPlayerResultsPerRound()
 {
+	// in each round every player plays one game
+	auto playersInRound = m_algoDLLVec.size();
 
+	// number of rounds is the number of games divided by number of players in round
+	int numRounds = m_gameList.size() / playersInRound;
 
-	m_isRoundFinished = false;
+	// init player results per round
+	for (int round = 0; round < numRounds; round++)
+	{
+		m_playersResultsPerRound.emplace_back();
+		for (int player = 0; player < playersInRound; player++)
+		{
+			m_playersResultsPerRound[round].m_results.emplace_back();
+		}
+	}
+
+	// init number of games finished per player
+	for (int player = 0; player < playersInRound; player++)
+	{
+		// this code is done by the control thread, therefore not need lock here
+		m_gameFinishedByEachPlayer.push_back(0);
+	}
+}
+
+void Tournament::startTournament(int numOfThreads)
+{
 	m_isTournamentFinished = false;
+	
+	// first create the reporter thread
+	thread reporter = reporterThread();
 
+	// vector of all threads - workers - do not open more threads than games
+	numOfThreads = (numOfThreads <= m_gameList.size() ? numOfThreads : m_gameList.size());
+	vector<thread> vec_threads(numOfThreads);
+	int id = 1;
+	for (auto & t : vec_threads) 
+	{
+		t = thread(&Tournament::executeGame, this, id);
+		++id;
+	}
 
-	return RC_SUCCESS;
+	// game is running
 
+	// join all threads, first workers 
+	for (auto & t : vec_threads) 
+	{
+		t.join();
+	}
+
+	// finally join the reporter
+	reporter.join();
 }
 
 void Tournament::printResult() const
 {
-	// Lock
-	vector<PlayerStatistics> playerStatVec = m_playerStat;
-	// Unlock
-	
-	sort(playerStatVec.begin(), playerStatVec.end(), SortByAge());
+	auto playerStat(m_playerStat);
+	sort(playerStat.begin(), playerStat.end(), SortByWins());
 	
 	const int nameWidth = 24;
 	const int colWidth = 8;
@@ -76,14 +119,15 @@ void Tournament::printResult() const
 	printElement("Pts Against", colWidth);
 	cout << endl;
 	
-	for (int i = 0; i < playerStatVec.size(); i++) {
+	for (int i = 0; i < playerStat.size(); i++) {
 
-		PlayerStatistics& ps = playerStatVec[i];
+		const PlayerStatistics& ps = playerStat[i];
+		// TODO ORM Gal this variable is needed or not?
 		int playerIndex = ps.getPlayerIndex();
 		
 		int wins = ps.getWins();
 		int losses = ps.getLosses();
-		double prec = ((double)wins / (wins + losses)) * 100;
+		double prec = (static_cast<double>(wins) / (wins + losses)) * 100;
 	
 		printElement(i + 1, colWidth);
 		printElement(ps.getPlayerName(), colWidth);
@@ -129,23 +173,13 @@ void Tournament::executeGame(int workerId) {
 	// There is more game to play
 
 	int currentGameIndex = m_nextGameIndex++;
-	while (currentGameIndex < m_totalGamesToPlay)
+	while (currentGameIndex < m_gameList.size())
 	{
 		Game& currentGame = m_gameList[currentGameIndex];
 		currentGame.startGame();
 		
 		// Notify result
 		notifyGameResult(currentGame, currentGameIndex);
-	
-
-		// TODO: Fix !! Mistake !! - The last game maybe will over before the pervious game,
-		// and then the round is not over
-		// Notify end of round
-		if (lastGameInRound(currentGameIndex))
-		{
-			m_cvRound.notify_one();
-		}
-
 
 		currentGameIndex = m_nextGameIndex++;
 	}
@@ -153,27 +187,56 @@ void Tournament::executeGame(int workerId) {
 	DBG(Debug::DBG_INFO, "Worker %d complete job", workerId);
 }
 
-bool Tournament::lastGameInRound(int gameIndex) const
-{
-	static size_t gamesInRound = m_algoDLLVec.size() / 2;
-	return gameIndex % gamesInRound == 0;
-}
 
 void Tournament::notifyGameResult(Game& game, int gameIndex)
 {
+	// TODO ORM why assert?
 	assert(game.isGameOver());
 
 	pair <int, int> playersIndexes = m_gamePlayerIndexes[gameIndex];
 	int playerAIndex = playersIndexes.first;
 	int playerBIndex = playersIndexes.second;
 
+	// critical section updating the game per player
+	m_gameFinishedByEachPlayerMutex.lock();
+	int playerAGame = m_gameFinishedByEachPlayer[playerAIndex]++;
+	int playerBGame = m_gameFinishedByEachPlayer[playerBIndex]++;
+	m_gameFinishedByEachPlayerMutex.unlock();
+
+	// get every player score from game
 	pair<int, int> s = game.getScore();
 	int playerAScore = s.first;
 	int playerBScore = s.second;
-	
-	lock_guard<mutex> guard(m_statMutex);
-	m_playerStat[playerAIndex].update(make_pair(playerAScore, playerBScore));
-	m_playerStat[playerBIndex].update(make_pair(playerBScore, playerAScore));
+
+	// update round results for each player
+	updateRoundResultForPlayer(playerAIndex, playerAGame, playerAScore, playerBScore);
+	updateRoundResultForPlayer(playerBIndex, playerBGame, playerBScore, playerAScore);
+}
+
+void Tournament::updateRoundResultForPlayer(int player, int RoundForPlayer ,int playerScore, int otherPlayerScore)
+{
+	int playerIndexInRound;
+	// fetch current index and increment current
+	{
+		lock_guard<mutex> lock(m_playersResultsPerRound[RoundForPlayer].m_roundMutex);
+		playerIndexInRound = m_playersResultsPerRound[RoundForPlayer].m_playersFinished++;
+		m_playersResultsPerRound[RoundForPlayer].m_results[playerIndexInRound].m_playerId = player;
+		m_playersResultsPerRound[RoundForPlayer].m_results[playerIndexInRound].m_pointsFor = playerScore;
+		m_playersResultsPerRound[RoundForPlayer].m_results[playerIndexInRound].m_pointsAgainst = otherPlayerScore;
+	}
+
+	// if Round is finished notify reporter
+	if (playerIndexInRound == m_playersResultsPerRound[RoundForPlayer].m_results.size() - 1)
+	{
+		// increment finished rounds for reporter
+		{
+			lock_guard<mutex> lock(m_reporterMutex);
+			++m_finishedRounds;
+		}
+
+		// wake up reporter
+		m_cvRound.notify_one();
+	}
 }
 
 
@@ -265,8 +328,8 @@ ReturnCode Tournament::loadBoards(vector<string>& boardsPaths)
 			return rc;
 		}
 		
-		// TODO: Check if move c'tor or copy c'tor
-		m_boards.push_back(b);
+		// TODO: using emplace for copy c'tor
+		m_boards.emplace_back(b);
 	}
 	
 	DBG(Debug::DBG_INFO, "Finished to load dlls, total wad loaded: %d", m_boards.size());
@@ -301,7 +364,7 @@ void Tournament::buildGameSchedule()
 				
 				//IBattleshipGameAlgo* ibg1 = get<1>(m_algoDLLVec[playerAIndex])();
 				//IBattleshipGameAlgo* ibg2 = get<1>(m_algoDLLVec[playerBIndex])();
-				m_gameList.emplace_back(b, ibg1, ibg2);
+				m_gameList.emplace_back(b, move(ibg1), move(ibg2));
 				m_gamePlayerIndexes.emplace_back(make_pair(playerAIndex, playerBIndex));
 			}
 		}
@@ -380,21 +443,40 @@ vector<pair<int, int>> Tournament::zip(vector<int> first, vector<int> second)
 
 void Tournament::reportResult()
 {
-	static size_t gamesInRound = m_algoDLLVec.size() / 2;
-
-	
-	while (m_isTournamentFinished)
+	// while there are running rounds
+	while (false == m_isTournamentFinished)
 	{
-		int indexLastGameInRound = ((m_nextRoundToReport + 1) * gamesInRound) - 1;
-		Game& lastGameInRound = m_gameList[indexLastGameInRound];
-	
-		unique_lock<mutex> lk(m_statMutex);
-		m_cvRound.wait(lk, lastGameInRound.isGameOver());
+		// NOTE: the lock is only on the cond_var wait
+		// The reason is that we want to let the workers increment m_finishedRounds
+		// even if the reporter is in reporting progress
+		// however we don't want to let the reporter go to sleep and miss a signal
+		// between the condition to the sleep.
+		unique_lock<std::mutex> lk(m_reporterMutex); //unique lock
+		m_cvRound.wait(lk, [this](void) { return m_printedRounds < m_finishedRounds; });
+		lk.unlock();
+		while (m_printedRounds < m_finishedRounds)
+		{
+			// print round m_printedRounds
+			updateStatAndPrintRound();
 
-		if (!m_isTournamentFinished)
-			this->printResult();
-
+			m_printedRounds++;
+			// check if tournament finished
+			if (m_printedRounds == m_playersResultsPerRound.size())
+				m_isTournamentFinished = true;
+		}
 	}
+}
+
+void Tournament::updateStatAndPrintRound()
+{
+	// update stat acording to the finished round
+	for (auto const& result: m_playersResultsPerRound[m_printedRounds].m_results)
+	{
+		// TODO ORM don't forget to handle tie!!!!!!!
+		m_playerStat[result.m_playerId].update(pair<int, int>(result.m_pointsFor, result.m_pointsAgainst));
+	}
+
+	printResult();
 }
 
 

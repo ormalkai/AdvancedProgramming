@@ -1,25 +1,45 @@
-#include "Game.h"
-#include "Debug.h"
 #include <iostream>
 #include <locale>
+#include <Windows.h>
+#include "Game.h"
+#include "Debug.h"
 #include "BoardBuilder.h"
 #include "Tournament.h"
+#include <codecvt>
 
-void parseArgs(int argc, char* argv[], string& filesLocation, bool& isQuiet, int& delay)
+#define INI_IS_QUIET_DEFAULT (0)
+#define INI_DELAY_DEFAULT (2000)
+#define INI_NUM_THREADS_DEFAULT (4)
+
+void parseIni(string& filesLocation, bool& isQuiet, int& delay, int& numThreads)
+{
+	wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
+	wstring fileName = converter.from_bytes(filesLocation) + L"conf.ini";
+	wstring generalSection = L"general";
+	wstring isQuietKey = L"isQuiet";
+	wstring delayKey = L"delay";
+	wstring numThreadsKey = L"numThreads";
+	isQuiet = GetPrivateProfileInt(generalSection.c_str(), isQuietKey.c_str(), INI_IS_QUIET_DEFAULT, fileName.c_str());
+	delay = GetPrivateProfileInt(generalSection.c_str(), delayKey.c_str(), INI_DELAY_DEFAULT, fileName.c_str());
+	numThreads = GetPrivateProfileInt(generalSection.c_str(), numThreadsKey.c_str(), INI_NUM_THREADS_DEFAULT, fileName.c_str());
+}
+
+void parseArgs(int argc, char* argv[], string& filesLocation, bool& isQuiet, int& delay, int& numThreads)
 {
 	bool isDelayInitialized = false;
+	bool isQuietInitialized = false;
+	bool isNumThreadsInitialized = false;
 
 	// set defaults
 	filesLocation = ".\\";
-	isQuiet = DEFAULT_IS_QUIET_MODE;
-	delay = DEFAULT_DELAY_ATTACK;
 
 	for (int i = 1; i < argc; i++)
 	{
 		string arg(argv[i]);
-		if (false == isQuiet && "-quiet" == arg)
+		if ("-quiet" == arg)
 		{
 			isQuiet = true;
+			isQuietInitialized = true;
 		}
 		else if (false == isDelayInitialized && "-delay" == arg)
 		{
@@ -29,8 +49,19 @@ void parseArgs(int argc, char* argv[], string& filesLocation, bool& isQuiet, int
 			}
 			i++;
 			string delatStr(argv[i]);
-			delay = std::stoi(delatStr);
+			delay = stoi(delatStr);
 			isDelayInitialized = true;
+		}
+		else if (false == isNumThreadsInitialized && "-threads" == arg)
+		{
+			if ((i + 1) == argc)
+			{
+				cout << "-threads configured with no value - using default" << endl;
+			}
+			i++;
+			string threadsStr(argv[i]);
+			delay = stoi(threadsStr);
+			isNumThreadsInitialized = true;
 		}
 		else /* this is path */
 		{
@@ -40,14 +71,26 @@ void parseArgs(int argc, char* argv[], string& filesLocation, bool& isQuiet, int
 				filesLocation = arg + "\\";
 		}
 	}
+
+	// get conf from ini and replace default if needed
+	bool isQuietIni;
+	int delayIni;
+	int numThreadsIni;
+	parseIni(filesLocation, isQuietIni, delayIni, numThreadsIni);
+	if (false == isQuietInitialized) isQuiet = isQuietIni;
+	if (false == isDelayInitialized) delay = delayIni;
+	if (false == isNumThreadsInitialized) numThreads = numThreadsIni;
 }
+
+
 
 int main(int argc, char* argv[])
 {
 	bool isQuiet;
 	int delay;
 	string filesLocation;
-	parseArgs(argc, argv, filesLocation, isQuiet, delay);
+	int numThreads;
+	parseArgs(argc, argv, filesLocation, isQuiet, delay, numThreads);
 
 	// init log
 	Debug::instance().init("game.log", true, false, Debug::DBG_INFO);

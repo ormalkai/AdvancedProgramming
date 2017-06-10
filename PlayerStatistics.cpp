@@ -3,7 +3,7 @@
 #include <cassert>
 
 
-void PlayerStatistics::update(std::pair<int, int> result)
+void PlayerStatistics::update(const pair<int, int> result)
 {
 	int myScore = result.first;
 	int otherScore = result.second;
@@ -11,7 +11,7 @@ void PlayerStatistics::update(std::pair<int, int> result)
 	assert(myScore != otherScore);
 
 	++m_gamesPlayed;
-
+	// TODO ORM what happens in tie
 	if (myScore > otherScore)
 	{
 		++m_wins;

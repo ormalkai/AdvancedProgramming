@@ -32,6 +32,7 @@ void BoardBuilder::initErrorDataStructures()
 	for (int i = 0; i < PlayerIndex::MAX_PLAYER; i++)
 	{
 		m_numOfShipsPerPlayer.push_back(0);
+		m_shipsPerPlayer.push_back(vector<char>());
 		m_wrongSizeOrShapePerPlayer.push_back(wrongSizeOrShapePerPlayer);
 	}
 	m_foundAdjacentShips = false;
@@ -83,6 +84,7 @@ ReturnCode BoardBuilder::getBoardDimensionsFromFile(ifstream& sboard)
 {
 	string line;
 	Utils::safeGetline(sboard, line);
+	transform(line.begin(), line.end(), line.begin(), ::tolower);
 	regex regex("^([0-9]+)x([0-9]+)x([0-9]+)");
 	smatch m;
 	regex_match(line, m, regex);
@@ -185,6 +187,7 @@ void BoardBuilder::validateBoard()
 						currentShip != m_initBoard[d - 1][i][j])
 					{
 						m_numOfShipsPerPlayer[playerIndex]++;
+						m_shipsPerPlayer[playerIndex].push_back(currentShip);
 					}
 				}
 
@@ -334,24 +337,34 @@ bool BoardBuilder::checkWrongSizeOrShape() const
 	return result;
 }
 
-bool BoardBuilder::checkNumberOfShips() const
+void BoardBuilder::checkIntegrityOfShips() const
 {
-	bool result = true;
-	for (int i = 0; i < PlayerIndex::MAX_PLAYER; i++)
+	// check number of ships
+	if (m_numOfShipsPerPlayer[PLAYER_A] != m_numOfShipsPerPlayer[PLAYER_B])
 	{
-		char player = Utils::getPlayerCharByIndex(i);
-		if (SHIPS_PER_PLAYER < m_numOfShipsPerPlayer[i])
+		// do not set result to false, keep playing!!!
+		DBG(Debug::DBG_WARNING, "Inconsistent number of ships per player - playerA[%d], playerB[%d] continue playing anyway", 
+			m_numOfShipsPerPlayer[PLAYER_A], m_numOfShipsPerPlayer[PLAYER_B]);
+		return;
+	}
+	// check that ships are the same
+	auto shipsPlayerACopy(m_shipsPerPlayer[PLAYER_A]);
+	auto shipsPlayerBCopy(m_shipsPerPlayer[PLAYER_B]);
+	sort(shipsPlayerACopy.begin(), shipsPlayerACopy.end(), less<char>());
+	sort(shipsPlayerBCopy.begin(), shipsPlayerBCopy.end(), less<char>());
+	for (int i=0; i < m_numOfShipsPerPlayer[PLAYER_A]; i++)
+	{
+		if (shipsPlayerACopy[i] != shipsPlayerBCopy[i])
 		{
-			cout << "Too many ships for player " << player << endl;
-			result = false;
-		}
-		else if (SHIPS_PER_PLAYER > m_numOfShipsPerPlayer[i])
-		{
-			cout << "Too few ships for player " << player << endl;
-			result = false;
+			DBG(Debug::DBG_WARNING, "Inconsistent ships for players");
+			for (int j = 0; j < m_numOfShipsPerPlayer[PLAYER_A]; j++)
+			{
+				DBG(Debug::DBG_WARNING, "Player A[%c] playerB[%c]", shipsPlayerACopy[j], shipsPlayerBCopy[j]);
+			}
+			DBG(Debug::DBG_WARNING, "continue playing anyway");
+			return;
 		}
 	}
-	return result;
 }
 
 bool BoardBuilder::checkAdjacentShips() const
@@ -371,12 +384,11 @@ bool BoardBuilder::checkErrors() const
 	// Wrong size or shape for ship errors
 
 	result = checkWrongSizeOrShape() && result;
-	// Too many/few ships for player errors
-
-	result = checkNumberOfShips() && result;
 	// Adjacent Ships on board error
-
 	result = checkAdjacentShips() && result;
+
+	// number and type of ships
+	checkIntegrityOfShips();
 	return result;
 }
 

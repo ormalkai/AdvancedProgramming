@@ -142,12 +142,15 @@ private:
 	int		m_rows;			// number of rows in the board
 	int		m_cols;			// number of columns in the board
 	int		m_depth;		// depth level of the board
+	bool	m_shipAwarenessStatus;
 	Board	m_board;
 	PriorityQueue<shared_ptr<Cell>, vector<shared_ptr<Cell>>, cmp> m_attackedQueue;
 	list<shared_ptr<Cell>> m_targetQueue;
 	SmartAlgoStautus m_currentStatus;
 	vector<shared_ptr<Cell>> m_currentAttackedShipCells;
 	map<pair<int, int>, int> m_stripToPotentialShips;
+	vector<map<pair<int, int>, int>> m_stripToPotentialShipsPerShip; // ship len to strip to potential ships
+	vector<int> m_otherPlayerShips;
 	
 	/**
 	* @Details		Return the next attack request in hunt mode - the cell with the highest hist value
@@ -239,12 +242,17 @@ private:
 	* @Details		Initialize the board by number of potential ships.
 	*/
 	void initStripSizeToNumPotentialShips();
+	void initStripSizeToNumPotentialShipsPerShip();
+
+	int getPotentialShipsByStrip(pair<int, int> strip);
+
+	void removeOtherPlayerSunkShip(int len);
 
 public:
 	/**
 	* @Details		Constructor receives id of the player
 	*/
-	BattleshipAlgoSmart(): m_id(-1), m_rows(-1), m_cols(-1), m_depth(-1), m_currentStatus(HUNT){}
+	BattleshipAlgoSmart(): m_id(-1), m_rows(-1), m_cols(-1), m_depth(-1), m_currentStatus(HUNT), m_shipAwarenessStatus(true){}
 
 	/**
 	* @Details		Default destructor

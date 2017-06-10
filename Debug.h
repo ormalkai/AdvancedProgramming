@@ -1,4 +1,6 @@
 #include <string>
+#include <mutex>
+#include <ctime>
 
 /*
  * @Details		This macro is print easy printing to log and or to stdout
@@ -7,22 +9,25 @@
 #define DBG( LEVEL , FMT, ... ) \
 	do\
 	{\
+		time_t now = time(0);\
+		char str[26];\
+		ctime_s(str, sizeof str, &now);\
 		switch(LEVEL)\
 		{\
 		case(Debug::DBG_ERROR):\
-			Debug::instance().print(LEVEL, "Error  " ": " FMT, ## __VA_ARGS__);\
+			Debug::instance().print(LEVEL, "%s Error  " ": " FMT, str, ## __VA_ARGS__);\
 			break;\
 		case(Debug::DBG_WARNING):\
-			Debug::instance().print(LEVEL, "Warning" ": " FMT, ## __VA_ARGS__);\
+			Debug::instance().print(LEVEL, "%s Warning" ": " FMT, str, ## __VA_ARGS__);\
 			break;\
 		case(Debug::DBG_INFO):\
-			Debug::instance().print(LEVEL, "Info   " ": " FMT, ## __VA_ARGS__);\
+			Debug::instance().print(LEVEL, "%s Info   " ": " FMT, str, ## __VA_ARGS__);\
 			break;\
 		case(Debug::DBG_DEBUG):\
-			Debug::instance().print(LEVEL, "Debug  " ": " FMT, ## __VA_ARGS__);\
+			Debug::instance().print(LEVEL, "%s Debug  " ": " FMT, str, ## __VA_ARGS__);\
 			break;\
 		default:\
-			Debug::instance().print(LEVEL, "Error  " ": " FMT, ## __VA_ARGS__);\
+			Debug::instance().print(LEVEL, "%s Error  " ": " FMT, str, ## __VA_ARGS__);\
 		}\
 	} while (0);
 
@@ -64,7 +69,7 @@ public:
 	 * @param		fmt - format of the print
 	 * @param		... - arguments for the format
 	 */
-	void print(DebugLevel debugLevel, const char* fmt, ...) const;
+	void print(DebugLevel debugLevel, const char* fmt, ...);
 
 private:
 	/**
@@ -92,10 +97,11 @@ private:
 	bool m_printToStd; // print to std or not
 	DebugLevel m_debugLevel; // minimum debug level
 	FILE* m_pFile;
+	mutex m_printMutex; // for printing from several threads
 
 
 	/**
 	 * @Details		assistent prin function
 	 */
-	void vprint(const char* fmt, va_list ap) const;
+	void vprint(const char* fmt, va_list ap);
 };
