@@ -5,6 +5,7 @@
 
 #define SHIPS_PER_PLAYER (5)
 #define MIN_DLLS_FILES (2)
+#define MIN_BOARDS_FILE (1)
 #define NUM_OF_PLAYERS (2)
 #define BOARD_DEPTH_SIZE (10)
 #define BOARD_ROW_SIZE (10)

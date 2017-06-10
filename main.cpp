@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
 	parseArgs(argc, argv, filesLocation, isQuiet, delay, numThreads);
 
 	// init log
-	Debug::instance().init(filesLocation + "game.log", true, false, Debug::DBG_INFO);
+	Debug::instance().init(filesLocation + "game.log", true, true, Debug::DBG_INFO);
 
 	Tournament& tournament = Tournament::instance();
 	

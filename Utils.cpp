@@ -297,7 +297,7 @@ void Utils::ShowConsoleCursor(bool showFlag)
 
 ReturnCode Utils::getPlayerNameByDllPath(const string& path, string& playerName)
 {
-	regex regex("ex3\.(\S+\.smart)\.dll$");
+	regex regex(".*ex3\\.(\\S+\\.smart)\\.dll");
 	smatch m;
 	regex_match(path, m, regex);
 	if (m.size() != 2)

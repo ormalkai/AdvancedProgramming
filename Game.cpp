@@ -13,8 +13,8 @@
 using namespace std;
 
 
-Game::Game(Board& board, unique_ptr<IBattleshipGameAlgo> algoA, unique_ptr<IBattleshipGameAlgo> algoB) : m_isQuiet(false),
-m_currentPlayerIndex(MAX_PLAYER), m_otherPlayerIndex(MAX_PLAYER), m_isGameOver(false)
+Game::Game(Board& board, unique_ptr<IBattleshipGameAlgo> algoA, unique_ptr<IBattleshipGameAlgo> algoB) : m_isGameOver(false),
+m_isQuiet(false), m_currentPlayerIndex(MAX_PLAYER), m_otherPlayerIndex(MAX_PLAYER)
 {
 	init(board, move(algoA), move(algoB));
 }
@@ -107,7 +107,7 @@ void Game::init(const Board& board, unique_ptr<IBattleshipGameAlgo> algoA, uniqu
 	Board boardA, boardB;
 	m_board.splitToPlayersBoards(boardA, boardB);
 
-	// Init player A
+	// Init players
 	m_players.push_back(move(algoA));
 	m_players.push_back(move(algoB));
 
@@ -129,9 +129,9 @@ AttackRequestCode Game::requestAttack(Coordinate& req)
 			m_finishedAttackPlayer[m_currentPlayerIndex] = true;
 			return ARC_FINISH_REQ;
 		}
-	else if (	req.depth < 0 || req.depth > m_depth ||
-				req.row   < 0 || req.row   > m_rows ||
-				req.col   < 0 || req.col   > m_cols)
+	else if (	req.depth < 0 || req.depth > m_board.depth() ||
+				req.row   < 0 || req.row   > m_board.rows() ||
+				req.col   < 0 || req.col   > m_board.cols())
 		return ARC_ERROR;
 	else
 		return ARC_SUCCESS;
@@ -152,7 +152,12 @@ void Game::startGame()
 	while (!m_isGameOver)
 	{
 		Coordinate attackReq = m_players[m_currentPlayerIndex]->attack();
-
+		DBG(Debug::DBG_INFO, "Player [%d] attack (%d, %d, %d)", m_currentPlayerIndex, attackReq.depth, attackReq.row, attackReq.col);
+		if (attackReq.depth == 1 && attackReq.row == 4 && attackReq.col == 1)
+		{
+			cout << "boo";
+		}
+		
 		// Check attack request 
 		AttackRequestCode arc = requestAttack(attackReq);
 		switch (arc)
@@ -237,6 +242,7 @@ void Game::startGame()
 		for (int i = 0; i < NUM_OF_PLAYERS; i++)
 		{
 			m_players[i]->notifyOnAttackResult(m_currentPlayerIndex, attackReq, attackResult);
+			DBG(Debug::DBG_INFO, "Notify Player [%d] attack (%d, %d, %d) [%d]", i, attackReq.depth, attackReq.row, attackReq.col, attackResult);
 		}
 
 		// If game over break

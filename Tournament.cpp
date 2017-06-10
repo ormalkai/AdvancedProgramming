@@ -1,12 +1,12 @@
 #include <string>
 #include <iostream>
+#include <thread>
+#include <cassert>
+#include <iomanip>
 #include "Tournament.h"
 #include "Game.h"
 #include "Debug.h"
-#include <thread>
-#include <cassert>
 #include "PriorityQueue.h"
-#include <iomanip>
 
 
 ReturnCode Tournament::init(const string& directoryPath)
@@ -30,12 +30,24 @@ ReturnCode Tournament::init(const string& directoryPath)
 	}
 	
 	// Load boards
-	thread thrBoardLoading(&Tournament::loadBoards, this, boardsFilesPaths);
-	thread thrDllLoading(&Tournament::loadAllAlgoFromDLLs, this, dllsFilesPaths);
+	promise<ReturnCode> p1;
+	promise<ReturnCode> p2;
+	auto f1 = p1.get_future();
+	auto f2 = p2.get_future();
+	thread thrBoardLoading(&Tournament::loadBoards, this, boardsFilesPaths, move(p1));
+	thread thrDllLoading(&Tournament::loadAllAlgoFromDLLs, this, dllsFilesPaths, move(p2));
 
 	// Wait boards and dll finish loading
 	thrBoardLoading.join();
 	thrDllLoading.join();
+	ReturnCode rcloadDll = f1.get();
+	ReturnCode rcloadBoards = f2.get();
+	if (RC_SUCCESS != rcloadDll || RC_SUCCESS != rcloadBoards)
+	{
+		return RC_ERROR;
+	}
+	cout << "Number of legal players : " << m_algoDLLVec.size() << endl;
+	cout << "Number of legal boards : " << m_boards.size() << endl;
 
 	// Load games to data structure
 	buildGameSchedule();
@@ -275,7 +287,7 @@ ReturnCode Tournament::initDLLFilesPath(const string& directoryPath, vector<stri
 	return RC_SUCCESS;
 }
 
-ReturnCode Tournament::loadAllAlgoFromDLLs(const vector<string>& dllPaths)
+ReturnCode Tournament::loadAllAlgoFromDLLs(const vector<string>& dllPaths, promise<ReturnCode>&& p)
 {
 	GetAlgoFuncType getAlgoFunc;
 	
@@ -312,10 +324,19 @@ ReturnCode Tournament::loadAllAlgoFromDLLs(const vector<string>& dllPaths)
 		playerIndex++;
 	}
 
+	if (MIN_DLLS_FILES > m_algoDLLVec.size())
+	{
+		DBG(Debug::DBG_ERROR, "Num of dlls (%d) is below the minimum (%d)", m_algoDLLVec.size(), MIN_DLLS_FILES);
+		p.set_value(RC_ERROR);
+		return RC_ERROR;
+	}
+	
+	DBG(Debug::DBG_INFO, "Finished to load dlls, total was loaded: %d", m_algoDLLVec.size());
+	p.set_value(RC_SUCCESS);
 	return RC_SUCCESS;
 }
 
-ReturnCode Tournament::loadBoards(vector<string>& boardsPaths)
+ReturnCode Tournament::loadBoards(vector<string>& boardsPaths, promise<ReturnCode>&& p)
 {
 
 	for (string boardPath : boardsPaths)
@@ -325,13 +346,22 @@ ReturnCode Tournament::loadBoards(vector<string>& boardsPaths)
 	
 		if (RC_SUCCESS != rc)
 		{
+			p.set_value(rc);
 			return rc;
 		}
 		
 		m_boards.push_back(b);
 	}
+
+	if (MIN_BOARDS_FILE > m_boards.size())
+	{
+		DBG(Debug::DBG_ERROR, "Num of boards (%d) is below the minimum (%d)", m_boards.size(), MIN_BOARDS_FILE);
+		p.set_value(RC_ERROR);
+		return RC_ERROR;
+	}
 	
-	DBG(Debug::DBG_INFO, "Finished to load dlls, total wad loaded: %d", m_boards.size());
+	DBG(Debug::DBG_INFO, "Finished to load boards, total was loaded: %d", m_boards.size());
+	p.set_value(RC_SUCCESS);
 	return RC_SUCCESS;
 }
 
@@ -342,7 +372,7 @@ void Tournament::buildGameSchedule()
 
 	auto allPossibilities = createSchedule(numOfAlgos);
 
-	for (size_t boardIndex = 0; boardIndex < numOfBoards; boardIndex)
+	for (size_t boardIndex = 0; boardIndex < numOfBoards; boardIndex++)
 	{
 		for (auto round : allPossibilities)
 		{
@@ -375,7 +405,7 @@ vector<vector<pair<int, int>>> Tournament::createSchedule(int numOfAlgos)
 	// Credit: https://stackoverflow.com/questions/1037057/how-to-automatically-generate-a-sports-league-schedule
 
 
-	vector<int> list(numOfAlgos);
+	vector<int> list;
 	for (int i = 0; i < numOfAlgos; i++)
 	{
 		list.push_back(i);
@@ -405,13 +435,13 @@ vector<vector<pair<int, int>>> Tournament::createSchedule(int numOfAlgos)
 
 		}
 
-		auto last = list[list.size() - 1];
+		auto last = list.back();
 		list.pop_back();
 		list.insert(list.begin() + 1, last);
 	}
 
-
-	for (auto cycleVec : result)
+	auto temp(result);
+	for (auto cycleVec : temp)
 	{
 		vector<pair<int, int>> inverse;
 
@@ -422,6 +452,8 @@ vector<vector<pair<int, int>>> Tournament::createSchedule(int numOfAlgos)
 
 		result.push_back(inverse);
 	}
+
+	
 
 	return result;
 }

@@ -12,22 +12,23 @@
 		time_t now = time(0);\
 		char str[26];\
 		ctime_s(str, sizeof str, &now);\
+		str[24] = '\0';\
 		switch(LEVEL)\
 		{\
 		case(Debug::DBG_ERROR):\
-			Debug::instance().print(LEVEL, "%s Error  " ": " FMT, str, ## __VA_ARGS__);\
+			Debug::instance().print(LEVEL, "%s    Error  " ": " FMT, str, ## __VA_ARGS__);\
 			break;\
 		case(Debug::DBG_WARNING):\
-			Debug::instance().print(LEVEL, "%s Warning" ": " FMT, str, ## __VA_ARGS__);\
+			Debug::instance().print(LEVEL, "%s    Warning" ": " FMT, str, ## __VA_ARGS__);\
 			break;\
 		case(Debug::DBG_INFO):\
-			Debug::instance().print(LEVEL, "%s Info   " ": " FMT, str, ## __VA_ARGS__);\
+			Debug::instance().print(LEVEL, "%s    Info   " ": " FMT, str, ## __VA_ARGS__);\
 			break;\
 		case(Debug::DBG_DEBUG):\
-			Debug::instance().print(LEVEL, "%s Debug  " ": " FMT, str, ## __VA_ARGS__);\
+			Debug::instance().print(LEVEL, "%s    Debug  " ": " FMT, str, ## __VA_ARGS__);\
 			break;\
 		default:\
-			Debug::instance().print(LEVEL, "%s Error  " ": " FMT, str, ## __VA_ARGS__);\
+			Debug::instance().print(LEVEL, "%s    Error  " ": " FMT, str, ## __VA_ARGS__);\
 		}\
 	} while (0);
 

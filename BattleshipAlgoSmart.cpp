@@ -599,6 +599,8 @@ void BattleshipAlgoSmart::initStripSizeToNumPotentialShips()
 			m_stripToPotentialShips.emplace(make_pair(make_pair(i, j), numPotentialShips));
 		}
 	}
+	// enable ship awerness
+	initStripSizeToNumPotentialShipsPerShip();
 }
 
 void BattleshipAlgoSmart::initStripSizeToNumPotentialShipsPerShip()

@@ -1,10 +1,11 @@
 #pragma once
 
-#include "Game.h"
+#include <future>
 #include <atomic>
 #include <thread>
-#include "PlayerStatistics.h"
 #include <mutex>
+#include "Game.h"
+#include "PlayerStatistics.h"
 
 
 class Tournament
@@ -86,8 +87,8 @@ private:
 
 	static ReturnCode initSboardFiles(const string& directoryPath, vector<string>& sboardFiles);
 	static ReturnCode initDLLFilesPath(const string& directoryPath, vector<string>& dllFiles);
-	ReturnCode loadAllAlgoFromDLLs(const vector<string>& dllPaths);
-	ReturnCode loadBoards(vector<string>& boardsPaths);
+	ReturnCode loadAllAlgoFromDLLs(const vector<string>& dllPaths, promise<ReturnCode>&& p);
+	ReturnCode loadBoards(vector<string>& boardsPaths, promise<ReturnCode>&& p);
 	void buildGameSchedule();
 	vector<vector<pair<int, int>>> createSchedule(int numOfAlgos);
 

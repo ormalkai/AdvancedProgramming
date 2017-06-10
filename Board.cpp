@@ -180,7 +180,7 @@ void Board::splitToPlayersBoards(Board& boardA, Board& boardB) const
 	int initDepthSize = depth() + BOARD_PADDING;
 	int initRowSize = rows() + BOARD_PADDING;
 	int initColSize = cols() + BOARD_PADDING;
-	cout << initDepthSize;
+
 	vector<vector<vector<char>>> copyBoardA;
 	vector<vector<vector<char>>> copyBoardB;
 	for (int d = 0; d < initDepthSize; d++)
@@ -468,6 +468,7 @@ ReturnCode Board::BoardBuilder::getBoardDimensionsFromFile(ifstream& sboard)
 {
 	string line;
 	Utils::safeGetline(sboard, line);
+	transform(line.begin(), line.end(), line.begin(), ::tolower);
 	regex regex("^([0-9]+)x([0-9]+)x([0-9]+)");
 	smatch m;
 	regex_match(line, m, regex);
