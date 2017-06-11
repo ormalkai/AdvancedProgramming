@@ -48,6 +48,13 @@ typedef enum PlayerIndex
 	MAX_PLAYER
 } PlayerIndex;
 
+typedef enum WinLoseTie
+{
+	WON,
+	LOST,
+	TIE
+} WinLoseTie;
+
 enum ShipType
 {
 	RUBBER_SHIP,
@@ -83,6 +90,8 @@ enum class Direction
 	LEFT,
 	MAX_DIRECTION
 };
+
+
 
 class Utils
 {

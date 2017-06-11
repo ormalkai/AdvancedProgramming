@@ -6,6 +6,8 @@
 #include "Utils.h"
 #include "Board.h"
 
+#define TIE_WINNER_ID (-1)
+
 using namespace std;
 
 
@@ -23,9 +25,10 @@ private:
 	int								m_depth;						// number of depth in the board
 	int								m_currentPlayerIndex;			// he id of the next player to attack
 	int								m_otherPlayerIndex;				// the id of the other playre to attack
+	int								m_winner;						// the id of the winner
 	vector<unique_ptr<IBattleshipGameAlgo>> m_players;			// the players
-	
 	int						m_playerScore[NUM_OF_PLAYERS] = { 0 };				// player's score
+	// TODO unused?
 	int						m_victoriesPerPlayer[NUM_OF_PLAYERS] = { 0 };		// player's num of victories
 	bool					m_finishedAttackPlayer[NUM_OF_PLAYERS] = { false }; // finished attack inidicator per player
 
@@ -95,14 +98,22 @@ public:
 	 * @Details		Parse files and build board matrix
 	 *
 	 */
-	void init(const vector<vector<vector<char>>> board, unique_ptr<IBattleshipGameAlgo> algoA, unique_ptr<IBattleshipGameAlgo> algoB);
-	void init(const Board& board, unique_ptr<IBattleshipGameAlgo> algoA, unique_ptr<IBattleshipGameAlgo> algoB);
+	void init();
 	/**
 	 * @Details		start current game
 	 */
 	void startGame();
 	bool isGameOver() const;
-	pair<int, int> getScore();
+
+	struct GameResult
+	{
+		int		m_winnerIndex; // this report is for player m_playerId
+		int		m_playerAPoints;	// how many points the player won in the game
+		int		m_playerBPoints;	// how many points the other player won in the game
+		GameResult(int winnerId, int playerAPoints, int playerBPoints) : 
+		m_winnerIndex(winnerId), m_playerAPoints(playerAPoints), m_playerBPoints(playerBPoints) {}
+	};
+	GameResult getGameResult();
 
 	/**
 	 * @Details		singleton class, get current instance.

@@ -60,7 +60,7 @@ void parseArgs(int argc, char* argv[], string& filesLocation, bool& isQuiet, int
 			}
 			i++;
 			string threadsStr(argv[i]);
-			delay = stoi(threadsStr);
+			numThreads = stoi(threadsStr);
 			isNumThreadsInitialized = true;
 		}
 		else /* this is path */
@@ -93,46 +93,20 @@ int main(int argc, char* argv[])
 	parseArgs(argc, argv, filesLocation, isQuiet, delay, numThreads);
 
 	// init log
-	Debug::instance().init(filesLocation + "game.log", true, true, Debug::DBG_INFO);
-
+	Debug::instance().init(filesLocation + "game.log", true, false, Debug::DBG_DEBUG);
+	DBG(Debug::DBG_INFO, "path [%s]", filesLocation.c_str());
+	DBG(Debug::DBG_INFO, "threads [%d]", numThreads);
 	Tournament& tournament = Tournament::instance();
 	
-	tournament.init(filesLocation);
-	tournament.startTournament(numThreads);
 	
-	
-	/*Game& game = Game::instance();
-
-	
-	
-
-	system("cls");
-	
-	BoardBuilder* bb = new BoardBuilder(filesLocation + "board.sboard");
-	vector<vector<vector<char>>> v; 
-	ReturnCode rc = bb->parseBoardFile(v);
+	ReturnCode rc = tournament.init(filesLocation);
 	if (RC_SUCCESS != rc)
 	{
+		DBG(Debug::DBG_ERROR, "Failed to init tournament");
 		return rc;
 	}
-	
-	string dllFolder = "C:\\Users\\USER\\Documents\\GitHub\\Ex1\\Proj\\Ex1\\x64\\Debug\\";
-	game.loadAllAlgoFromDLLs({ dllFolder + "or.dll", dllFolder + "gal.dll" });
-	IBattleshipGameAlgo* ibg1 = get<1>(game.m_algoDLLVec[PLAYER_A])();
-	unique_ptr<IBattleshipGameAlgo> p1(ibg1);
+	tournament.startTournament(numThreads);
 
-	IBattleshipGameAlgo* ibg2 = get<1>(game.m_algoDLLVec[PLAYER_B])();
-	unique_ptr<IBattleshipGameAlgo> p2(ibg2);
-
-	rc = game.init(v,move(p1), move(p2));
-	game.startGame();
-	
-	/*ReturnCode rc = game.init(filesLocation, isQuiet, delay);
-	if (RC_SUCCESS != rc)
-		return RC_ERROR;
-
-	game.startGame();
-	*/
 	int a;
 	cin >> a;
 	return 0;

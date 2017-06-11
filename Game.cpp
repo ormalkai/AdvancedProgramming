@@ -14,9 +14,13 @@ using namespace std;
 
 
 Game::Game(Board& board, unique_ptr<IBattleshipGameAlgo> algoA, unique_ptr<IBattleshipGameAlgo> algoB) : m_isGameOver(false),
-m_isQuiet(false), m_currentPlayerIndex(MAX_PLAYER), m_otherPlayerIndex(MAX_PLAYER)
+m_isQuiet(false), m_currentPlayerIndex(MAX_PLAYER), m_otherPlayerIndex(MAX_PLAYER), m_winner(TIE_WINNER_ID)
 {
-	init(board, move(algoA), move(algoB));
+	// invoke copy constructor!
+	m_board = board;
+	// Init players
+	m_players.push_back(move(algoA));
+	m_players.push_back(move(algoB));
 }
 
 Game::~Game()
@@ -86,30 +90,10 @@ ReturnCode Game::initDLLFilesPath(const string& filesPath, vector<string>& dllPe
 }
 
 
-/**
- * @Details		receives path to sboard and attack files and initializes the game:
- *				players, board etc
- * @Param		filesPath - location of sboard and attack files
- */
-void Game::init(const vector<vector<vector<char>>> board, unique_ptr<IBattleshipGameAlgo> algoA, unique_ptr<IBattleshipGameAlgo> algoB)
+void Game::init()
 {
-	// now the board is valid lets build our board
-	m_board.buildBoard(board);
-	
-	init(m_board, move(algoA), move(algoB));
-}
-
-void Game::init(const Board& board, unique_ptr<IBattleshipGameAlgo> algoA, unique_ptr<IBattleshipGameAlgo> algoB)
-{
-	// invoke copy constructor!
-	m_board = board;
-	
 	Board boardA, boardB;
 	m_board.splitToPlayersBoards(boardA, boardB);
-
-	// Init players
-	m_players.push_back(move(algoA));
-	m_players.push_back(move(algoB));
 
 	m_players[PLAYER_A]->setBoard(boardA);
 	m_players[PLAYER_B]->setBoard(boardB);
@@ -140,7 +124,7 @@ AttackRequestCode Game::requestAttack(Coordinate& req)
 
 void Game::startGame()
 {
-
+	init();
 	auto& shipsPerPlayer = m_board.shipsPerPlayer();
 
 	m_board.printBoard();
@@ -152,19 +136,16 @@ void Game::startGame()
 	while (!m_isGameOver)
 	{
 		Coordinate attackReq = m_players[m_currentPlayerIndex]->attack();
-		DBG(Debug::DBG_INFO, "Player [%d] attack (%d, %d, %d)", m_currentPlayerIndex, attackReq.depth, attackReq.row, attackReq.col);
-		if (attackReq.depth == 1 && attackReq.row == 4 && attackReq.col == 1)
-		{
-			cout << "boo";
-		}
-		
+		DBG(Debug::DBG_DEBUG, "Player [%d] attack (%d, %d, %d)", m_currentPlayerIndex, attackReq.depth, attackReq.row, attackReq.col);
+	
 		// Check attack request 
 		AttackRequestCode arc = requestAttack(attackReq);
 		switch (arc)
 		{
 		case ARC_GAME_OVER:
-			DBG(Debug::DBG_INFO, "For both players - No more attack requests");
+			DBG(Debug::DBG_INFO, "Game Over For both players - No more attack requests");
 			m_isGameOver = true;
+			m_winner = TIE_WINNER_ID;
 			continue;
 		case ARC_FINISH_REQ:
 			proceedToNextPlayer();
@@ -242,14 +223,15 @@ void Game::startGame()
 		for (int i = 0; i < NUM_OF_PLAYERS; i++)
 		{
 			m_players[i]->notifyOnAttackResult(m_currentPlayerIndex, attackReq, attackResult);
-			DBG(Debug::DBG_INFO, "Notify Player [%d] attack (%d, %d, %d) [%d]", i, attackReq.depth, attackReq.row, attackReq.col, attackResult);
+			DBG(Debug::DBG_DEBUG, "Notify Player [%d] attack (%d, %d, %d) [%d]", i, attackReq.depth, attackReq.row, attackReq.col, attackResult);
 		}
 
 		// If game over break
 		if (Utils::isExistInVec(shipsPerPlayer, 0))
 		{
 			m_isGameOver = true;
-			DBG(Debug::DBG_DEBUG, "Game over - 0 ships remaining");
+			m_winner = m_currentPlayerIndex;
+			DBG(Debug::DBG_INFO, "Game over - 0 ships remaining");
 		}
 		// If attack failed - iter.next
 		// If iter == last do iter = begin
@@ -262,8 +244,6 @@ void Game::startGame()
 		}
 
 	} // Game Loop
-	
-	printSummary();
 }
 
 bool Game::isGameOver() const
@@ -271,9 +251,9 @@ bool Game::isGameOver() const
 	return m_isGameOver;
 }
 
-pair<int,int> Game::getScore()
+Game::GameResult Game::getGameResult()
 {
-	return make_pair(m_playerScore[PLAYER_A], m_playerScore[PLAYER_B]);
+	return GameResult(m_winner, m_playerScore[PLAYER_A], m_playerScore[PLAYER_B]);
 }
 
 

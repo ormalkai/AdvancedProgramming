@@ -27,18 +27,23 @@ private:
 	
 	vector<tuple<HINSTANCE, GetAlgoFuncType>>	m_algoDLLVec;						// dll tuples <hanfle, algo func>
 
-	struct GameResult
+	int											m_maxNameLen = 0;
+
+	struct PlayerGameResult
 	{
-		int		m_playerId; // this report is for player m_playerId
-		int		m_pointsFor;	// how many points the player won in the game
-		int		m_pointsAgainst;	// how many points the other player won in the game
-		GameResult() : m_playerId(-1), m_pointsFor(0), m_pointsAgainst(0) {}
+		int			m_playerId; // this report is for player m_playerId
+		int			m_pointsFor;	// how many points the player won in the game
+		int			m_pointsAgainst;	// how many points the other player won in the game
+		WinLoseTie	m_isWon;
+		PlayerGameResult() : m_playerId(-1), m_pointsFor(0), m_pointsAgainst(0), m_isWon(TIE){}
+		PlayerGameResult(int playerId, int pointsFor, int pointsAgainst , WinLoseTie isWon) :
+		m_playerId(playerId), m_pointsFor(pointsFor), m_pointsAgainst(pointsAgainst), m_isWon(isWon) {}
 	};
 
 	struct RoundResults
 	{
 		int					m_playersFinished;	// holds how many players finished their games in this round, atomic since this is the index to insert in the round
-		vector<GameResult>	m_results;			// holds all the results in this round
+		vector<PlayerGameResult>	m_results;			// holds all the results in this round
 		mutex				m_roundMutex;		// lock for each round between workers and reporter
 		RoundResults() : m_playersFinished(0) {}
 		RoundResults(const RoundResults &other) : m_roundMutex()
@@ -68,7 +73,7 @@ private:
 
 	struct SortByWins
 	{
-		bool operator() (PlayerStatistics & L, PlayerStatistics & R) const { return L.getWins() < R.getWins(); }
+		bool operator() (PlayerStatistics & L, PlayerStatistics & R) const { return L.getWins() > R.getWins(); }
 	};
 
 
@@ -83,7 +88,7 @@ private:
 	void executeGame(int workerId);
 	void notifyGameResult(Game& game, int gameIndex);
 
-	void updateRoundResultForPlayer(int player, int RoundForPlayer, int playerScore, int otherPlayerScore);
+	void updateRoundResultForPlayer(int RoundForPlayer, PlayerGameResult& playerResult);
 
 	static ReturnCode initSboardFiles(const string& directoryPath, vector<string>& sboardFiles);
 	static ReturnCode initDLLFilesPath(const string& directoryPath, vector<string>& dllFiles);

@@ -56,34 +56,9 @@ void Board::buildBoard(const BoardData& initBoard)
 }
 
 
-void Board::buildBoard(const vector<vector<vector<Cell>>>& initBoard)
-{
-
-	size_t initDepthSize	= initBoard.size();
-	size_t initRowSize		= initBoard[0].size();
-	size_t initColSize		= initBoard[0][0].size();
-
-	vector<vector<vector<char>>> copyBoard;
-	for (int d = 0; d < initDepthSize; d++)
-	{
-		vector<vector<char>> depth;
-		copyBoard.push_back(depth);
-		for (int i = 0; i < initRowSize; i++)
-		{
-			vector<char> col;
-			copyBoard[d].push_back(col);
-			for (int j = 0; j < initColSize; j++)
-			{
-				copyBoard[d][i].push_back(initBoard[d][i][j].getSign());
-			}
-		}
-	}
-
-	buildBoard(copyBoard);
-}
-
 void Board::buildBoard(const vector<vector<vector<char>>>& initBoard)
 {
+	clear();
 	m_depth = _depth = static_cast<int>(initBoard.size() - BOARD_PADDING);
 	m_rows = _rows = static_cast<int>(initBoard[0].size() - BOARD_PADDING);
 	m_cols = _cols = static_cast<int>(initBoard[0][0].size() - BOARD_PADDING);
@@ -315,7 +290,7 @@ void Board::printHist()
 		Utils::gotoxy(13,0);
 	else
 		Utils::gotoxy(27, 0);
-	for (int d = 0; d < m_depth; ++d)
+	for (int d = 1; d <= m_depth; ++d)
 	{
 		for (int i = 1; i <= m_rows; ++i)
 		{
@@ -331,6 +306,7 @@ void Board::printHist()
 		}
 		cout << endl << endl;
 	}
+	cout << "-------------------------------------" << endl;
 }
 
 void Board::printAttack(int player, int i, int j, int d, AttackResult attackResult) const
@@ -417,6 +393,7 @@ void Board::BoardBuilder::initErrorDataStructures()
 	for (int i = 0; i < PlayerIndex::MAX_PLAYER; i++)
 	{
 		m_numOfShipsPerPlayer.push_back(0);
+		m_shipsPerPlayer.push_back(vector<char>());
 		m_wrongSizeOrShapePerPlayer.push_back(wrongSizeOrShapePerPlayer);
 	}
 	m_foundAdjacentShips = false;
@@ -552,9 +529,9 @@ void Board::BoardBuilder::validateBoard()
 
 				PlayerIndex playerIndex = Utils::getPlayerIdByShip(currentShip);
 				int shipIndex = Utils::getIndexByShip(currentShip);
-				if (((expectedLen != horizontalShipLen) || (expectedLen == horizontalShipLen && 1 != verticalShipLen && 1 != depthShipLen)) &&
-					((expectedLen != verticalShipLen) || (expectedLen == verticalShipLen && 1 != horizontalShipLen && 1 != depthShipLen)) &&
-					((expectedLen != depthShipLen) || (expectedLen == depthShipLen && 1 != horizontalShipLen && 1 != verticalShipLen)))
+				if (((expectedLen != horizontalShipLen) || (expectedLen == horizontalShipLen && (1 != verticalShipLen || 1 != depthShipLen))) &&
+					((expectedLen != verticalShipLen) || (expectedLen == verticalShipLen && (1 != horizontalShipLen || 1 != depthShipLen))) &&
+					((expectedLen != depthShipLen) || (expectedLen == depthShipLen && (1 != horizontalShipLen || 1 != verticalShipLen))))
 				{
 					// ERROR - wrong size or shape for currentShip(player too)
 					m_wrongSizeOrShapePerPlayer[playerIndex][shipIndex] = true;
@@ -571,6 +548,7 @@ void Board::BoardBuilder::validateBoard()
 						currentShip != m_initBoard[d - 1][i][j])
 					{
 						m_numOfShipsPerPlayer[playerIndex]++;
+						m_shipsPerPlayer[playerIndex].push_back(currentShip);
 					}
 				}
 
@@ -712,7 +690,7 @@ bool Board::BoardBuilder::checkWrongSizeOrShape() const
 			if (true == m_wrongSizeOrShapePerPlayer[i][j])
 			{
 				char ship = Utils::getShipByIndexAndPlayer(j, i);
-				cout << "Wrong size or shape for ship " << ship << " for player " << player << endl;
+				DBG(Debug::DBG_WARNING, "Wrong size or shape for ship [%c] for [%c] board[%s]", ship, player, m_sboardFilePath.c_str());
 				result = false;
 			}
 		}
@@ -720,24 +698,34 @@ bool Board::BoardBuilder::checkWrongSizeOrShape() const
 	return result;
 }
 
-bool Board::BoardBuilder::checkNumberOfShips() const
+void Board::BoardBuilder::checkIntegrityOfShips() const
 {
-	bool result = true;
-	for (int i = 0; i < PlayerIndex::MAX_PLAYER; i++)
+	// check number of ships
+	if (m_numOfShipsPerPlayer[PLAYER_A] != m_numOfShipsPerPlayer[PLAYER_B])
 	{
-		char player = Utils::getPlayerCharByIndex(i);
-		if (SHIPS_PER_PLAYER < m_numOfShipsPerPlayer[i])
+		// do not set result to false, keep playing!!!
+		DBG(Debug::DBG_WARNING, "Inconsistent number of ships per player - playerA[%d], playerB[%d] continue playing anyway",
+			m_numOfShipsPerPlayer[PLAYER_A], m_numOfShipsPerPlayer[PLAYER_B]);
+		return;
+	}
+	// check that ships are the same
+	auto shipsPlayerACopy(m_shipsPerPlayer[PLAYER_A]);
+	auto shipsPlayerBCopy(m_shipsPerPlayer[PLAYER_B]);
+	sort(shipsPlayerACopy.begin(), shipsPlayerACopy.end(), less<char>());
+	sort(shipsPlayerBCopy.begin(), shipsPlayerBCopy.end(), less<char>());
+	for (int i = 0; i < m_numOfShipsPerPlayer[PLAYER_A]; i++)
+	{
+		if (tolower(shipsPlayerACopy[i]) != tolower(shipsPlayerBCopy[i]))
 		{
-			cout << "Too many ships for player " << player << endl;
-			result = false;
-		}
-		else if (SHIPS_PER_PLAYER > m_numOfShipsPerPlayer[i])
-		{
-			cout << "Too few ships for player " << player << endl;
-			result = false;
+			DBG(Debug::DBG_WARNING, "Inconsistent ships for players");
+			for (int j = 0; j < m_numOfShipsPerPlayer[PLAYER_A]; j++)
+			{
+				DBG(Debug::DBG_WARNING, "Player A[%c] playerB[%c]", shipsPlayerACopy[j], shipsPlayerBCopy[j]);
+			}
+			DBG(Debug::DBG_WARNING, "continue playing anyway");
+			return;
 		}
 	}
-	return result;
 }
 
 bool Board::BoardBuilder::checkAdjacentShips() const
@@ -745,7 +733,7 @@ bool Board::BoardBuilder::checkAdjacentShips() const
 	bool result = true;
 	if (true == m_foundAdjacentShips)
 	{
-		cout << "Adjacent Ships on Board" << endl;
+		DBG(Debug::DBG_WARNING, "Adjacent Ships on Board board [%s]", m_sboardFilePath.c_str());
 		result = false;
 	}
 	return result;
@@ -757,12 +745,11 @@ bool Board::BoardBuilder::checkErrors() const
 	// Wrong size or shape for ship errors
 
 	result = checkWrongSizeOrShape() && result;
-	// Too many/few ships for player errors
-
-	result = checkNumberOfShips() && result;
 	// Adjacent Ships on board error
-
 	result = checkAdjacentShips() && result;
+
+	// number and type of ships
+	checkIntegrityOfShips();
 	return result;
 }
 
@@ -792,4 +779,11 @@ void Board::getOtherPlayerShips(vector<int>& ships)
 	{
 		ships.push_back(ship->getLength());
 	}
+}
+
+void Board::clear()
+{
+	m_boardData.clear();	// The board is matrix of Cells
+	m_shipsOnBoard.clear();	// Pointer to every ship on the board
+	m_numOfShipsPerPlayer.clear();
 }

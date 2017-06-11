@@ -64,8 +64,8 @@ void Tournament::initPlayerResultsPerRound()
 	// in each round every player plays one game
 	auto playersInRound = m_algoDLLVec.size();
 
-	// number of rounds is the number of games divided by number of players in round
-	int numRounds = m_gameList.size() / playersInRound;
+	// number of rounds is the number of games mul 2 divided by number of players in round
+	int numRounds = (m_gameList.size() * 2) / playersInRound;
 
 	// init player results per round
 	for (int round = 0; round < numRounds; round++)
@@ -116,10 +116,12 @@ void Tournament::startTournament(int numOfThreads)
 
 void Tournament::printResult() const
 {
+	Utils::gotoxy(3, 0);
+	cout << "------ Round " << m_printedRounds+1 << " ------" << endl;
 	auto playerStat(m_playerStat);
 	sort(playerStat.begin(), playerStat.end(), SortByWins());
 	
-	const int nameWidth = 24;
+	const int nameWidth = m_maxNameLen + 2;
 	const int colWidth = 8;
 	
 	printElement("#", colWidth);
@@ -133,24 +135,21 @@ void Tournament::printResult() const
 	
 	for (int i = 0; i < playerStat.size(); i++) {
 
-		const PlayerStatistics& ps = playerStat[i];
-		// TODO ORM Gal this variable is needed or not?
-		int playerIndex = ps.getPlayerIndex();
-		
+		const PlayerStatistics& ps = playerStat[i];		
 		int wins = ps.getWins();
 		int losses = ps.getLosses();
 		double prec = (static_cast<double>(wins) / (wins + losses)) * 100;
 	
 		printElement(i + 1, colWidth);
-		printElement(ps.getPlayerName(), colWidth);
+		printElement(ps.getPlayerName(), nameWidth);
 		printElement(wins, colWidth);
 		printElement(losses, colWidth);
 		printElement(prec, colWidth);
 		printElement(ps.getPointsFor(), colWidth);
 		printElement(ps.getPointsAgainst(), colWidth);
+		cout << endl;
 	}
-
-	// TODO: Print in the format
+	cout << endl;
 
 	/*
 #       Team Name               Wins    Losses  %       Pts For Pts Against
@@ -173,6 +172,7 @@ void Tournament::printResult() const
 	 */
 
 }
+
 
 template<typename T> void Tournament::printElement(T t, const int& width)
 {
@@ -211,30 +211,49 @@ void Tournament::notifyGameResult(Game& game, int gameIndex)
 
 	// critical section updating the game per player
 	m_gameFinishedByEachPlayerMutex.lock();
+	// TODO ORM what happen here?
 	int playerAGame = m_gameFinishedByEachPlayer[playerAIndex]++;
 	int playerBGame = m_gameFinishedByEachPlayer[playerBIndex]++;
 	m_gameFinishedByEachPlayerMutex.unlock();
 
 	// get every player score from game
-	pair<int, int> s = game.getScore();
-	int playerAScore = s.first;
-	int playerBScore = s.second;
+	Game::GameResult s = game.getGameResult();
+	int playerAScore = s.m_playerAPoints;
+	int playerBScore = s.m_playerBPoints;
+	int winnerIndex = s.m_winnerIndex;
+	WinLoseTie winLoseTieA;
+	WinLoseTie winLoseTieB;
+	if (winnerIndex == PLAYER_A)
+	{
+		winLoseTieA = WON;
+		winLoseTieB = LOST;
+	}
+	else if (winnerIndex == PLAYER_B)
+	{
+		winLoseTieA = LOST;
+		winLoseTieB = WON;
+	}
+	else
+	{
+		winLoseTieA = TIE;
+		winLoseTieB = TIE;
+	}
+	PlayerGameResult playerAResult(playerAIndex, playerAScore, playerBScore, winLoseTieA);
+	PlayerGameResult playerBResult(playerBIndex, playerBScore, playerAScore, winLoseTieB);
 
 	// update round results for each player
-	updateRoundResultForPlayer(playerAIndex, playerAGame, playerAScore, playerBScore);
-	updateRoundResultForPlayer(playerBIndex, playerBGame, playerBScore, playerAScore);
+	updateRoundResultForPlayer(playerAGame, playerAResult);
+	updateRoundResultForPlayer(playerBGame, playerBResult);
 }
 
-void Tournament::updateRoundResultForPlayer(int player, int RoundForPlayer ,int playerScore, int otherPlayerScore)
+void Tournament::updateRoundResultForPlayer(int RoundForPlayer, PlayerGameResult& playerResult)
 {
 	int playerIndexInRound;
 	// fetch current index and increment current
 	{
 		lock_guard<mutex> lock(m_playersResultsPerRound[RoundForPlayer].m_roundMutex);
 		playerIndexInRound = m_playersResultsPerRound[RoundForPlayer].m_playersFinished++;
-		m_playersResultsPerRound[RoundForPlayer].m_results[playerIndexInRound].m_playerId = player;
-		m_playersResultsPerRound[RoundForPlayer].m_results[playerIndexInRound].m_pointsFor = playerScore;
-		m_playersResultsPerRound[RoundForPlayer].m_results[playerIndexInRound].m_pointsAgainst = otherPlayerScore;
+		m_playersResultsPerRound[RoundForPlayer].m_results[playerIndexInRound] = playerResult;
 	}
 
 	// if Round is finished notify reporter
@@ -259,6 +278,7 @@ ReturnCode Tournament::initSboardFiles(const string& directoryPath, vector<strin
 	// ERROR means that the path exists but there is no file
 	if (RC_ERROR == rc || sboardFiles.size() == 0)
 	{
+		// TODO ORM exercise is different "No board files (*.sboard) looking in path:"
 		cout << "Missing board file (*.sboard) looking in path: " << directoryPath << endl;
 		DBG(Debug::DBG_ERROR, "Missing board file (*.sboard) looking in path: %s", directoryPath);
 		return rc;
@@ -279,8 +299,8 @@ ReturnCode Tournament::initDLLFilesPath(const string& directoryPath, vector<stri
 	}
 	if (RC_ERROR == rc || (RC_SUCCESS == rc && dllFiles.size() < MIN_DLLS_FILES)) // no dlls in path or less then 2 dlls
 	{
-		cout << "Missing an algorithm (dll) file looking in path : " + directoryPath << endl;
-		DBG(Debug::DBG_ERROR, "Missing an algorithm(dll) file looking in path : %s", directoryPath);
+		cout << "Missing an algorithm (dll) file looking in path : " + directoryPath << " (needs at least two)" << endl;
+		DBG(Debug::DBG_ERROR, "Missing an algorithm(dll) file looking in path : %s", directoryPath.c_str());
 		return RC_ERROR;
 	}
 
@@ -318,6 +338,10 @@ ReturnCode Tournament::loadAllAlgoFromDLLs(const vector<string>& dllPaths, promi
 		{
 			continue;
 		}
+		if (m_maxNameLen < playerName.size())
+		{
+			m_maxNameLen = playerName.size();
+		}
 		
 		m_algoDLLVec.push_back(make_tuple(hDll, getAlgoFunc));
 		m_playerStat.emplace_back(playerIndex, playerName);
@@ -346,8 +370,8 @@ ReturnCode Tournament::loadBoards(vector<string>& boardsPaths, promise<ReturnCod
 	
 		if (RC_SUCCESS != rc)
 		{
-			p.set_value(rc);
-			return rc;
+			DBG(Debug::DBG_WARNING, "Invalid board [%s], skipping", boardPath.c_str());
+			continue;
 		}
 		
 		m_boards.push_back(b);
@@ -371,7 +395,6 @@ void Tournament::buildGameSchedule()
 	size_t numOfAlgos = m_algoDLLVec.size();
 
 	auto allPossibilities = createSchedule(numOfAlgos);
-
 	for (size_t boardIndex = 0; boardIndex < numOfBoards; boardIndex++)
 	{
 		for (auto round : allPossibilities)
@@ -387,12 +410,9 @@ void Tournament::buildGameSchedule()
 
 				Board b = m_boards[boardIndex];
 				
-				// TODO: Change to unique ptr
 				unique_ptr<IBattleshipGameAlgo> ibg1(get<1>(m_algoDLLVec[playerAIndex])());
 				unique_ptr<IBattleshipGameAlgo> ibg2(get<1>(m_algoDLLVec[playerBIndex])());
 				
-				//IBattleshipGameAlgo* ibg1 = get<1>(m_algoDLLVec[playerAIndex])();
-				//IBattleshipGameAlgo* ibg2 = get<1>(m_algoDLLVec[playerBIndex])();
 				m_gameList.emplace_back(b, move(ibg1), move(ibg2));
 				m_gamePlayerIndexes.emplace_back(make_pair(playerAIndex, playerBIndex));
 			}
@@ -452,9 +472,6 @@ vector<vector<pair<int, int>>> Tournament::createSchedule(int numOfAlgos)
 
 		result.push_back(inverse);
 	}
-
-	
-
 	return result;
 }
 
@@ -503,8 +520,7 @@ void Tournament::updateStatAndPrintRound()
 	// update stat acording to the finished round
 	for (auto const& result: m_playersResultsPerRound[m_printedRounds].m_results)
 	{
-		// TODO ORM don't forget to handle tie!!!!!!!
-		m_playerStat[result.m_playerId].update(pair<int, int>(result.m_pointsFor, result.m_pointsAgainst));
+		m_playerStat[result.m_playerId].update(pair<int, int>(result.m_pointsFor, result.m_pointsAgainst), result.m_isWon);
 	}
 
 	printResult();

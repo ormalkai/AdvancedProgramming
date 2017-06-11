@@ -18,13 +18,26 @@ void BattleshipAlgoSmart::setPlayer(int player) {
 	m_id = player;
 }
 
+void BattleshipAlgoSmart::clear()
+{
+	m_shipAwarenessStatus = true;
+	m_attackedQueue.clear();
+	m_targetQueue.clear();
+	m_currentStatus = HUNT;
+	m_currentAttackedShipCells.clear();
+	m_otherPlayerShips.clear();
+	m_stripToPotentialShips.clear();
+	m_stripToPotentialShipsPerShip.clear(); // ship len to strip to potential ships
+}
+
 void BattleshipAlgoSmart::setBoard(const BoardData& board)
 {
+	clear();
 	m_rows = board.rows();
 	m_cols = board.cols();
 	m_depth = board.depth();
-
 	m_board.buildBoard(board);
+	
 	m_board.getOtherPlayerShips(m_otherPlayerShips);
 	initStripSizeToNumPotentialShips();
 
@@ -57,16 +70,24 @@ Coordinate BattleshipAlgoSmart::attack()
 			updateTargetAttackQueue(c, ShipDirection::ALL, false);
 
 			c = popTargetAttack();
-			return std::move(Coordinate(c->row(), c->col(), c->depth()));
+			if (nullptr == c)
+			{
+				return move(Coordinate(-1, -1, -1));
+			}
+			return move(Coordinate(c->row(), c->col(), c->depth()));
 		}
 
-		return std::move(Coordinate(c->row(), c->col(), c->depth()));
+		return move(Coordinate(c->row(), c->col(), c->depth()));
 	}
 	else /*(m_currentStatus == TARGET)*/
 	{
 		shared_ptr<Cell> c = popTargetAttack();
+		if (nullptr == c)
+		{
+			return move(Coordinate(-1, -1, -1));
+		}
 
-		return std::move(Coordinate(c->row(), c->col(), c->depth()));
+		return move(Coordinate(c->row(), c->col(), c->depth()));
 	}
 }
 
@@ -159,11 +180,13 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, Coordinate move, Atta
 				bool toRemoveWrongAxis = false;
 				if (m_currentAttackedShipCells.size() == 2)
 					toRemoveWrongAxis = true;
-				if (m_currentAttackedShipCells.at(0)->row() == m_currentAttackedShipCells.at(1)->row())
+				if (m_currentAttackedShipCells.at(0)->row() == m_currentAttackedShipCells.at(1)->row() && 
+					m_currentAttackedShipCells.at(0)->depth() == m_currentAttackedShipCells.at(1)->depth())
 					updateTargetAttackQueue(attackedCell, ShipDirection::HORIZONTAL, toRemoveWrongAxis);
-				else if (m_currentAttackedShipCells.at(0)->col() == m_currentAttackedShipCells.at(1)->col())
+				else if (m_currentAttackedShipCells.at(0)->col() == m_currentAttackedShipCells.at(1)->col() &&
+					m_currentAttackedShipCells.at(0)->depth() == m_currentAttackedShipCells.at(1)->depth())
 					updateTargetAttackQueue(attackedCell, ShipDirection::VERTICAL, toRemoveWrongAxis);
-				else
+				else /* row and col are equal*/
 					updateTargetAttackQueue(attackedCell, ShipDirection::DEPTH, toRemoveWrongAxis);
 
 			} break;
@@ -330,11 +353,11 @@ void BattleshipAlgoSmart::updateTargetAttackQueue(const shared_ptr<Cell> attacke
 			int rIndex = (*it)->row();
 			int cIndex = (*it)->col();
 
-			if (ShipDirection::HORIZONTAL == direction && rowIndex != rIndex)
+			if (ShipDirection::HORIZONTAL == direction && (rowIndex != rIndex || depthIndex != dIndex))
 				it = m_targetQueue.erase(it);
-			if (ShipDirection::VERTICAL == direction && colIndex != cIndex)
+			if (ShipDirection::VERTICAL == direction && (colIndex != cIndex || depthIndex != dIndex))
 				it = m_targetQueue.erase(it);
-			if (ShipDirection::DEPTH == direction && depthIndex != dIndex)
+			if (ShipDirection::DEPTH == direction && (rowIndex != rIndex || colIndex != cIndex))
 				it = m_targetQueue.erase(it);
 			else if (it != m_targetQueue.end())
 				++it;
@@ -641,7 +664,9 @@ int BattleshipAlgoSmart::getPotentialShipsByStrip(pair<int, int>strip)
 	{
 		for (auto const& ship : m_otherPlayerShips)
 		{
-			numOfPotentialShips += m_stripToPotentialShipsPerShip[Utils::getShipLen(ship)][strip];
+			// ignore ships of size 1, calculated separetely
+			if (1 != ship)
+				numOfPotentialShips += m_stripToPotentialShipsPerShip[ship][strip];
 		}
 	}
 	else
@@ -654,7 +679,7 @@ int BattleshipAlgoSmart::getPotentialShipsByStrip(pair<int, int>strip)
 
 void BattleshipAlgoSmart::removeOtherPlayerSunkShip(int len)
 {
-	for (auto it = m_otherPlayerShips.begin(); it < m_otherPlayerShips.end(); ++it)
+	for (auto it = m_otherPlayerShips.begin(); it != m_otherPlayerShips.end(); ++it)
 	{
 		if (*it == len)
 		{

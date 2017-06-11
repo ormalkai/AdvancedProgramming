@@ -34,7 +34,7 @@ void Debug::init(string logFile, bool printToLog, bool printToStd, DebugLevel de
 		}
 		else
 		{
-			print(DBG_INFO, "==================== Starting Tournament ====================");
+			DBG(DBG_MSG, "========================= Starting Tournament =========================");
 		}
 	}
 }

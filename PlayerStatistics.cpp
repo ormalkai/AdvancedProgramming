@@ -3,26 +3,25 @@
 #include <cassert>
 
 
-void PlayerStatistics::update(const pair<int, int> result)
+void PlayerStatistics::update(const pair<int, int> score, WinLoseTie result)
 {
-	int myScore = result.first;
-	int otherScore = result.second;
-
-	assert(myScore != otherScore);
+	int myScore = score.first;
+	int otherScore = score.second;
 
 	++m_gamesPlayed;
-	// TODO ORM what happens in tie
-	if (myScore > otherScore)
+	if (WON == result)
 	{
 		++m_wins;
 	}
-	else
+	else if (LOST == result)
 	{
 		++m_losses;
 	}
+	else /*TIE == result*/
+	{
+		++m_ties;
+	}
 	
-	assert(m_gamesPlayed == m_wins + m_losses);
-
 	m_ptsFor += myScore;
 	m_ptsAgainst += otherScore;
 }

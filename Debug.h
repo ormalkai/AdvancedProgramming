@@ -16,19 +16,19 @@
 		switch(LEVEL)\
 		{\
 		case(Debug::DBG_ERROR):\
-			Debug::instance().print(LEVEL, "%s    Error  " ": " FMT, str, ## __VA_ARGS__);\
+			Debug::instance().print(LEVEL, "%s   Error  " ": %s()%d: " FMT, str, __func__, __LINE__, ## __VA_ARGS__);\
 			break;\
 		case(Debug::DBG_WARNING):\
-			Debug::instance().print(LEVEL, "%s    Warning" ": " FMT, str, ## __VA_ARGS__);\
+			Debug::instance().print(LEVEL, "%s   Warning" ": %s()%d: " FMT, str, __func__, __LINE__, ## __VA_ARGS__);\
 			break;\
 		case(Debug::DBG_INFO):\
-			Debug::instance().print(LEVEL, "%s    Info   " ": " FMT, str, ## __VA_ARGS__);\
+			Debug::instance().print(LEVEL, "%s   Info   " ": %s()%d: " FMT, str, __func__, __LINE__, ## __VA_ARGS__);\
 			break;\
 		case(Debug::DBG_DEBUG):\
-			Debug::instance().print(LEVEL, "%s    Debug  " ": " FMT, str, ## __VA_ARGS__);\
+			Debug::instance().print(LEVEL, "%s   Debug  " ": %s()%d: " FMT, str, __func__, __LINE__, ## __VA_ARGS__);\
 			break;\
 		default:\
-			Debug::instance().print(LEVEL, "%s    Error  " ": " FMT, str, ## __VA_ARGS__);\
+			Debug::instance().print(LEVEL, "%s   Msg    " ": " FMT, str, ## __VA_ARGS__);\
 		}\
 	} while (0);
 
@@ -43,6 +43,7 @@ public:
 	 */
 	enum DebugLevel
 	{
+		DBG_MSG,
 		DBG_ERROR,
 		DBG_WARNING,
 		DBG_INFO,

@@ -5,6 +5,7 @@
 #include "IBattleshipGameAlgo.h"
 #include "Board.h"
 #include <iostream>
+#include <cassert>
 
 /**
  *
@@ -125,7 +126,7 @@
 class BattleshipAlgoSmart : public IBattleshipGameAlgo
 {
 
-	enum SmartAlgoStautus {
+	enum SmartAlgoStatus {
 		HUNT,
 		TARGET
 	};
@@ -146,12 +147,12 @@ private:
 	Board	m_board;
 	PriorityQueue<shared_ptr<Cell>, vector<shared_ptr<Cell>>, cmp> m_attackedQueue;
 	list<shared_ptr<Cell>> m_targetQueue;
-	SmartAlgoStautus m_currentStatus;
+	SmartAlgoStatus m_currentStatus;
 	vector<shared_ptr<Cell>> m_currentAttackedShipCells;
 	map<pair<int, int>, int> m_stripToPotentialShips;
 	vector<map<pair<int, int>, int>> m_stripToPotentialShipsPerShip; // ship len to strip to potential ships
 	vector<int> m_otherPlayerShips;
-	
+
 	/**
 	* @Details		Return the next attack request in hunt mode - the cell with the highest hist value
 	* @Return		The next cell to be attacked
@@ -164,6 +165,11 @@ private:
 	*/
 	shared_ptr<Cell> popTargetAttack()
 	{
+		if (0 == m_targetQueue.size())
+		{
+			assert(false);
+			return nullptr;
+		}
 		shared_ptr<Cell> c = m_targetQueue.front();
 		m_targetQueue.pop_front();
 		return c;
@@ -301,6 +307,8 @@ public:
 	* @Param		player - player id
 	*/
 	void setPlayer(int player) override;
+
+	void clear();
 
 
 };

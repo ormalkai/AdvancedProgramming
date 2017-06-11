@@ -40,4 +40,6 @@ template <class T, class Container = std::vector<T>,
 		{
 			std::make_heap(c.begin(), c.end(), comp);
 		}
+
+		void clear() { c.clear(); }
 };
