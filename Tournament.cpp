@@ -426,6 +426,10 @@ vector<vector<pair<int, int>>> Tournament::createSchedule(int numOfAlgos)
 
 
 	vector<int> list;
+	// Padding
+	if (numOfAlgos % 2 == 1)
+		list.push_back(-1);
+
 	for (int i = 0; i < numOfAlgos; i++)
 	{
 		list.push_back(i);
@@ -433,10 +437,6 @@ vector<vector<pair<int, int>>> Tournament::createSchedule(int numOfAlgos)
 
 	vector<vector<pair<int,int>>> result;
 	
-	// Padding
-	if (numOfAlgos % 2 == 1)
-		list.push_back(-1);
-
 	for (int i = 0; i < list.size() - 1; i++)
 	{
 		size_t mid = list.size() / 2;
