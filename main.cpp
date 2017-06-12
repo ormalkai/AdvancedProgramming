@@ -49,7 +49,14 @@ void parseArgs(int argc, char* argv[], string& filesLocation, bool& isQuiet, int
 			}
 			i++;
 			string delatStr(argv[i]);
-			delay = stoi(delatStr);
+			try
+			{
+				delay = stoi(delatStr);
+			}
+			catch(exception&)
+			{
+				isDelayInitialized = false;
+			}
 			isDelayInitialized = true;
 		}
 		else if (false == isNumThreadsInitialized && "-threads" == arg)
@@ -60,7 +67,14 @@ void parseArgs(int argc, char* argv[], string& filesLocation, bool& isQuiet, int
 			}
 			i++;
 			string threadsStr(argv[i]);
-			numThreads = stoi(threadsStr);
+			try
+			{
+				numThreads = stoi(threadsStr);
+			}
+			catch(exception&)
+			{
+				isNumThreadsInitialized = false;
+			}
 			isNumThreadsInitialized = true;
 		}
 		else /* this is path */
