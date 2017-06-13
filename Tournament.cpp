@@ -426,14 +426,14 @@ vector<vector<pair<int, int>>> Tournament::createSchedule(int numOfAlgos)
 
 
 	vector<int> list;
-	// Padding
-	if (numOfAlgos % 2 == 1)
-		list.push_back(-1);
 
 	for (int i = 0; i < numOfAlgos; i++)
 	{
 		list.push_back(i);
 	}
+	// Padding
+	if (numOfAlgos % 2 == 1)
+		list.push_back(-1);
 
 	vector<vector<pair<int,int>>> result;
 	
@@ -442,7 +442,7 @@ vector<vector<pair<int, int>>> Tournament::createSchedule(int numOfAlgos)
 		size_t mid = list.size() / 2;
 		vector<int> l1(list.begin(), list.begin() + mid);
 		vector<int> l2(list.begin() + mid, list.end());
-		l2.reserve(l2.size());
+		reverse(l2.begin(), l2.end());
 
 		// Switch sides after each round
 		if (i % 2 == 1)
