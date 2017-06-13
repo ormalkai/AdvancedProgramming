@@ -6,6 +6,7 @@
 #include "Board.h"
 #include <iostream>
 #include <cassert>
+#include <set>
 
 /**
  *
@@ -123,6 +124,8 @@
  *
  */
 
+#define BOARD_AWARENESS_HIST_VAL (5990)
+
 class BattleshipAlgoSmart : public IBattleshipGameAlgo
 {
 
@@ -152,6 +155,8 @@ private:
 	map<pair<int, int>, int> m_stripToPotentialShips;
 	vector<map<pair<int, int>, int>> m_stripToPotentialShipsPerShip; // ship len to strip to potential ships
 	vector<int> m_otherPlayerShips;
+	
+	set<shared_ptr<Cell>> m_operationCell;
 
 	/**
 	* @Details		Return the next attack request in hunt mode - the cell with the highest hist value
@@ -163,17 +168,7 @@ private:
 	* @Details		Return the next attack request in target mode - the cell is negihbor on the last attack
 	* @Return		The next cell to be attacked
 	*/
-	shared_ptr<Cell> popTargetAttack()
-	{
-		if (0 == m_targetQueue.size())
-		{
-			assert(false);
-			return nullptr;
-		}
-		shared_ptr<Cell> c = m_targetQueue.front();
-		m_targetQueue.pop_front();
-		return c;
-	}
+	shared_ptr<Cell> popTargetAttack();
 
 	/**
 	* @Details		Handle case (update hist value for relevent cells) sink not it target mode - for example: we hit ship of one cell
@@ -286,6 +281,7 @@ public:
 	*/
 	void setBoard(const BoardData& board) override;
 
+	void removeOperationCellIfNeed(shared_ptr<Cell>& c);
 	/**
 	* @Details		Return next attack request
 	* @retrun		Coordinate - requested attack.
@@ -310,7 +306,7 @@ public:
 
 	void clear();
 
-
+	void recoverBoardAwareness();
 };
 
 

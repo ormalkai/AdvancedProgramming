@@ -26,7 +26,8 @@ private:
 
 	int					m_histValue;			// The histogram value - number of ship this cell could be part of them
 	bool				m_isHitted;				// Indicator if the cell was hitted		
-
+	
+	bool				m_isOperationCell;
 
 public:
 	/**
@@ -163,4 +164,11 @@ public:
 	* @Details		hit cell - set indicator this cell was attacked
 	*/
 	void hitCell() { m_isHitted = true; }
+
+
+	bool isOperationCell () const { return m_isOperationCell; }
+
+	void setOperationCellStatus(bool isOperation) { m_isOperationCell = isOperation; }
+
 };
+

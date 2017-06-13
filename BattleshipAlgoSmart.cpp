@@ -10,6 +10,21 @@ shared_ptr<Cell> BattleshipAlgoSmart::popAttack()
 	m_attackedQueue.update();
 	shared_ptr<Cell> c = m_attackedQueue.top();
 	m_attackedQueue.pop();
+	removeOperationCellIfNeed(c);
+	return c;
+}
+
+shared_ptr<Cell> BattleshipAlgoSmart::popTargetAttack()
+{
+	if (0 == m_targetQueue.size())
+	{
+		assert(false);
+		return nullptr;
+	}
+	shared_ptr<Cell> c = m_targetQueue.front();
+	m_targetQueue.pop_front();
+
+	removeOperationCellIfNeed(c);
 	return c;
 }
 
@@ -30,14 +45,27 @@ void BattleshipAlgoSmart::clear()
 	m_stripToPotentialShipsPerShip.clear(); // ship len to strip to potential ships
 }
 
+void BattleshipAlgoSmart::recoverBoardAwareness()
+{
+	for (shared_ptr<Cell> cell : m_operationCell)
+	{
+		int cellHistVal = cell->getHistValue();
+		cell->setHistValue(cellHistVal - BOARD_AWARENESS_HIST_VAL);
+		cell->setOperationCellStatus(false);
+	}
+
+	m_operationCell.clear();
+}
+
 void BattleshipAlgoSmart::setBoard(const BoardData& board)
 {
 	clear();
+
 	m_rows = board.rows();
 	m_cols = board.cols();
 	m_depth = board.depth();
 	m_board.buildBoard(board);
-	
+
 	m_board.getOtherPlayerShips(m_otherPlayerShips);
 	initStripSizeToNumPotentialShips();
 
@@ -53,6 +81,108 @@ void BattleshipAlgoSmart::setBoard(const BoardData& board)
 			}
 		}
 	}
+
+	
+
+
+}
+
+void BattleshipAlgoSmart::getAwarenessBoards()
+{
+	// Get temp directory path
+	wstring strTempPath;
+	wchar_t wchPath[MAX_PATH];
+	if (GetTempPathW(MAX_PATH, wchPath))
+		strTempPath = wchPath;
+	
+	const string strTmp(strTempPath.begin(), strTempPath.end());
+
+	vector<string> boardFiles;
+	// get all sboards file names in tempdir path
+	Utils::getListOfFilesInDirectoryBySuffix(strTmp, ".ohgsmart", boardFiles);
+
+	int maxRatio = -1;
+	vector<Coordinate> maxRatioCoord;
+
+	// foreach file 
+	for (string boardPath : boardFiles)
+	{
+		vector<Coordinate> boardCoord;
+		ReturnCode rc = parseBoardDataFile(boardPath, boardCoord, );
+		if (RC_SUCCESS != rc)
+		{
+			continue;
+		}
+		
+		int ratio = calcSimilarityRatio(boardCoord);
+		if (ratio > maxRatio)
+		{
+			maxRatio = ratio;
+			maxRatioCoord = boardCoord;
+
+			if (100 == maxRatio)
+				break;
+		}
+	}
+	//     read the data (coord list) (for both players) with delimiter
+	//     compare to our board - calc similarity ratio
+	//				if (size not equal) ratio = 0
+	//		if (100% - stop search)
+	//		find the max ratio
+	//		return the highest ratio vector contains other player's cells
+	
+
+	for (Coordinate coor : maxRatioCoord)
+	{
+		int histVal = m_board.get(coor)->getHistValue();
+		shared_ptr<Cell> c = m_board.get(coor);
+
+		c->setOperationCellStatus(true);
+		c->setHistValue(histVal + BOARD_AWARENESS_HIST_VAL);
+		m_operationCell.insert(c);
+	}
+	// foreach coord in the vector
+	//		update flag
+	//		add shared_ptr<cell> to the set
+	//		update hist value of the cells by MAX_INT - 1
+
+
+
+	// TODO: Create the board file and save my coord!
+
+}
+
+int BattleshipAlgoSmart::calcSimilarityRatio(vector<Coordinate>& boardCoord)
+{
+	// TODO: Make better by check if coord is bot neighbor of my cell
+	for (Coordinate coor : boardCoord)
+	{
+		// TODO: complete the if with the orminator !
+		if (false)
+		{
+			
+		}
+	}
+
+	return 19191919191;
+}
+
+ReturnCode BattleshipAlgoSmart::parseBoardDataFile(string& boardPath ,vector<Coordinate>& coord)
+{
+
+
+	
+	return RC_SUCCESS;
+}
+
+
+void BattleshipAlgoSmart::removeOperationCellIfNeed(shared_ptr<Cell>& c)
+{
+	if (c->isOperationCell())
+	{
+		c->setOperationCellStatus(false);
+		m_operationCell.erase(c);
+	}
 }
 
 Coordinate BattleshipAlgoSmart::attack()
@@ -60,7 +190,7 @@ Coordinate BattleshipAlgoSmart::attack()
 	if (m_currentStatus == HUNT)
 	{
 		shared_ptr<Cell> c = popAttack();
-
+	
 		if (c->getHistValue() == INT_MAX)
 		{
 			m_currentStatus = TARGET;
@@ -121,12 +251,20 @@ void BattleshipAlgoSmart::handleTargetShipSunk(shared_ptr<Cell> const attackedCe
 	m_currentAttackedShipCells.clear();
 }
 
+
 void BattleshipAlgoSmart::notifyOnAttackResult(int player, Coordinate move, AttackResult result)
 {
 	int depth = move.depth;
 	int row = move.row;
 	int col = move.col;
 	shared_ptr<Cell> attackedCell = m_board.get(depth, row, col);
+
+	if ((result == AttackResult::Miss && attackedCell->isOperationCell()) || 
+		result !=  AttackResult::Miss && !attackedCell->isOperationCell() && player != m_id)
+	{
+		recoverBoardAwareness();
+	}
+
 	attackedCell->hitCell();
 	if (AttackResult::Hit == result || AttackResult::Sink == result)
 		attackedCell->setStatus(Cell::DEAD);

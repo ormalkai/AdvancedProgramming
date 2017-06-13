@@ -93,7 +93,7 @@ void Tournament::startTournament(int numOfThreads)
 	thread reporter = reporterThread();
 
 	// vector of all threads - workers - do not open more threads than games
-	numOfThreads = (numOfThreads <= m_gameList.size() ? numOfThreads : m_gameList.size());
+	numOfThreads = (numOfThreads <= m_gameList.size() ? numOfThreads : static_cast<int>(m_gameList.size()));
 	vector<thread> vec_threads(numOfThreads);
 	int id = 1;
 	for (auto & t : vec_threads) 
