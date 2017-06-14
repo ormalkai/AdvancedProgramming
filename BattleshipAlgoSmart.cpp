@@ -1,16 +1,23 @@
 
 
 #include <climits>
+#include <iostream>
+#include <conio.h>
+#include <regex>
+#include <fstream>
 #include "BattleshipAlgoSmart.h"
 #include "Utils.h"
 #include "Debug.h"
+#include <set>
+
+#define PLAYERS_DELIMETER "----------"
 
 shared_ptr<Cell> BattleshipAlgoSmart::popAttack()
 {
 	m_attackedQueue.update();
 	shared_ptr<Cell> c = m_attackedQueue.top();
 	m_attackedQueue.pop();
-	removeOperationCellIfNeed(c);
+	//removeOperationCellIfNeed(c);
 	return c;
 }
 
@@ -24,7 +31,7 @@ shared_ptr<Cell> BattleshipAlgoSmart::popTargetAttack()
 	shared_ptr<Cell> c = m_targetQueue.front();
 	m_targetQueue.pop_front();
 
-	removeOperationCellIfNeed(c);
+	//removeOperationCellIfNeed(c);
 	return c;
 }
 
@@ -36,6 +43,7 @@ void BattleshipAlgoSmart::setPlayer(int player) {
 void BattleshipAlgoSmart::clear()
 {
 	m_shipAwarenessStatus = true;
+	m_saveNewBoardAwerness = false;
 	m_attackedQueue.clear();
 	m_targetQueue.clear();
 	m_currentStatus = HUNT;
@@ -82,13 +90,21 @@ void BattleshipAlgoSmart::setBoard(const BoardData& board)
 		}
 	}
 
-	
-
+	// board Awerness
+	getAwarenessBoards();
 
 }
 
 void BattleshipAlgoSmart::getAwarenessBoards()
 {
+	//     read the data (coord list) (for both players) with delimiter
+	//     compare to our board - calc similarity ratio
+	//				if (size not equal) ratio = 0
+	//		if (100% - stop search)
+	//		find the max ratio
+	//		return the highest ratio vector contains other player's cells
+
+
 	// Get temp directory path
 	wstring strTempPath;
 	wchar_t wchPath[MAX_PATH];
@@ -99,38 +115,60 @@ void BattleshipAlgoSmart::getAwarenessBoards()
 
 	vector<string> boardFiles;
 	// get all sboards file names in tempdir path
-	Utils::getListOfFilesInDirectoryBySuffix(strTmp, ".ohgsmart", boardFiles);
+	Utils::getListOfFilesInDirectoryBySuffix(strTmp, "ohgsmart", boardFiles);
 
 	int maxRatio = -1;
 	vector<Coordinate> maxRatioCoord;
+	
+	vector<Coordinate> myShipsCoord;
+	m_board.getShipsCoord(myShipsCoord);
 
 	// foreach file 
 	for (string boardPath : boardFiles)
 	{
-		vector<Coordinate> boardCoord;
-		ReturnCode rc = parseBoardDataFile(boardPath, boardCoord, );
+		vector<Coordinate> playerACoord;
+		vector<Coordinate> playerBCoord;
+		ReturnCode rc = parseBoardDataFile(boardPath, playerACoord, playerBCoord);
 		if (RC_SUCCESS != rc)
 		{
 			continue;
 		}
 		
-		int ratio = calcSimilarityRatio(boardCoord);
-		if (ratio > maxRatio)
+		int ratioA = calcSimilarityRatio(playerACoord, myShipsCoord);
+		if (ratioA <= 100/* can be greater than 100*/)
 		{
-			maxRatio = ratio;
-			maxRatioCoord = boardCoord;
+			if (ratioA > maxRatio)
+			{
+				maxRatio = ratioA;
+				// attack the other player
+				if (ratioA > 90/*threshold*/)
+					maxRatioCoord = playerBCoord;
 
-			if (100 == maxRatio)
-				break;
+				if (100 == maxRatio)
+					break;
+			}
+		}
+
+		int ratioB = calcSimilarityRatio(playerBCoord, myShipsCoord);
+		if (ratioB <= 100/* can be greater than 100*/)
+		{
+			if (ratioB > maxRatio)
+			{
+				maxRatio = ratioB;
+				// attack the other player
+				if (ratioA > 90/*threshold*/)
+					maxRatioCoord = playerACoord;
+
+				if (100 == maxRatio)
+					break;
+			}
 		}
 	}
-	//     read the data (coord list) (for both players) with delimiter
-	//     compare to our board - calc similarity ratio
-	//				if (size not equal) ratio = 0
-	//		if (100% - stop search)
-	//		find the max ratio
-	//		return the highest ratio vector contains other player's cells
 	
+	// foreach coord in the vector
+	//		update flag
+	//		add shared_ptr<cell> to the set
+	//		update hist value of the cells by MAX_INT - 1
 
 	for (Coordinate coor : maxRatioCoord)
 	{
@@ -141,36 +179,121 @@ void BattleshipAlgoSmart::getAwarenessBoards()
 		c->setHistValue(histVal + BOARD_AWARENESS_HIST_VAL);
 		m_operationCell.insert(c);
 	}
-	// foreach coord in the vector
-	//		update flag
-	//		add shared_ptr<cell> to the set
-	//		update hist value of the cells by MAX_INT - 1
-
-
 
 	// TODO: Create the board file and save my coord!
-
+	char randName[256] = {'\0'};
+	tmpnam_s(randName, 256);
+	m_newBoardAwernessFile = string(randName) + ".ohgsmart";
+	//open the file
+	ofstream newBoardAwerness(m_newBoardAwernessFile);
+	if (!newBoardAwerness.is_open())
+	{
+		m_saveNewBoardAwerness = false;
+		return;
+	}
+	//print dim
+	newBoardAwerness << m_cols << "x" << m_rows << "x" << m_depth << endl;
+	//print coordinates
+	for (auto coord : myShipsCoord)
+	{
+		newBoardAwerness << coord.row << "," << coord.col << "," << coord.depth << endl;
+	}
+	//print delimeter
+	newBoardAwerness << PLAYERS_DELIMETER << endl;
+	// continue saving coordinates during the game
+	m_saveNewBoardAwerness = true;
 }
 
-int BattleshipAlgoSmart::calcSimilarityRatio(vector<Coordinate>& boardCoord)
+int BattleshipAlgoSmart::calcSimilarityRatio(vector<Coordinate>& boardCoord, vector<Coordinate> myShipsCoord)
 {
 	// TODO: Make better by check if coord is bot neighbor of my cell
+	// Will cause penalty in performance!
+	
+	int hits = 0;
 	for (Coordinate coor : boardCoord)
 	{
 		// TODO: complete the if with the orminator !
-		if (false)
+		for (auto myCoor : myShipsCoord)
 		{
-			
+			if (coor.depth == myCoor.depth && coor.row == myCoor.row && coor.col == myCoor.col)
+			{
+				hits++;
+				break;
+			}
+			// cant check this condition i'm shooting in my leg when checking the ships!
+			//else if (1 == m_board.get(myCoor)->squaredDistance(coor)) // this coord is neighbor to me can't be my board
+			//{
+			//	return 0;
+			//}
 		}
 	}
-
-	return 19191919191;
+	if (0 == hits)
+		return 0;
+	return static_cast<int>(myShipsCoord.size()) / hits * 100;
 }
 
-ReturnCode BattleshipAlgoSmart::parseBoardDataFile(string& boardPath ,vector<Coordinate>& coord)
+ReturnCode BattleshipAlgoSmart::parseBoardDataFile(string& boardPath ,vector<Coordinate>& playerACoord, vector<Coordinate>& playerBCoord) const
 {
+	// Read from file 
+	int cols, rows, depth;
+	ifstream sboard(boardPath);
+	if (!sboard.is_open())
+	{
+		return RC_ERROR;
+	}
 
+	string line;
+	Utils::safeGetline(sboard, line);
+	transform(line.begin(), line.end(), line.begin(), ::tolower);
+	regex regexDim("^([0-9]+)x([0-9]+)x([0-9]+)");
+	smatch m;
+	regex_match(line, m, regexDim);
+	if (m.size() != 4)
+	{
+		return RC_ERROR;
+	}
+	try
+	{
+		cols = stoi(m[1]);
+		rows = stoi(m[2]);
+		depth = stoi(m[3]);
+	}
+	catch (const std::exception&)
+	{
+		return RC_ERROR;
+	}
 
+	// do not read file if dimensions are different
+	if(m_depth != depth || m_rows != rows || m_cols != cols)
+		return RC_ERROR;
+
+	vector<Coordinate>* currentPlayerCoord = &playerACoord;
+	while (Utils::safeGetline(sboard, line))
+	{
+		if (sboard.eof())
+			break;
+
+		regex regexCoord("^([0-9]+),([0-9]+),([0-9]+)");
+		smatch m;
+		regex_match(line, m, regexCoord);
+		if (m.size() != 4)
+		{
+			if (line != PLAYERS_DELIMETER)
+			{
+				return RC_ERROR;
+			}
+			currentPlayerCoord = &playerBCoord;
+			continue;
+		}
+		try
+		{
+			currentPlayerCoord->push_back(move(Coordinate(stoi(m[1]), stoi(m[2]), stoi(m[3]))));
+		}
+		catch (const std::exception&)
+		{
+			return RC_ERROR;
+		}
+	}
 	
 	return RC_SUCCESS;
 }
@@ -180,6 +303,7 @@ void BattleshipAlgoSmart::removeOperationCellIfNeed(shared_ptr<Cell>& c)
 {
 	if (c->isOperationCell())
 	{
+		// cant update this in attack we need this information in notify
 		c->setOperationCellStatus(false);
 		m_operationCell.erase(c);
 	}
@@ -258,11 +382,21 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, Coordinate move, Atta
 	int row = move.row;
 	int col = move.col;
 	shared_ptr<Cell> attackedCell = m_board.get(depth, row, col);
-
+	
 	if ((result == AttackResult::Miss && attackedCell->isOperationCell()) || 
-		result !=  AttackResult::Miss && !attackedCell->isOperationCell() && player != m_id)
+		result !=  AttackResult::Miss && !attackedCell->isOperationCell() && attackedCell->getPlayerIndexOwner() != m_id)
 	{
 		recoverBoardAwareness();
+	}
+	removeOperationCellIfNeed(attackedCell);
+
+	if (m_saveNewBoardAwerness)
+	{
+		if (result != AttackResult::Miss && attackedCell->getPlayerIndexOwner() != m_id)
+		{
+			ofstream newBoardAwerness(m_newBoardAwernessFile, fstream::app);
+			newBoardAwerness << move.row << "," << move.col << "," << move.depth << endl;
+		}
 	}
 
 	attackedCell->hitCell();
@@ -586,6 +720,10 @@ void BattleshipAlgoSmart::calcHist(Coordinate c)
 	}
 	
 	auto numOfPotentialShips = 1;
+	if (cell->isOperationCell())
+	{
+		numOfPotentialShips += BOARD_AWARENESS_HIST_VAL;
+	}
 
 	map<Direction, int> maxIndexOfValid = {
 		{ Direction::INSIDE, MAX_SHIP_LEN - 1 },
@@ -822,6 +960,7 @@ void BattleshipAlgoSmart::removeOtherPlayerSunkShip(int len)
 		if (*it == len)
 		{
 			m_otherPlayerShips.erase(it);
+			// TODO Board Awerness
 			return;
 		}
 	}

@@ -67,6 +67,8 @@ public:
 	*/
 	_In_ WORD getColor() const  { return m_color; }
 
+	vector<shared_ptr<Cell>> getCellsList() const { return m_cellList; }
+
 	/**
 	* @Details		update ship's length
 	* @return		ship's new length

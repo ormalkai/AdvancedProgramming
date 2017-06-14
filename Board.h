@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <memory>
+#include <set>
 #include "IBattleshipGameAlgo.h"
 #include "Cell.h"
 
@@ -285,6 +286,8 @@ public:
 	ReturnCode loadBoardFromFile(string& boardPath);
 
 	void getOtherPlayerShips(vector<int>& ships);
+
+	void getShipsCoord(vector<Coordinate>& shipsCoord) const;
 
 	void clear();
 

@@ -3,12 +3,13 @@
 #include <windows.h> 
 #include <iostream>
 #include <conio.h>
+#include <regex>
+#include <fstream>
+#include <set>
 #include "Board.h"
 #include "Utils.h"
 #include "ShipFactory.h"
 #include "Debug.h"
-#include <fstream>
-#include <regex>
 
 #define INC_ROW(DIR, ROW, OFFSET) (((ShipDirection::VERTICAL) == (DIR)) ? ((ROW) + (OFFSET)) : (ROW))
 #define INC_COL(DIR, COL, OFFSET) (((ShipDirection::HORIZONTAL) == (DIR)) ? ((COL) + (OFFSET)) : (COL))
@@ -778,6 +779,17 @@ void Board::getOtherPlayerShips(vector<int>& ships)
 	for (auto const& ship : m_shipsOnBoard)
 	{
 		ships.push_back(ship->getLength());
+	}
+}
+
+void Board::getShipsCoord(vector<Coordinate>& shipsCoord) const
+{
+	for (auto ship : m_shipsOnBoard)
+	{
+		for (auto cell : ship->getCellsList())
+		{
+			shipsCoord.push_back(move(cell->getCoord()));
+		}
 	}
 }
 

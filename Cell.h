@@ -112,6 +112,8 @@ public:
 	* @return		cell's depth index
 	*/
 	int depth() const { return m_coord.depth; }
+
+	Coordinate getCoord()const { return m_coord; }
 	
 	/**
 	* @Details		setter of histogram value in the cell
@@ -137,7 +139,11 @@ public:
 	* @return		the squared distance
 	*/
 	double squaredDistance(shared_ptr<Cell> oc) const {
-		return (pow(oc->row() - this->row(), 2) + pow(oc->col() - this->col(), 2));
+		return (pow(oc->row() - this->row(), 2) + pow(oc->col() - this->col(), 2) + pow(oc->depth() - this->depth(), 2));
+	}
+
+	double squaredDistance(Coordinate oc) const {
+		return (pow(oc.row - this->row(), 2) + pow(oc.col - this->col(), 2) + pow(oc.depth - this->depth(), 2));
 	}
 	
 	/**

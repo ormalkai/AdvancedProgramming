@@ -157,6 +157,8 @@ private:
 	vector<int> m_otherPlayerShips;
 	
 	set<shared_ptr<Cell>> m_operationCell;
+	string m_newBoardAwernessFile;
+	bool m_saveNewBoardAwerness;
 
 	/**
 	* @Details		Return the next attack request in hunt mode - the cell with the highest hist value
@@ -253,7 +255,7 @@ public:
 	/**
 	* @Details		Constructor receives id of the player
 	*/
-	BattleshipAlgoSmart(): m_id(-1), m_rows(-1), m_cols(-1), m_depth(-1), m_currentStatus(HUNT), m_shipAwarenessStatus(true){}
+	BattleshipAlgoSmart(): m_id(-1), m_rows(-1), m_cols(-1), m_depth(-1), m_currentStatus(HUNT), m_shipAwarenessStatus(true), m_saveNewBoardAwerness(false){}
 
 	/**
 	* @Details		Default destructor
@@ -280,6 +282,12 @@ public:
 	* @Param		board - player's board
 	*/
 	void setBoard(const BoardData& board) override;
+
+	void getAwarenessBoards();
+
+	int calcSimilarityRatio(vector<Coordinate>& boardCoord, vector<Coordinate> myShipsCoord);
+
+	ReturnCode parseBoardDataFile(string & boardPath, vector<Coordinate>& playerACoord, vector<Coordinate>& playerBCoord) const;
 
 	void removeOperationCellIfNeed(shared_ptr<Cell>& c);
 	/**
