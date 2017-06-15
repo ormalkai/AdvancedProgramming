@@ -244,6 +244,11 @@ void Tournament::notifyGameResult(Game& game, int gameIndex)
 	// update round results for each player
 	updateRoundResultForPlayer(playerAGame, playerAResult);
 	updateRoundResultForPlayer(playerBGame, playerBResult);
+	DBG(Debug::DBG_INFO, "Game [%d] finished ", gameIndex);
+	DBG(Debug::DBG_INFO, "playerAIndex[%d], playerAScore[%d], playerBScore[%d], winLoseTieA[%d]", playerAIndex, playerAScore, playerBScore, winLoseTieA);
+	DBG(Debug::DBG_INFO, "playerBIndex[%d], playerBScore[%d], playerAScore[%d], winLoseTieA[%d]", playerBIndex, playerBScore, playerAScore, winLoseTieB);
+
+
 }
 
 void Tournament::updateRoundResultForPlayer(int RoundForPlayer, PlayerGameResult& playerResult)

@@ -287,7 +287,7 @@ public:
 
 	static int calcSimilarityRatio(vector<Coordinate>& boardCoord, vector<Coordinate> myShipsCoord);
 
-	ReturnCode parseBoardDataFile(string & boardPath, vector<Coordinate>& playerACoord, vector<Coordinate>& playerBCoord) const;
+	ReturnCode parseBoardDataFile(string & boardPath, vector<Coordinate>& playerACoord, vector<Coordinate>& playerBCoord, vector<vector<vector<bool>>>& legalCells) const;
 
 	void removeOperationCellIfNeed(shared_ptr<Cell>& c);
 	/**

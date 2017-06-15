@@ -109,19 +109,19 @@ void BattleshipAlgoSmart::getAwarenessBoards()
 	vector<Coordinate> myShipsCoord;
 	m_board.getShipsCoord(myShipsCoord);
 
-	for (int c = 0; c < m_board.cols(); c++)
+	for (int d = 0; d < m_board.depth() + BOARD_PADDING; d++)
 	{
-		vector<vector<bool>> cvec;
-		for (int r = 0; r < m_board.rows(); r++)
+		vector<vector<bool>> dvec;
+		for (int r = 0; r < m_board.rows() + BOARD_PADDING; r++)
 		{
 			vector<bool> rvec;
-			for (int d = 0; d < m_board.depth(); d++)
+			for (int c = 0; c < m_board.cols() + BOARD_PADDING; c++)
 			{
 				rvec.push_back(true);
 			}
-			cvec.push_back(rvec);
+			dvec.push_back(rvec);
 		}
-		legalCell.push_back(cvec);
+		legalCell.push_back(dvec);
 	}
 
 
@@ -132,22 +132,26 @@ void BattleshipAlgoSmart::getAwarenessBoards()
 		int c = coord.col;
 		int d = coord.depth;
 
-
-		// TODO: Check performance - maybe better to replace by 9 directly assignment
-		for (int i = -1; i <= 1; i++)
-		{
-			for (int j = -1; j <= 1; j++)
-			{
-				for (int k = -1; k <= 1; k++)
-				{
-					legalCell[r + i][c + j][d + k] = false;
-				}
-			}
-		}
+		legalCell[d + 1][r][c] = false;
+		legalCell[d - 1][r][c] = false;
+		legalCell[d][r + 1][c] = false;
+		legalCell[d][r - 1][c] = false;
+		legalCell[d][r][c + 1] = false;
+		legalCell[d][r][c - 1] = false;
 	}
 
+	for (Coordinate coord : myShipsCoord)
+	{
+		int r = coord.row;
+		int c = coord.col;
+		int d = coord.depth;
 
+		legalCell[d][r][c] = true;
+	}
 
+	
+
+	// fix my ships legal cells
 
 	// Get temp directory path
 	wstring strTempPath;
@@ -333,11 +337,11 @@ ReturnCode BattleshipAlgoSmart::parseBoardDataFile(string& boardPath ,vector<Coo
 		}
 		try
 		{
-			int c = stoi(m[1]);
-			int r = stoi(m[2]);
+			int r = stoi(m[1]);
+			int c = stoi(m[2]);
 			int d = stoi(m[3]);
 			
-			if (!legalCells[c][r][d])
+			if (!legalCells[d][r][c])
 				return RC_ERROR;
 
 			currentPlayerCoord->push_back(move(Coordinate(r,c,d)));
@@ -698,13 +702,25 @@ void BattleshipAlgoSmart::updateTargetAttackQueue(const shared_ptr<Cell> attacke
 		newRow = rowIndex + 1;
 		while (m_board.get(depthIndex, newRow, colIndex)->isPendingCell()) newRow++;
 		if (isAttackable(m_board.get(depthIndex, newRow, colIndex)))
-			m_targetQueue.push_back(m_board.get(depthIndex, newRow, colIndex));
+		{
+			shared_ptr<Cell> cell = m_board.get(depthIndex, newRow, colIndex);
+			if (cell->isOperationCell())
+				m_targetQueue.push_front(cell);
+			else
+				m_targetQueue.push_back(cell);
+		}
 
 		// Up
 		newRow = rowIndex - 1;
 		while (m_board.get(depthIndex, newRow, colIndex)->isPendingCell()) newRow--;
 		if (isAttackable(m_board.get(depthIndex, newRow, colIndex)))
-			m_targetQueue.push_back(m_board.get(depthIndex, newRow, colIndex));
+		{
+			shared_ptr<Cell> cell = m_board.get(depthIndex, newRow, colIndex);
+			if (cell->isOperationCell())
+				m_targetQueue.push_front(cell);
+			else
+				m_targetQueue.push_back(cell);
+		}
 	}
 	if (ShipDirection::ALL == direction || ShipDirection::HORIZONTAL == direction)
 	{
@@ -712,13 +728,25 @@ void BattleshipAlgoSmart::updateTargetAttackQueue(const shared_ptr<Cell> attacke
 		newCol = colIndex + 1;
 		while (m_board.get(depthIndex, rowIndex, newCol)->isPendingCell()) newCol++;
 		if (isAttackable(m_board.get(depthIndex, rowIndex, newCol)))
-			m_targetQueue.push_back(m_board.get(depthIndex, rowIndex, newCol));
+		{
+			shared_ptr<Cell> cell = m_board.get(depthIndex, rowIndex, newCol);
+			if (cell->isOperationCell())
+				m_targetQueue.push_front(cell);
+			else
+				m_targetQueue.push_back(cell);
+		}
 
 		// Left
 		newCol = colIndex - 1;
 		while (m_board.get(depthIndex, rowIndex, newCol)->isPendingCell()) newCol--;
 		if (isAttackable(m_board.get(depthIndex, rowIndex, newCol)))
-			m_targetQueue.push_back(m_board.get(depthIndex, rowIndex, newCol));
+		{
+			shared_ptr<Cell> cell = m_board.get(depthIndex, rowIndex, newCol);
+			if (cell->isOperationCell())
+				m_targetQueue.push_front(cell);
+			else
+				m_targetQueue.push_back(cell);
+		}
 	}
 	if (ShipDirection::ALL == direction || ShipDirection::DEPTH == direction)
 	{
@@ -726,13 +754,25 @@ void BattleshipAlgoSmart::updateTargetAttackQueue(const shared_ptr<Cell> attacke
 		newDepth = depthIndex + 1;
 		while (m_board.get(newDepth, rowIndex, colIndex)->isPendingCell()) newDepth++;
 		if (isAttackable(m_board.get(newDepth, rowIndex, colIndex)))
-			m_targetQueue.push_back(m_board.get(newDepth, rowIndex, colIndex));
+		{
+			shared_ptr<Cell> cell = m_board.get(newDepth, rowIndex, colIndex);
+			if (cell->isOperationCell())
+				m_targetQueue.push_front(cell);
+			else
+				m_targetQueue.push_back(cell);
+		}
 
 		// Left
 		newDepth = depthIndex - 1;
 		while (m_board.get(newDepth, rowIndex, colIndex)->isPendingCell()) newDepth--;
 		if (isAttackable(m_board.get(newDepth, rowIndex, colIndex)))
-			m_targetQueue.push_back(m_board.get(newDepth, rowIndex, colIndex));
+		{
+			shared_ptr<Cell> cell = m_board.get(newDepth, rowIndex, colIndex);
+			if (cell->isOperationCell())
+				m_targetQueue.push_front(cell);
+			else
+				m_targetQueue.push_back(cell);
+		}
 	}
 }
 
