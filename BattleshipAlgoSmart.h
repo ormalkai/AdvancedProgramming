@@ -285,7 +285,7 @@ public:
 
 	void getAwarenessBoards();
 
-	int calcSimilarityRatio(vector<Coordinate>& boardCoord, vector<Coordinate> myShipsCoord);
+	static int calcSimilarityRatio(vector<Coordinate>& boardCoord, vector<Coordinate> myShipsCoord);
 
 	ReturnCode parseBoardDataFile(string & boardPath, vector<Coordinate>& playerACoord, vector<Coordinate>& playerBCoord) const;
 

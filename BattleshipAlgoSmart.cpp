@@ -104,6 +104,50 @@ void BattleshipAlgoSmart::getAwarenessBoards()
 	//		find the max ratio
 	//		return the highest ratio vector contains other player's cells
 
+	vector<vector<vector<bool>>> legalCell;
+
+	vector<Coordinate> myShipsCoord;
+	m_board.getShipsCoord(myShipsCoord);
+
+	for (int c = 0; c < m_board.cols(); c++)
+	{
+		vector<vector<bool>> cvec;
+		for (int r = 0; r < m_board.rows(); r++)
+		{
+			vector<bool> rvec;
+			for (int d = 0; d < m_board.depth(); d++)
+			{
+				rvec.push_back(true);
+			}
+			cvec.push_back(rvec);
+		}
+		legalCell.push_back(cvec);
+	}
+
+
+
+	for (Coordinate coord : myShipsCoord)
+	{
+		int r = coord.row;
+		int c = coord.col;
+		int d = coord.depth;
+
+
+		// TODO: Check performance - maybe better to replace by 9 directly assignment
+		for (int i = -1; i <= 1; i++)
+		{
+			for (int j = -1; j <= 1; j++)
+			{
+				for (int k = -1; k <= 1; k++)
+				{
+					legalCell[r + i][c + j][d + k] = false;
+				}
+			}
+		}
+	}
+
+
+
 
 	// Get temp directory path
 	wstring strTempPath;
@@ -117,18 +161,20 @@ void BattleshipAlgoSmart::getAwarenessBoards()
 	// get all sboards file names in tempdir path
 	Utils::getListOfFilesInDirectoryBySuffix(strTmp, "ohgsmart", boardFiles);
 
+	// Sort for choosing the last boards before
+	sort(boardFiles.begin(), boardFiles.end(), std::greater<string>());
+
 	int maxRatio = -1;
 	vector<Coordinate> maxRatioCoord;
 	
-	vector<Coordinate> myShipsCoord;
-	m_board.getShipsCoord(myShipsCoord);
+	
 
 	// foreach file 
 	for (string boardPath : boardFiles)
 	{
 		vector<Coordinate> playerACoord;
 		vector<Coordinate> playerBCoord;
-		ReturnCode rc = parseBoardDataFile(boardPath, playerACoord, playerBCoord);
+		ReturnCode rc = parseBoardDataFile(boardPath, playerACoord, playerBCoord, legalCell);
 		if (RC_SUCCESS != rc)
 		{
 			continue;
@@ -204,7 +250,7 @@ void BattleshipAlgoSmart::getAwarenessBoards()
 	m_saveNewBoardAwerness = true;
 }
 
-int BattleshipAlgoSmart::calcSimilarityRatio(vector<Coordinate>& boardCoord, vector<Coordinate> myShipsCoord)
+int BattleshipAlgoSmart::calcSimilarityRatio(vector<Coordinate>& boardCoord, const vector<Coordinate> myShipsCoord)
 {
 	// TODO: Make better by check if coord is bot neighbor of my cell
 	// Will cause penalty in performance!
@@ -232,7 +278,7 @@ int BattleshipAlgoSmart::calcSimilarityRatio(vector<Coordinate>& boardCoord, vec
 	return static_cast<int>(myShipsCoord.size()) / hits * 100;
 }
 
-ReturnCode BattleshipAlgoSmart::parseBoardDataFile(string& boardPath ,vector<Coordinate>& playerACoord, vector<Coordinate>& playerBCoord) const
+ReturnCode BattleshipAlgoSmart::parseBoardDataFile(string& boardPath ,vector<Coordinate>& playerACoord, vector<Coordinate>& playerBCoord, vector<vector<vector<bool>>>&  legalCells) const
 {
 	// Read from file 
 	int cols, rows, depth;
@@ -287,7 +333,14 @@ ReturnCode BattleshipAlgoSmart::parseBoardDataFile(string& boardPath ,vector<Coo
 		}
 		try
 		{
-			currentPlayerCoord->push_back(move(Coordinate(stoi(m[1]), stoi(m[2]), stoi(m[3]))));
+			int c = stoi(m[1]);
+			int r = stoi(m[2]);
+			int d = stoi(m[3]);
+			
+			if (!legalCells[c][r][d])
+				return RC_ERROR;
+
+			currentPlayerCoord->push_back(move(Coordinate(r,c,d)));
 		}
 		catch (const std::exception&)
 		{
