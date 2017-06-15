@@ -156,7 +156,7 @@ void BattleshipAlgoSmart::getAwarenessBoards()
 			{
 				maxRatio = ratioB;
 				// attack the other player
-				if (ratioA > 90/*threshold*/)
+				if (ratioB > 90/*threshold*/)
 					maxRatioCoord = playerACoord;
 
 				if (100 == maxRatio)
