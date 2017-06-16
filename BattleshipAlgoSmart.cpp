@@ -152,9 +152,6 @@ void BattleshipAlgoSmart::getAwarenessBoards()
 	// get all sboards file names in tempdir path
 	Utils::getListOfFilesInDirectoryBySuffix(strTmp, "ohgsmart.victory", boardFiles); 
 
-	// Sort for choosing the last boards before
-	sort(boardFiles.begin(), boardFiles.end(), std::greater<string>());
-
 	int maxRatio = -1;
 	vector<Coordinate> maxRatioCoord;
 	

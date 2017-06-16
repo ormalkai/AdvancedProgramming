@@ -196,7 +196,6 @@ std::istream& Utils::safeGetline(std::istream& is, std::string& t)
 	// The sentry object performs various tasks,
 	// such as thread synchronization and updating the stream state.
 
-	std::istream::sentry se(is, true);
 	std::streambuf* sb = is.rdbuf();
 
 	for (;;)
@@ -279,7 +278,7 @@ ReturnCode Utils::getListOfFilesInDirectoryBySuffix(const string& path, const st
 	FindClose(hFind);
 
 	// sort files in lex order
-	sort(files.begin(), files.end(), less<string>());
+	sort(files.begin(), files.end(), greater<string>());
 
 	return RC_SUCCESS;
 }

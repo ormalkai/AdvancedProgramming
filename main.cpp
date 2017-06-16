@@ -54,6 +54,7 @@ void parseArgs(int argc, char* argv[], string& filesLocation, bool& isQuiet, int
 			catch (exception&)
 			{
 				isDelayInitialized = false;
+				continue;
 			}
 			isDelayInitialized = true;
 		}
@@ -72,6 +73,7 @@ void parseArgs(int argc, char* argv[], string& filesLocation, bool& isQuiet, int
 			catch (exception&)
 			{
 				isNumThreadsInitialized = false;
+				continue;
 			}
 			isNumThreadsInitialized = true;
 		}
