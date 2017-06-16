@@ -1,8 +1,5 @@
 
 #include <codecvt>
-#include <iostream>
-#include <fstream>
-#include <string>
 #include <windows.h>
 #include "Game.h"
 #include "Utils.h"
@@ -14,7 +11,7 @@ using namespace std;
 
 
 Game::Game(Board& board, unique_ptr<IBattleshipGameAlgo> algoA, unique_ptr<IBattleshipGameAlgo> algoB) : m_isGameOver(false),
-m_isQuiet(false), m_currentPlayerIndex(MAX_PLAYER), m_otherPlayerIndex(MAX_PLAYER), m_winner(TIE_WINNER_ID)
+m_isQuiet(false), m_currentPlayerIndex(MAX_PLAYER), m_otherPlayerIndex(MAX_PLAYER), m_winner(TIE_WINNER_ID), m_depth(-1), m_rows(-1), m_cols(-1)
 {
 	// invoke copy constructor!
 	m_board = board;
@@ -23,72 +20,7 @@ m_isQuiet(false), m_currentPlayerIndex(MAX_PLAYER), m_otherPlayerIndex(MAX_PLAYE
 	m_players.push_back(move(algoB));
 }
 
-Game::~Game()
-{
-	/*for (int i=0; i< MAX_PLAYER ;i++)
-	{
-		if (nullptr != m_players[i])
-		{
-			delete m_players[i];
-		}
-	}*/
-}
-
-ReturnCode Game::initSboardFilePath(const string& filesPath, string& sboardFilePath)
-{
-	vector<string> sboardFiles;
-	// load sboard file
-	auto rc = Utils::getListOfFilesInDirectoryBySuffix(filesPath, "sboard", sboardFiles, true);
-	// ERROR means that the path exists but there is no file
-	if (RC_ERROR == rc)
-	{
-		cout << "Missing board file (*.sboard) looking in path: " << filesPath << endl;
-		return rc;
-	}
-	sboardFilePath = sboardFiles[0];
-
-	return RC_SUCCESS;
-}
-
-ReturnCode Game::getSboardFileNameFromDirectory(const string filesPath, string& sboardFileName)
-{
-	WIN32_FIND_DATAA FindFileData;
-	HANDLE hFind;
-
-	string sboardFile = filesPath + "*.sboard";
-	hFind = FindFirstFileA(sboardFile.c_str(), &FindFileData);
-	if (INVALID_HANDLE_VALUE == hFind)
-	{
-		cout << "Missing board file (*.sboard) looking in path: " << filesPath << endl;
-		return RC_ERROR;
-	}
-	
-	sboardFileName = filesPath + FindFileData.cFileName;
-	FindClose(hFind);
-	return RC_SUCCESS;
-}
-
-
-
-ReturnCode Game::initDLLFilesPath(const string& filesPath, vector<string>& dllPerPlayer)
-{
-	// find dll files
-	auto rc = Utils::getListOfFilesInDirectoryBySuffix(filesPath, "dll", dllPerPlayer);
-	if (RC_INVALID_ARG == rc)
-	{
-		// something bad happens, someone deleted the path between getting sboard and getting dll
-		DBG(Debug::DBG_ERROR, "Failed in finding dll files");
-		return rc;
-	}
-	if (RC_ERROR == rc || (RC_SUCCESS == rc && dllPerPlayer.size() < MAX_PLAYER)) // no dlls in path or less then 2 dlls
-	{
-		cout << "Missing an algorithm (dll) file looking in path : " + filesPath << endl;
-		return RC_ERROR;
-	}
-
-	return RC_SUCCESS;
-}
-
+Game::~Game(){}
 
 void Game::init()
 {
@@ -254,29 +186,4 @@ bool Game::isGameOver() const
 Game::GameResult Game::getGameResult()
 {
 	return GameResult(m_winner, m_playerScore[PLAYER_A], m_playerScore[PLAYER_B]);
-}
-
-
-void Game::printSummary() const
-{
-	if (false == m_isQuiet)
-	{
-		Utils::gotoxy(13, 0);
-	}
-
-	// Notify winner
-	int scoreDef = m_playerScore[PLAYER_A] - m_playerScore[PLAYER_B];
-
-	if (0 != scoreDef)
-	{
-		int winner = (scoreDef > 0) ? PLAYER_A : PLAYER_B;
-		cout << "Player " << Utils::getPlayerCharByIndex(winner) << " won" << endl;
-	}
-
-	// Print points
-	cout << "Points:" << endl;
-	for (int i = 0; i < NUM_OF_PLAYERS; i++)
-	{
-		cout << "Player " << Utils::getPlayerCharByIndex(i) << ": " << m_playerScore[i] << endl;
-	}
 }

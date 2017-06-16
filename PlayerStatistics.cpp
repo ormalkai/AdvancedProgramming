@@ -1,6 +1,5 @@
 
 #include "PlayerStatistics.h"
-#include <cassert>
 
 
 void PlayerStatistics::update(const pair<int, int> score, WinLoseTie result)

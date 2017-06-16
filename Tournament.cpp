@@ -11,12 +11,14 @@
 
 ReturnCode Tournament::init(const string& directoryPath)
 {
+	DBG(Debug::DBG_DEBUG, "init tournament");
 	vector<string> boardsFilesPaths;
 	
 	// Get all board paths
 	ReturnCode rc = initSboardFiles(directoryPath, boardsFilesPaths);
 	if (RC_SUCCESS != rc)
 	{
+		DBG(Debug::DBG_ERROR, "initSboardFiles failed [%d]", rc);
 		return rc;
 	}
 	
@@ -26,6 +28,7 @@ ReturnCode Tournament::init(const string& directoryPath)
 	rc = initDLLFilesPath(directoryPath, dllsFilesPaths);
 	if (RC_SUCCESS != rc)
 	{
+		DBG(Debug::DBG_ERROR, "initDLLFilesPath failed [%d]", rc);
 		return rc;
 	}
 	
@@ -44,6 +47,7 @@ ReturnCode Tournament::init(const string& directoryPath)
 	ReturnCode rcloadBoards = f2.get();
 	if (RC_SUCCESS != rcloadDll || RC_SUCCESS != rcloadBoards)
 	{
+		DBG(Debug::DBG_ERROR, "thrBoardLoading or thrDllLoading failed rcloadDll[%d], rcloadBoards[%d]", rcloadDll, rcloadBoards);
 		return RC_ERROR;
 	}
 	cout << "Number of legal players : " << m_algoDLLVec.size() << endl;
@@ -54,7 +58,7 @@ ReturnCode Tournament::init(const string& directoryPath)
 
 	// init main database - result per player in round
 	initPlayerResultsPerRound();
-
+	DBG(Debug::DBG_ERROR, "init tournament succeeded");
 	return RC_SUCCESS;
 }
 
@@ -87,6 +91,7 @@ void Tournament::initPlayerResultsPerRound()
 
 void Tournament::startTournament(int numOfThreads)
 {
+	DBG(Debug::DBG_INFO, "starting tournament");
 	m_isTournamentFinished = false;
 	
 	// first create the reporter thread
@@ -98,6 +103,7 @@ void Tournament::startTournament(int numOfThreads)
 	int id = 1;
 	for (auto & t : vec_threads) 
 	{
+		DBG(Debug::DBG_INFO, "starting worker[%d]", id);
 		t = thread(&Tournament::executeGame, this, id);
 		++id;
 	}
@@ -112,6 +118,7 @@ void Tournament::startTournament(int numOfThreads)
 
 	// finally join the reporter
 	reporter.join();
+	DBG(Debug::DBG_INFO, "finishing tournament");
 }
 
 void Tournament::printResult() const
@@ -183,10 +190,10 @@ template<typename T> void Tournament::printElement(T t, const int& width)
 void Tournament::executeGame(int workerId) {
 
 	// There is more game to play
-
 	int currentGameIndex = m_nextGameIndex++;
 	while (currentGameIndex < m_gameList.size())
 	{
+		DBG(Debug::DBG_INFO, "starting game [%d] in worker[%d]", currentGameIndex, workerId);
 		Game& currentGame = m_gameList[currentGameIndex];
 		currentGame.startGame();
 		
@@ -202,16 +209,12 @@ void Tournament::executeGame(int workerId) {
 
 void Tournament::notifyGameResult(Game& game, int gameIndex)
 {
-	// TODO ORM why assert?
-	assert(game.isGameOver());
-
 	pair <int, int> playersIndexes = m_gamePlayerIndexes[gameIndex];
 	int playerAIndex = playersIndexes.first;
 	int playerBIndex = playersIndexes.second;
 
 	// critical section updating the game per player
 	m_gameFinishedByEachPlayerMutex.lock();
-	// TODO ORM what happen here?
 	int playerAGame = m_gameFinishedByEachPlayer[playerAIndex]++;
 	int playerBGame = m_gameFinishedByEachPlayer[playerBIndex]++;
 	m_gameFinishedByEachPlayerMutex.unlock();
@@ -247,8 +250,6 @@ void Tournament::notifyGameResult(Game& game, int gameIndex)
 	DBG(Debug::DBG_INFO, "Game [%d] finished ", gameIndex);
 	DBG(Debug::DBG_INFO, "playerAIndex[%d], playerAScore[%d], playerBScore[%d], winLoseTieA[%d]", playerAIndex, playerAScore, playerBScore, winLoseTieA);
 	DBG(Debug::DBG_INFO, "playerBIndex[%d], playerBScore[%d], playerAScore[%d], winLoseTieA[%d]", playerBIndex, playerBScore, playerAScore, winLoseTieB);
-
-
 }
 
 void Tournament::updateRoundResultForPlayer(int RoundForPlayer, PlayerGameResult& playerResult)
@@ -283,9 +284,8 @@ ReturnCode Tournament::initSboardFiles(const string& directoryPath, vector<strin
 	// ERROR means that the path exists but there is no file
 	if (RC_ERROR == rc || sboardFiles.size() == 0)
 	{
-		// TODO ORM exercise is different "No board files (*.sboard) looking in path:"
-		cout << "Missing board file (*.sboard) looking in path: " << directoryPath << endl;
-		DBG(Debug::DBG_ERROR, "Missing board file (*.sboard) looking in path: %s", directoryPath);
+		cout << "No board files (*.sboard) looking in path: " << directoryPath << endl;
+		DBG(Debug::DBG_ERROR, "No board files (*.sboard) looking in path: %s", directoryPath);
 		return rc;
 	}
 
@@ -312,7 +312,7 @@ ReturnCode Tournament::initDLLFilesPath(const string& directoryPath, vector<stri
 	return RC_SUCCESS;
 }
 
-ReturnCode Tournament::loadAllAlgoFromDLLs(const vector<string>& dllPaths, promise<ReturnCode>&& p)
+void Tournament::loadAllAlgoFromDLLs(const vector<string>& dllPaths, promise<ReturnCode>&& p)
 {
 	GetAlgoFuncType getAlgoFunc;
 	
@@ -357,17 +357,15 @@ ReturnCode Tournament::loadAllAlgoFromDLLs(const vector<string>& dllPaths, promi
 	{
 		DBG(Debug::DBG_ERROR, "Num of dlls (%d) is below the minimum (%d)", m_algoDLLVec.size(), MIN_DLLS_FILES);
 		p.set_value(RC_ERROR);
-		return RC_ERROR;
+		return;
 	}
 	
 	DBG(Debug::DBG_INFO, "Finished to load dlls, total was loaded: %d", m_algoDLLVec.size());
 	p.set_value(RC_SUCCESS);
-	return RC_SUCCESS;
 }
 
-ReturnCode Tournament::loadBoards(vector<string>& boardsPaths, promise<ReturnCode>&& p)
+void Tournament::loadBoards(vector<string>& boardsPaths, promise<ReturnCode>&& p)
 {
-
 	for (string boardPath : boardsPaths)
 	{
 		Board b;
@@ -386,12 +384,11 @@ ReturnCode Tournament::loadBoards(vector<string>& boardsPaths, promise<ReturnCod
 	{
 		DBG(Debug::DBG_ERROR, "Num of boards (%d) is below the minimum (%d)", m_boards.size(), MIN_BOARDS_FILE);
 		p.set_value(RC_ERROR);
-		return RC_ERROR;
+		return;
 	}
 	
 	DBG(Debug::DBG_INFO, "Finished to load boards, total was loaded: %d", m_boards.size());
 	p.set_value(RC_SUCCESS);
-	return RC_SUCCESS;
 }
 
 void Tournament::buildGameSchedule()
@@ -482,8 +479,6 @@ vector<vector<pair<int, int>>> Tournament::createSchedule(int numOfAlgos)
 
 vector<pair<int, int>> Tournament::zip(vector<int> first, vector<int> second)
 {
-	assert(first.size() == second.size());
-
 	vector<pair<int, int>> result;
 
 	for (size_t i = 0; i < first.size(); i++)

@@ -1,11 +1,9 @@
 #include <iostream>
 #include <locale>
 #include <Windows.h>
-#include "Game.h"
-#include "Debug.h"
-#include "BoardBuilder.h"
-#include "Tournament.h"
 #include <codecvt>
+#include "Debug.h"
+#include "Tournament.h"
 
 #define INI_IS_QUIET_DEFAULT (0)
 #define INI_DELAY_DEFAULT (2000)

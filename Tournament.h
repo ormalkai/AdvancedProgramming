@@ -12,23 +12,30 @@ class Tournament
 {
 private:
 		
-	bool										m_isTournamentFinished;
-	vector<Game>								m_gameList;
-	vector<pair<int, int>>						m_gamePlayerIndexes;
-
-	mutex										m_reporterMutex;
-	condition_variable							m_cvRound;
-	int											m_nextRoundToReport = 0;
-
-	atomic<int>									m_nextGameIndex = 0;
+	Tournament() : 
+	m_isTournamentFinished(false), 
+	m_nextRoundToReport(0), 
+	m_nextGameIndex(0), 
+	m_maxNameLen(0),
+	m_finishedRounds(0),
+	m_printedRounds(0)
+	{}
 	
-	vector<Board>								m_boards;
-	vector<PlayerStatistics>					m_playerStat;
-	
-	vector<tuple<HINSTANCE, GetAlgoFuncType>>	m_algoDLLVec;						// dll tuples <hanfle, algo func>
+	bool										m_isTournamentFinished;		// is tournament finished
+	vector<Game>								m_gameList;					// list of all games in the tournament
+	vector<pair<int, int>>						m_gamePlayerIndexes;		// Ids of every player in each game
+	mutex										m_reporterMutex;			// reporter mutex for conditional variable
+	condition_variable							m_cvRound;					// conditional variable for reporter in end of round
+	int											m_nextRoundToReport;		// the number of the next reound to report
+	atomic<int>									m_nextGameIndex;			// next index in game list to play
+	vector<Board>								m_boards;					// all boards in the tournament
+	vector<PlayerStatistics>					m_playerStat;				// table of managing statistics of the tournament
+	vector<tuple<HINSTANCE, GetAlgoFuncType>>	m_algoDLLVec;				// dll tuples <hanfle, algo func>
+	int											m_maxNameLen;				// for printing pretty table
 
-	int											m_maxNameLen = 0;
-
+	/**
+	 * @Details		struct for managing games results
+	 */
 	struct PlayerGameResult
 	{
 		int			m_playerId; // this report is for player m_playerId
@@ -40,11 +47,14 @@ private:
 		m_playerId(playerId), m_pointsFor(pointsFor), m_pointsAgainst(pointsAgainst), m_isWon(isWon) {}
 	};
 
+	/**
+	 * @Details		struct for managing round results
+	 */
 	struct RoundResults
 	{
-		int					m_playersFinished;	// holds how many players finished their games in this round, atomic since this is the index to insert in the round
+		int							m_playersFinished;	// holds how many players finished their games in this round, atomic since this is the index to insert in the round
 		vector<PlayerGameResult>	m_results;			// holds all the results in this round
-		mutex				m_roundMutex;		// lock for each round between workers and reporter
+		mutex						m_roundMutex;		// lock for each round between workers and reporter
 		RoundResults() : m_playersFinished(0) {}
 		RoundResults(const RoundResults &other) : m_roundMutex()
 		{
@@ -53,9 +63,9 @@ private:
 		}
 	};
 
-	vector<RoundResults>	m_playersResultsPerRound; // the main database of the tournament
-	int						m_finishedRounds; // indicates how many rounds are finished for printing results on progress
-	int						m_printedRounds; // how many rounds are actually printed 
+	vector<RoundResults>	m_playersResultsPerRound;	// the main database of the tournament
+	int						m_finishedRounds;			// indicates how many rounds are finished for printing results on progress
+	int						m_printedRounds;			// how many rounds are actually printed 
 
 	// Updating this vector must be against lock and it can not be vector of atomic int
 	// take the following example in consider
@@ -68,8 +78,8 @@ private:
 	// ThreadB continues
 	// The result:  ThreadA game is game1 for player1 and game2 for player2
 	//				ThreadB game is game1 for player2 and game2 for player1
-	vector<int>		m_gameFinishedByEachPlayer; // needed for updating m_playersResultsPerRound in the correct round
-	mutex			m_gameFinishedByEachPlayerMutex;
+	vector<int>		m_gameFinishedByEachPlayer;			// needed for updating m_playersResultsPerRound in the correct round
+	mutex			m_gameFinishedByEachPlayerMutex;	// locak between workers for incrementing game per player atomically in the context of game
 
 	struct SortByWins
 	{
@@ -77,38 +87,101 @@ private:
 	};
 
 
-	
+	/**
+	 * @Details		init main DB of managing game results in rounds
+	 */
 	void initPlayerResultsPerRound();
 	
+	/**
+	 * @Details		prints round result
+	 */
 	void printResult() const;
 	
+	/**
+	 * @Details		prints one element in the table
+	 */
 	template <class T>
 	static void printElement(T t, const int& width);
 	
+	/**
+	 * @Details		main function of workers, executes one or more games
+	 */
 	void executeGame(int workerId);
+
+	/**
+	 * @Details		After every game update the main DB for reporter
+	 */
 	void notifyGameResult(Game& game, int gameIndex);
 
+	/**
+	 * @Details		updates the main DB for one player
+	 */
 	void updateRoundResultForPlayer(int RoundForPlayer, PlayerGameResult& playerResult);
 
+	/**
+	 * @Details		gets all sboard files from directory
+	 */
 	static ReturnCode initSboardFiles(const string& directoryPath, vector<string>& sboardFiles);
+
+	/**
+	 * @Details		gets all dll files from directory
+	 */
 	static ReturnCode initDLLFilesPath(const string& directoryPath, vector<string>& dllFiles);
-	ReturnCode loadAllAlgoFromDLLs(const vector<string>& dllPaths, promise<ReturnCode>&& p);
-	ReturnCode loadBoards(vector<string>& boardsPaths, promise<ReturnCode>&& p);
+
+	/**
+	 * @Details		loads all algos
+	 */
+	void loadAllAlgoFromDLLs(const vector<string>& dllPaths, promise<ReturnCode>&& p);
+
+	/**
+	 * @Details		loads all boards
+	 */
+	void loadBoards(vector<string>& boardsPaths, promise<ReturnCode>&& p);
+
+	/**
+	 * @Details		creates game schedule in leage order
+	 */
 	void buildGameSchedule();
 	vector<vector<pair<int, int>>> createSchedule(int numOfAlgos);
 
+	/**
+	 * @Details		reporter thread
+	 */
 	thread reporterThread() {
 		return std::thread([=] { reportResult(); });
 	}
 
-	vector<pair<int, int>> zip(vector<int> first, vector<int> second);
+	/**
+	 * @Details		gets two vectors and returns vector of pairs
+	 *				where the the ith pair is the ith var in vector 1
+	 *				and the ith var in vector 2
+	 */
+	static vector<pair<int, int>> zip(vector<int> first, vector<int> second);
+
+	/**
+	 * @Details		main function of reproter, reports result
+	 */
 	void reportResult();
 
+	/**
+	 * @Details		reporter prints round
+	 */
 	void updateStatAndPrintRound();
 
 public:
+	/**
+	 * @Details		init all internal DS
+	 */
 	ReturnCode init(const string& directoryPath);
+
+	/**
+	 * @Details		starts the tournament
+	 */
 	void startTournament(int numOfThreads);
+
+	/**
+	 * @Details		singleton implementation
+	 */
 	static Tournament& instance()
 	{
 		static Tournament tournamentInstance;
