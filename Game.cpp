@@ -1,4 +1,3 @@
-
 #include <codecvt>
 #include <windows.h>
 #include "Game.h"
@@ -11,7 +10,7 @@ using namespace std;
 
 
 Game::Game(Board& board, unique_ptr<IBattleshipGameAlgo> algoA, unique_ptr<IBattleshipGameAlgo> algoB) : m_isGameOver(false),
-m_isQuiet(false), m_currentPlayerIndex(MAX_PLAYER), m_otherPlayerIndex(MAX_PLAYER), m_winner(TIE_WINNER_ID), m_depth(-1), m_rows(-1), m_cols(-1)
+                                                                                                         m_isQuiet(false), m_currentPlayerIndex(MAX_PLAYER), m_otherPlayerIndex(MAX_PLAYER), m_winner(TIE_WINNER_ID), m_depth(-1), m_rows(-1), m_cols(-1)
 {
 	// invoke copy constructor!
 	m_board = board;
@@ -20,7 +19,9 @@ m_isQuiet(false), m_currentPlayerIndex(MAX_PLAYER), m_otherPlayerIndex(MAX_PLAYE
 	m_players.push_back(move(algoB));
 }
 
-Game::~Game(){}
+Game::~Game()
+{
+}
 
 void Game::init()
 {
@@ -37,17 +38,17 @@ void Game::init()
 
 AttackRequestCode Game::requestAttack(Coordinate& req)
 {
-
 	if (ARC_FINISH_REQ == req.depth && ARC_FINISH_REQ == req.row && ARC_FINISH_REQ == req.col)
 		if (true == m_finishedAttackPlayer[m_otherPlayerIndex])
 			return ARC_GAME_OVER;
-		else {
+		else
+		{
 			m_finishedAttackPlayer[m_currentPlayerIndex] = true;
 			return ARC_FINISH_REQ;
 		}
-	else if (	req.depth < 0 || req.depth > m_board.depth() ||
-				req.row   < 0 || req.row   > m_board.rows() ||
-				req.col   < 0 || req.col   > m_board.cols())
+	else if (req.depth < 0 || req.depth > m_board.depth() ||
+		req.row < 0 || req.row > m_board.rows() ||
+		req.col < 0 || req.col > m_board.cols())
 		return ARC_ERROR;
 	else
 		return ARC_SUCCESS;
@@ -69,7 +70,7 @@ void Game::startGame()
 	{
 		Coordinate attackReq = m_players[m_currentPlayerIndex]->attack();
 		DBG(Debug::DBG_DEBUG, "Player [%d] attack (%d, %d, %d)", m_currentPlayerIndex, attackReq.depth, attackReq.row, attackReq.col);
-	
+
 		// Check attack request 
 		AttackRequestCode arc = requestAttack(attackReq);
 		switch (arc)
@@ -98,52 +99,52 @@ void Game::startGame()
 		switch (attackedCell->getStatus())
 		{
 		case Cell::ALIVE:
-		{
-			attackedCell->setStatus(Cell::DEAD);
-
-			// Notify the user his ridiculous mistake
-			if (attackedCell->getPlayerIndexOwner() == m_currentPlayerIndex)
 			{
-				DBG(Debug::DBG_INFO, "You bombed youself, U R probably an idiot..");
-			}
+				attackedCell->setStatus(Cell::DEAD);
 
-			shared_ptr<Ship> pShip = attackedCell->getShip();
-			pShip->executeAttack();
-
-			if (pShip->isShipAlive())
-			{
-				attackResult = AttackResult::Hit;
-			}
-			else
-			{
-				attackResult = AttackResult::Sink;
-
-				// Hit myself
+				// Notify the user his ridiculous mistake
 				if (attackedCell->getPlayerIndexOwner() == m_currentPlayerIndex)
 				{
-					m_playerScore[m_otherPlayerIndex] += pShip->getValue();
-					shipsPerPlayer[m_currentPlayerIndex]--;
+					DBG(Debug::DBG_INFO, "You bombed youself, U R probably an idiot..");
+				}
+
+				shared_ptr<Ship> pShip = attackedCell->getShip();
+				pShip->executeAttack();
+
+				if (pShip->isShipAlive())
+				{
+					attackResult = AttackResult::Hit;
 				}
 				else
 				{
-					// Update score for player
-					m_playerScore[m_currentPlayerIndex] += pShip->getValue();
+					attackResult = AttackResult::Sink;
 
-					// Update number of alive ships
-					shipsPerPlayer[m_otherPlayerIndex]--;
-				}		
+					// Hit myself
+					if (attackedCell->getPlayerIndexOwner() == m_currentPlayerIndex)
+					{
+						m_playerScore[m_otherPlayerIndex] += pShip->getValue();
+						shipsPerPlayer[m_currentPlayerIndex]--;
+					}
+					else
+					{
+						// Update score for player
+						m_playerScore[m_currentPlayerIndex] += pShip->getValue();
+
+						// Update number of alive ships
+						shipsPerPlayer[m_otherPlayerIndex]--;
+					}
+				}
 			}
-		}
-		break;
+			break;
 		case Cell::DEAD:
-		{
-			DBG(Debug::DBG_INFO, "This cell was already bombed, go to sleep bro...");
-			if (attackedCell->getShip()->isShipAlive())
-				attackResult = AttackResult::Hit;
-			else
-				attackResult = AttackResult::Miss;
-		}
-		break;
+			{
+				DBG(Debug::DBG_INFO, "This cell was already bombed, go to sleep bro...");
+				if (attackedCell->getShip()->isShipAlive())
+					attackResult = AttackResult::Hit;
+				else
+					attackResult = AttackResult::Miss;
+			}
+			break;
 		case Cell::FREE:
 		default:
 			attackResult = AttackResult::Miss;
@@ -174,7 +175,6 @@ void Game::startGame()
 		{
 			proceedToNextPlayer();
 		}
-
 	} // Game Loop
 }
 

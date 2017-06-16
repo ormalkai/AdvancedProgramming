@@ -13,7 +13,7 @@ ReturnCode Tournament::init(const string& directoryPath)
 {
 	DBG(Debug::DBG_DEBUG, "init tournament");
 	vector<string> boardsFilesPaths;
-	
+
 	// Get all board paths
 	ReturnCode rc = initSboardFiles(directoryPath, boardsFilesPaths);
 	if (RC_SUCCESS != rc)
@@ -21,7 +21,7 @@ ReturnCode Tournament::init(const string& directoryPath)
 		DBG(Debug::DBG_ERROR, "initSboardFiles failed [%d]", rc);
 		return rc;
 	}
-	
+
 	vector<string> dllsFilesPaths;
 
 	// Get all dlls paths
@@ -31,7 +31,7 @@ ReturnCode Tournament::init(const string& directoryPath)
 		DBG(Debug::DBG_ERROR, "initDLLFilesPath failed [%d]", rc);
 		return rc;
 	}
-	
+
 	// Load boards
 	promise<ReturnCode> p1;
 	promise<ReturnCode> p2;
@@ -50,8 +50,8 @@ ReturnCode Tournament::init(const string& directoryPath)
 		DBG(Debug::DBG_ERROR, "thrBoardLoading or thrDllLoading failed rcloadDll[%d], rcloadBoards[%d]", rcloadDll, rcloadBoards);
 		return RC_ERROR;
 	}
-	cout << "Number of legal players : " << m_algoDLLVec.size() << endl;
-	cout << "Number of legal boards : " << m_boards.size() << endl;
+	cout << "Number of legal players: " << m_algoDLLVec.size() << endl;
+	cout << "Number of legal boards: " << m_boards.size() << endl;
 
 	// Load games to data structure
 	buildGameSchedule();
@@ -59,6 +59,7 @@ ReturnCode Tournament::init(const string& directoryPath)
 	// init main database - result per player in round
 	initPlayerResultsPerRound();
 	DBG(Debug::DBG_ERROR, "init tournament succeeded");
+	DBG(Debug::DBG_DEBUG, "Num of games : %d", m_gameList.size());
 	return RC_SUCCESS;
 }
 
@@ -69,7 +70,7 @@ void Tournament::initPlayerResultsPerRound()
 	auto playersInRound = m_algoDLLVec.size();
 
 	// number of rounds is the number of games mul 2 divided by number of players in round
-	int numRounds = (m_gameList.size() * 2) / playersInRound;
+	int numRounds = static_cast<int>((m_gameList.size() * 2) / playersInRound);
 
 	// init player results per round
 	for (int round = 0; round < numRounds; round++)
@@ -91,17 +92,24 @@ void Tournament::initPlayerResultsPerRound()
 
 void Tournament::startTournament(int numOfThreads)
 {
+	// TODO:BOOM
 	DBG(Debug::DBG_INFO, "starting tournament");
 	m_isTournamentFinished = false;
-	
+
 	// first create the reporter thread
 	thread reporter = reporterThread();
 
 	// vector of all threads - workers - do not open more threads than games
-	numOfThreads = (numOfThreads <= m_gameList.size() ? numOfThreads : static_cast<int>(m_gameList.size()));
+	if (numOfThreads > m_gameList.size())
+	{
+		int newNumOfThreads = static_cast<int>(m_gameList.size());
+		DBG(Debug::DBG_DEBUG, "Received num of thread [%d] but only [%d] games, set num of threads to %d", numOfThreads, newNumOfThreads, newNumOfThreads);
+		numOfThreads = newNumOfThreads;
+	}
+	
 	vector<thread> vec_threads(numOfThreads);
 	int id = 1;
-	for (auto & t : vec_threads) 
+	for (auto& t : vec_threads)
 	{
 		DBG(Debug::DBG_INFO, "starting worker[%d]", id);
 		t = thread(&Tournament::executeGame, this, id);
@@ -111,7 +119,7 @@ void Tournament::startTournament(int numOfThreads)
 	// game is running
 
 	// join all threads, first workers 
-	for (auto & t : vec_threads) 
+	for (auto& t : vec_threads)
 	{
 		t.join();
 	}
@@ -124,13 +132,13 @@ void Tournament::startTournament(int numOfThreads)
 void Tournament::printResult() const
 {
 	Utils::gotoxy(3, 0);
-	cout << "------ Round " << m_printedRounds+1 << " ------" << endl;
+	cout << "------ Round " << m_printedRounds + 1 << " ------" << endl;
 	auto playerStat(m_playerStat);
 	sort(playerStat.begin(), playerStat.end(), SortByWins());
-	
+
 	const int nameWidth = m_maxNameLen + 2;
 	const int colWidth = 8;
-	
+
 	printElement("#", colWidth);
 	printElement("Team Name", nameWidth);
 	printElement("Wins", colWidth);
@@ -139,14 +147,14 @@ void Tournament::printResult() const
 	printElement("Pts For", colWidth);
 	printElement("Pts Against", colWidth);
 	cout << endl;
-	
-	for (int i = 0; i < playerStat.size(); i++) {
 
-		const PlayerStatistics& ps = playerStat[i];		
+	for (int i = 0; i < playerStat.size(); i++)
+	{
+		const PlayerStatistics& ps = playerStat[i];
 		int wins = ps.getWins();
 		int losses = ps.getLosses();
 		double prec = (static_cast<double>(wins) / (wins + losses)) * 100;
-	
+
 		printElement(i + 1, colWidth);
 		printElement(ps.getPlayerName(), nameWidth);
 		printElement(wins, colWidth);
@@ -177,18 +185,18 @@ void Tournament::printResult() const
 14.     inbarm1.smart           962     838     53.44   41708   38733
 15.     ofirg1.smart            940     860     52.22   36013   35334
 	 */
-
 }
 
 
-template<typename T> void Tournament::printElement(T t, const int& width)
+template <typename T>
+void Tournament::printElement(T t, const int& width)
 {
 	cout << left << setw(width) << setfill(' ') << t;
 }
 
 
-void Tournament::executeGame(int workerId) {
-
+void Tournament::executeGame(int workerId)
+{
 	// There is more game to play
 	int currentGameIndex = m_nextGameIndex++;
 	while (currentGameIndex < m_gameList.size())
@@ -196,7 +204,7 @@ void Tournament::executeGame(int workerId) {
 		DBG(Debug::DBG_INFO, "starting game [%d] in worker[%d]", currentGameIndex, workerId);
 		Game& currentGame = m_gameList[currentGameIndex];
 		currentGame.startGame();
-		
+
 		// Notify result
 		notifyGameResult(currentGame, currentGameIndex);
 
@@ -209,7 +217,7 @@ void Tournament::executeGame(int workerId) {
 
 void Tournament::notifyGameResult(Game& game, int gameIndex)
 {
-	pair <int, int> playersIndexes = m_gamePlayerIndexes[gameIndex];
+	pair<int, int> playersIndexes = m_gamePlayerIndexes[gameIndex];
 	int playerAIndex = playersIndexes.first;
 	int playerBIndex = playersIndexes.second;
 
@@ -315,7 +323,7 @@ ReturnCode Tournament::initDLLFilesPath(const string& directoryPath, vector<stri
 void Tournament::loadAllAlgoFromDLLs(const vector<string>& dllPaths, promise<ReturnCode>&& p)
 {
 	GetAlgoFuncType getAlgoFunc;
-	
+
 	int playerIndex = 0;
 
 	for (string path : dllPaths)
@@ -341,13 +349,14 @@ void Tournament::loadAllAlgoFromDLLs(const vector<string>& dllPaths, promise<Ret
 		ReturnCode rc = Utils::getPlayerNameByDllPath(path, playerName);
 		if (RC_SUCCESS != rc)
 		{
+			DBG(Debug::DBG_INFO, "DLL file [%s] is not in the correct foramt: ex3.<Name>.smart.dll.", path.c_str());
 			continue;
 		}
 		if (m_maxNameLen < playerName.size())
 		{
-			m_maxNameLen = playerName.size();
+			m_maxNameLen = static_cast<int>(playerName.size());
 		}
-		
+
 		m_algoDLLVec.push_back(make_tuple(hDll, getAlgoFunc));
 		m_playerStat.emplace_back(playerIndex, playerName);
 		playerIndex++;
@@ -359,7 +368,7 @@ void Tournament::loadAllAlgoFromDLLs(const vector<string>& dllPaths, promise<Ret
 		p.set_value(RC_ERROR);
 		return;
 	}
-	
+
 	DBG(Debug::DBG_INFO, "Finished to load dlls, total was loaded: %d", m_algoDLLVec.size());
 	p.set_value(RC_SUCCESS);
 }
@@ -370,13 +379,13 @@ void Tournament::loadBoards(vector<string>& boardsPaths, promise<ReturnCode>&& p
 	{
 		Board b;
 		ReturnCode rc = b.loadBoardFromFile(boardPath);
-	
+
 		if (RC_SUCCESS != rc)
 		{
 			DBG(Debug::DBG_WARNING, "Invalid board [%s], skipping", boardPath.c_str());
 			continue;
 		}
-		
+
 		m_boards.push_back(b);
 	}
 
@@ -386,24 +395,23 @@ void Tournament::loadBoards(vector<string>& boardsPaths, promise<ReturnCode>&& p
 		p.set_value(RC_ERROR);
 		return;
 	}
-	
+
 	DBG(Debug::DBG_INFO, "Finished to load boards, total was loaded: %d", m_boards.size());
 	p.set_value(RC_SUCCESS);
 }
 
 void Tournament::buildGameSchedule()
 {
-	size_t numOfBoards = m_boards.size();
-	size_t numOfAlgos = m_algoDLLVec.size();
+	int numOfBoards = static_cast<int>(m_boards.size());
+	int numOfAlgos = static_cast<int>(m_algoDLLVec.size());
 
 	auto allPossibilities = createSchedule(numOfAlgos);
 	for (size_t boardIndex = 0; boardIndex < numOfBoards; boardIndex++)
 	{
 		for (auto round : allPossibilities)
 		{
-			for (pair<int,int> p : round)
+			for (pair<int, int> p : round)
 			{
-
 				int playerAIndex = p.first;
 				int playerBIndex = p.second;
 
@@ -411,10 +419,10 @@ void Tournament::buildGameSchedule()
 					continue;
 
 				Board b = m_boards[boardIndex];
-				
+
 				unique_ptr<IBattleshipGameAlgo> ibg1(get<1>(m_algoDLLVec[playerAIndex])());
 				unique_ptr<IBattleshipGameAlgo> ibg2(get<1>(m_algoDLLVec[playerBIndex])());
-				
+
 				m_gameList.emplace_back(b, move(ibg1), move(ibg2));
 				m_gamePlayerIndexes.emplace_back(make_pair(playerAIndex, playerBIndex));
 			}
@@ -437,8 +445,8 @@ vector<vector<pair<int, int>>> Tournament::createSchedule(int numOfAlgos)
 	if (numOfAlgos % 2 == 1)
 		list.push_back(-1);
 
-	vector<vector<pair<int,int>>> result;
-	
+	vector<vector<pair<int, int>>> result;
+
 	for (int i = 0; i < list.size() - 1; i++)
 	{
 		size_t mid = list.size() / 2;
@@ -454,7 +462,6 @@ vector<vector<pair<int, int>>> Tournament::createSchedule(int numOfAlgos)
 		else
 		{
 			result.push_back(zip(l2, l1));
-
 		}
 
 		auto last = list.back();
@@ -513,6 +520,10 @@ void Tournament::reportResult()
 				m_isTournamentFinished = true;
 		}
 	}
+
+	Utils::gotoxy(20, 3);
+	cout << "Finished !!!!!!!!!!!";
+	Sleep(3000);
 }
 
 void Tournament::updateStatAndPrintRound()
@@ -525,5 +536,3 @@ void Tournament::updateStatAndPrintRound()
 
 	printResult();
 }
-
-

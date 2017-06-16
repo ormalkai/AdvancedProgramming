@@ -11,40 +11,47 @@
 class Tournament
 {
 private:
-		
-	Tournament() : 
-	m_isTournamentFinished(false), 
-	m_nextRoundToReport(0), 
-	m_nextGameIndex(0), 
-	m_maxNameLen(0),
-	m_finishedRounds(0),
-	m_printedRounds(0)
-	{}
-	
-	bool										m_isTournamentFinished;		// is tournament finished
-	vector<Game>								m_gameList;					// list of all games in the tournament
-	vector<pair<int, int>>						m_gamePlayerIndexes;		// Ids of every player in each game
-	mutex										m_reporterMutex;			// reporter mutex for conditional variable
-	condition_variable							m_cvRound;					// conditional variable for reporter in end of round
-	int											m_nextRoundToReport;		// the number of the next reound to report
-	atomic<int>									m_nextGameIndex;			// next index in game list to play
-	vector<Board>								m_boards;					// all boards in the tournament
-	vector<PlayerStatistics>					m_playerStat;				// table of managing statistics of the tournament
-	vector<tuple<HINSTANCE, GetAlgoFuncType>>	m_algoDLLVec;				// dll tuples <hanfle, algo func>
-	int											m_maxNameLen;				// for printing pretty table
+
+	Tournament() :
+		m_isTournamentFinished(false),
+		m_nextRoundToReport(0),
+		m_nextGameIndex(0),
+		m_maxNameLen(0),
+		m_finishedRounds(0),
+		m_printedRounds(0)
+	{
+	}
+
+	bool m_isTournamentFinished; // is tournament finished
+	vector<Game> m_gameList; // list of all games in the tournament
+	vector<pair<int, int>> m_gamePlayerIndexes; // Ids of every player in each game
+	mutex m_reporterMutex; // reporter mutex for conditional variable
+	condition_variable m_cvRound; // conditional variable for reporter in end of round
+	int m_nextRoundToReport; // the number of the next reound to report
+	atomic<int> m_nextGameIndex; // next index in game list to play
+	vector<Board> m_boards; // all boards in the tournament
+	vector<PlayerStatistics> m_playerStat; // table of managing statistics of the tournament
+	vector<tuple<HINSTANCE, GetAlgoFuncType>> m_algoDLLVec; // dll tuples <hanfle, algo func>
+	int m_maxNameLen; // for printing pretty table
 
 	/**
 	 * @Details		struct for managing games results
 	 */
 	struct PlayerGameResult
 	{
-		int			m_playerId; // this report is for player m_playerId
-		int			m_pointsFor;	// how many points the player won in the game
-		int			m_pointsAgainst;	// how many points the other player won in the game
-		WinLoseTie	m_isWon;
-		PlayerGameResult() : m_playerId(-1), m_pointsFor(0), m_pointsAgainst(0), m_isWon(TIE){}
-		PlayerGameResult(int playerId, int pointsFor, int pointsAgainst , WinLoseTie isWon) :
-		m_playerId(playerId), m_pointsFor(pointsFor), m_pointsAgainst(pointsAgainst), m_isWon(isWon) {}
+		int m_playerId; // this report is for player m_playerId
+		int m_pointsFor; // how many points the player won in the game
+		int m_pointsAgainst; // how many points the other player won in the game
+		WinLoseTie m_isWon;
+
+		PlayerGameResult() : m_playerId(-1), m_pointsFor(0), m_pointsAgainst(0), m_isWon(TIE)
+		{
+		}
+
+		PlayerGameResult(int playerId, int pointsFor, int pointsAgainst, WinLoseTie isWon) :
+			m_playerId(playerId), m_pointsFor(pointsFor), m_pointsAgainst(pointsAgainst), m_isWon(isWon)
+		{
+		}
 	};
 
 	/**
@@ -52,20 +59,23 @@ private:
 	 */
 	struct RoundResults
 	{
-		int							m_playersFinished;	// holds how many players finished their games in this round, atomic since this is the index to insert in the round
-		vector<PlayerGameResult>	m_results;			// holds all the results in this round
-		mutex						m_roundMutex;		// lock for each round between workers and reporter
-		RoundResults() : m_playersFinished(0) {}
-		RoundResults(const RoundResults &other) : m_roundMutex()
+		int m_playersFinished; // holds how many players finished their games in this round, atomic since this is the index to insert in the round
+		vector<PlayerGameResult> m_results; // holds all the results in this round
+		mutex m_roundMutex; // lock for each round between workers and reporter
+		RoundResults() : m_playersFinished(0)
+		{
+		}
+
+		RoundResults(const RoundResults& other) : m_roundMutex()
 		{
 			m_playersFinished = other.m_playersFinished;
 			m_results = other.m_results;
 		}
 	};
 
-	vector<RoundResults>	m_playersResultsPerRound;	// the main database of the tournament
-	int						m_finishedRounds;			// indicates how many rounds are finished for printing results on progress
-	int						m_printedRounds;			// how many rounds are actually printed 
+	vector<RoundResults> m_playersResultsPerRound; // the main database of the tournament
+	int m_finishedRounds; // indicates how many rounds are finished for printing results on progress
+	int m_printedRounds; // how many rounds are actually printed 
 
 	// Updating this vector must be against lock and it can not be vector of atomic int
 	// take the following example in consider
@@ -78,12 +88,12 @@ private:
 	// ThreadB continues
 	// The result:  ThreadA game is game1 for player1 and game2 for player2
 	//				ThreadB game is game1 for player2 and game2 for player1
-	vector<int>		m_gameFinishedByEachPlayer;			// needed for updating m_playersResultsPerRound in the correct round
-	mutex			m_gameFinishedByEachPlayerMutex;	// locak between workers for incrementing game per player atomically in the context of game
+	vector<int> m_gameFinishedByEachPlayer; // needed for updating m_playersResultsPerRound in the correct round
+	mutex m_gameFinishedByEachPlayerMutex; // locak between workers for incrementing game per player atomically in the context of game
 
 	struct SortByWins
 	{
-		bool operator() (PlayerStatistics & L, PlayerStatistics & R) const { return L.getWins() > R.getWins(); }
+		bool operator()(PlayerStatistics& L, PlayerStatistics& R) const { return L.getWins() > R.getWins(); }
 	};
 
 
@@ -91,18 +101,18 @@ private:
 	 * @Details		init main DB of managing game results in rounds
 	 */
 	void initPlayerResultsPerRound();
-	
+
 	/**
 	 * @Details		prints round result
 	 */
 	void printResult() const;
-	
+
 	/**
 	 * @Details		prints one element in the table
 	 */
 	template <class T>
 	static void printElement(T t, const int& width);
-	
+
 	/**
 	 * @Details		main function of workers, executes one or more games
 	 */
@@ -142,12 +152,13 @@ private:
 	 * @Details		creates game schedule in leage order
 	 */
 	void buildGameSchedule();
-	vector<vector<pair<int, int>>> createSchedule(int numOfAlgos);
+	static vector<vector<pair<int, int>>> createSchedule(int numOfAlgos);
 
 	/**
 	 * @Details		reporter thread
 	 */
-	thread reporterThread() {
+	thread reporterThread()
+	{
 		return std::thread([=] { reportResult(); });
 	}
 
@@ -187,6 +198,4 @@ public:
 		static Tournament tournamentInstance;
 		return tournamentInstance;
 	}
-
-
 };

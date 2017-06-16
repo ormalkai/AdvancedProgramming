@@ -17,7 +17,7 @@ void parseIni(string& filesLocation, bool& isQuiet, int& delay, int& numThreads)
 	wstring isQuietKey = L"isQuiet";
 	wstring delayKey = L"delay";
 	wstring numThreadsKey = L"numThreads";
-	isQuiet = GetPrivateProfileInt(generalSection.c_str(), isQuietKey.c_str(), INI_IS_QUIET_DEFAULT, fileName.c_str());
+	isQuiet = GetPrivateProfileInt(generalSection.c_str(), isQuietKey.c_str(), INI_IS_QUIET_DEFAULT, fileName.c_str()) != 0;
 	delay = GetPrivateProfileInt(generalSection.c_str(), delayKey.c_str(), INI_DELAY_DEFAULT, fileName.c_str());
 	numThreads = GetPrivateProfileInt(generalSection.c_str(), numThreadsKey.c_str(), INI_NUM_THREADS_DEFAULT, fileName.c_str());
 }
@@ -41,7 +41,7 @@ void parseArgs(int argc, char* argv[], string& filesLocation, bool& isQuiet, int
 		}
 		else if (false == isDelayInitialized && "-delay" == arg)
 		{
-			if ((i+1) == argc)
+			if ((i + 1) == argc)
 			{
 				cout << "-delay configured with no value - using default" << endl;
 			}
@@ -51,7 +51,7 @@ void parseArgs(int argc, char* argv[], string& filesLocation, bool& isQuiet, int
 			{
 				delay = stoi(delatStr);
 			}
-			catch(exception&)
+			catch (exception&)
 			{
 				isDelayInitialized = false;
 			}
@@ -69,7 +69,7 @@ void parseArgs(int argc, char* argv[], string& filesLocation, bool& isQuiet, int
 			{
 				numThreads = stoi(threadsStr);
 			}
-			catch(exception&)
+			catch (exception&)
 			{
 				isNumThreadsInitialized = false;
 			}
@@ -95,7 +95,6 @@ void parseArgs(int argc, char* argv[], string& filesLocation, bool& isQuiet, int
 }
 
 
-
 int main(int argc, char* argv[])
 {
 	bool isQuiet;
@@ -109,8 +108,8 @@ int main(int argc, char* argv[])
 	DBG(Debug::DBG_INFO, "path [%s]", filesLocation.c_str());
 	DBG(Debug::DBG_INFO, "threads [%d]", numThreads);
 	Tournament& tournament = Tournament::instance();
-	
-	
+
+
 	ReturnCode rc = tournament.init(filesLocation);
 	if (RC_SUCCESS != rc)
 	{

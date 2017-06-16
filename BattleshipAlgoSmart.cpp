@@ -1,6 +1,5 @@
 
 
-#include <climits>
 #include <iostream>
 #include <conio.h>
 #include <regex>
@@ -8,7 +7,6 @@
 #include "BattleshipAlgoSmart.h"
 #include "Utils.h"
 #include "Debug.h"
-#include <set>
 
 #define PLAYERS_DELIMETER "----------"
 
@@ -25,7 +23,6 @@ shared_ptr<Cell> BattleshipAlgoSmart::popTargetAttack()
 {
 	if (0 == m_targetQueue.size())
 	{
-		assert(false);
 		return nullptr;
 	}
 	shared_ptr<Cell> c = m_targetQueue.front();
@@ -97,12 +94,6 @@ void BattleshipAlgoSmart::setBoard(const BoardData& board)
 
 void BattleshipAlgoSmart::getAwarenessBoards()
 {
-	//     read the data (coord list) (for both players) with delimiter
-	//     compare to our board - calc similarity ratio
-	//				if (size not equal) ratio = 0
-	//		if (100% - stop search)
-	//		find the max ratio
-	//		return the highest ratio vector contains other player's cells
 
 	vector<vector<vector<bool>>> legalCell;
 
@@ -149,10 +140,6 @@ void BattleshipAlgoSmart::getAwarenessBoards()
 		legalCell[d][r][c] = true;
 	}
 
-	
-
-	// fix my ships legal cells
-
 	// Get temp directory path
 	wstring strTempPath;
 	wchar_t wchPath[MAX_PATH];
@@ -163,7 +150,7 @@ void BattleshipAlgoSmart::getAwarenessBoards()
 
 	vector<string> boardFiles;
 	// get all sboards file names in tempdir path
-	Utils::getListOfFilesInDirectoryBySuffix(strTmp, "ohgsmart", boardFiles);
+	Utils::getListOfFilesInDirectoryBySuffix(strTmp, "ohgsmart.victory", boardFiles); 
 
 	// Sort for choosing the last boards before
 	sort(boardFiles.begin(), boardFiles.end(), std::greater<string>());
@@ -173,7 +160,7 @@ void BattleshipAlgoSmart::getAwarenessBoards()
 	
 	
 
-	// foreach file 
+	//	return the highest ratio vector contains other player's cells
 	for (string boardPath : boardFiles)
 	{
 		vector<Coordinate> playerACoord;
@@ -184,6 +171,7 @@ void BattleshipAlgoSmart::getAwarenessBoards()
 			continue;
 		}
 		
+		// Compare to our board - calc similarity ratio
 		int ratioA = calcSimilarityRatio(playerACoord, myShipsCoord);
 		if (ratioA <= 100/* can be greater than 100*/)
 		{
@@ -199,6 +187,7 @@ void BattleshipAlgoSmart::getAwarenessBoards()
 			}
 		}
 
+		// Compare to our board - calc similarity ratio
 		int ratioB = calcSimilarityRatio(playerBCoord, myShipsCoord);
 		if (ratioB <= 100/* can be greater than 100*/)
 		{
@@ -241,20 +230,24 @@ void BattleshipAlgoSmart::getAwarenessBoards()
 		m_saveNewBoardAwerness = false;
 		return;
 	}
-	//print dim
+
+	// print dim
 	newBoardAwerness << m_cols << "x" << m_rows << "x" << m_depth << endl;
+	
 	//print coordinates
 	for (auto coord : myShipsCoord)
 	{
 		newBoardAwerness << coord.row << "," << coord.col << "," << coord.depth << endl;
 	}
+
 	//print delimeter
 	newBoardAwerness << PLAYERS_DELIMETER << endl;
+	
 	// continue saving coordinates during the game
 	m_saveNewBoardAwerness = true;
 }
 
-int BattleshipAlgoSmart::calcSimilarityRatio(vector<Coordinate>& boardCoord, const vector<Coordinate> myShipsCoord)
+int BattleshipAlgoSmart::calcSimilarityRatio(vector<Coordinate>& boardCoord, const vector<Coordinate>& myShipsCoord)
 {
 	// TODO: Make better by check if coord is bot neighbor of my cell
 	// Will cause penalty in performance!
@@ -453,6 +446,7 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, Coordinate move, Atta
 		{
 			ofstream newBoardAwerness(m_newBoardAwernessFile, fstream::app);
 			newBoardAwerness << move.row << "," << move.col << "," << move.depth << endl;
+			// TODO: close the file ?
 		}
 	}
 
@@ -1054,6 +1048,12 @@ void BattleshipAlgoSmart::removeOtherPlayerSunkShip(int len)
 		{
 			m_otherPlayerShips.erase(it);
 			// TODO Board Awerness
+			
+			if (m_otherPlayerShips.size() == 0)
+			{
+				string newStr = m_newBoardAwernessFile + ".victory";
+				rename(m_newBoardAwernessFile.c_str(), newStr.c_str());
+			}
 			return;
 		}
 	}
@@ -1062,6 +1062,7 @@ void BattleshipAlgoSmart::removeOtherPlayerSunkShip(int len)
 	// that the number of ships and the type of ships is not equal for both players
 	// in order to continue playing we need to disable ship awareness feature
 	m_shipAwarenessStatus = false;
+
 }
 
 IBattleshipGameAlgo* GetAlgorithm()
