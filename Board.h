@@ -49,6 +49,9 @@ private:
 
 	public:
 		BoardBuilder(const string sboardPath);
+		BoardBuilder(const BoardBuilder&) = delete;
+		BoardBuilder(BoardBuilder&&) = delete;
+		BoardBuilder& operator=(const BoardBuilder &) = delete;
 		~BoardBuilder();
 
 		/**
@@ -181,7 +184,7 @@ public:
 	 */
 	Board(const Board &);
 	Board& operator=(const Board &);
-	Board(Board &&) = default; // TODO ORM working?
+	Board(Board &&) = default;
 
 	/**
 	* @Details		Receive row and col indexes and returns reference for the cell in the board
@@ -204,7 +207,6 @@ public:
 	* @Details		Prints the board in with sign color for each player's ship
 	*/
 	void printBoard() const;
-	
 
 	/**
 	* @Details		Update GUI board after attack
@@ -233,8 +235,7 @@ public:
 	void buildBoard(const vector<vector<vector<char>>>& initBoard);
 
 	void buildBoard(const BoardData& initBoard);
-	void buildBoard(const vector<vector<vector<Cell>>>& initBoard);
-
+	
 	/**
 	* @Details		receive cell's coords and returns sign of requested cell
 	* @Param		r - requested cell's row index
@@ -279,7 +280,7 @@ public:
 	/**
 	* @Details		This function prints the histogram - value of each cell, for debug and future porposes
 	*/
-	void printHist();
+	void printHist() const;
 
 
 	void splitToPlayersBoards(Board& boardA, Board& boardB) const;

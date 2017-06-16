@@ -26,6 +26,13 @@ public:
 	{
 	}
 
+	PlayerStatistics(const PlayerStatistics&) = default;
+	PlayerStatistics(PlayerStatistics&&) = default;
+	PlayerStatistics& operator=(const PlayerStatistics &) = default;
+	~PlayerStatistics() = default;
+
+
+
 	/**
 	 * @Details		Update player result for game
 	 */

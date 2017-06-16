@@ -284,7 +284,7 @@ void Board::printBoard() const
 	
 }
 
-void Board::printHist()
+void Board::printHist() const
 {
 	static int k = 1;
 	if (k++ % 2 == 0)

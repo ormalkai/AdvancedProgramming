@@ -51,6 +51,7 @@ public:
 	 * @Details		game constructor
 	 */
 	Game(Board& board, unique_ptr<IBattleshipGameAlgo> algoA, unique_ptr<IBattleshipGameAlgo> algoB);
+	
 	/**
 	* @Details		game destructor
 	*/

@@ -22,6 +22,11 @@ private:
 	{
 	}
 
+	Tournament(const Tournament&) = delete;
+	Tournament(Tournament&&) = delete;
+	Tournament& operator=(const Tournament &) = delete;
+	~Tournament() = default;
+
 	bool m_isTournamentFinished; // is tournament finished
 	vector<Game> m_gameList; // list of all games in the tournament
 	vector<pair<int, int>> m_gamePlayerIndexes; // Ids of every player in each game
