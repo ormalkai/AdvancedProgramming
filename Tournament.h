@@ -38,6 +38,7 @@ private:
 	vector<PlayerStatistics> m_playerStat; // table of managing statistics of the tournament
 	vector<tuple<HINSTANCE, GetAlgoFuncType>> m_algoDLLVec; // dll tuples <hanfle, algo func>
 	int m_maxNameLen; // for printing pretty table
+	int m_totalRounds;
 
 	/**
 	 * @Details		struct for managing games results

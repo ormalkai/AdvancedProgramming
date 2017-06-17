@@ -70,10 +70,10 @@ void Tournament::initPlayerResultsPerRound()
 	auto playersInRound = m_algoDLLVec.size();
 
 	// number of rounds is the number of games mul 2 divided by number of players in round
-	int numRounds = static_cast<int>((m_gameList.size() * 2) / playersInRound);
+	m_totalRounds = static_cast<int>((m_gameList.size() * 2) / playersInRound);
 
 	// init player results per round
-	for (int round = 0; round < numRounds; round++)
+	for (int round = 0; round < m_totalRounds; round++)
 	{
 		m_playersResultsPerRound.emplace_back();
 		for (int player = 0; player < playersInRound; player++)
@@ -132,7 +132,7 @@ void Tournament::startTournament(int numOfThreads)
 void Tournament::printResult() const
 {
 	Utils::gotoxy(3, 0);
-	cout << "------ Round " << m_printedRounds + 1 << " / " << m_gameList.size() << " ------" << endl;
+	cout << "------ Round " << m_printedRounds + 1 << " / " << m_totalRounds << " ------" << endl;
 	auto playerStat(m_playerStat);
 	sort(playerStat.begin(), playerStat.end(), SortByWins());
 
