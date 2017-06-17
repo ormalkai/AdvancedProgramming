@@ -132,7 +132,7 @@ void Tournament::startTournament(int numOfThreads)
 void Tournament::printResult() const
 {
 	Utils::gotoxy(3, 0);
-	cout << "------ Round " << m_printedRounds + 1 << " ------" << endl;
+	cout << "------ Round " << m_printedRounds + 1 << " / " << m_gameList.size() << " ------" << endl;
 	auto playerStat(m_playerStat);
 	sort(playerStat.begin(), playerStat.end(), SortByWins());
 

@@ -5,6 +5,8 @@
 #include <regex>
 #include "Utils.h"
 #include "Debug.h"
+#include "Shlwapi.h"
+#include "atlstr.h"
 
 
 map<char, int> Utils::m_shipLenBySign = {
@@ -295,9 +297,12 @@ void Utils::ShowConsoleCursor(bool showFlag)
 
 ReturnCode Utils::getPlayerNameByDllPath(const string& path, string& playerName)
 {
-	regex regex(".*ex3\\.(\\S+\\.smart)\\.dll");
+	wstring wpath(path.begin(), path.end());
+	string fileName(CW2A(PathFindFileNameW(wpath.c_str())));
+	regex regex("(.*\\.smart)\\.dll");
 	smatch m;
-	regex_match(path, m, regex);
+	
+	regex_match(fileName, m, regex);
 	if (m.size() != 2)
 	{
 		DBG(Debug::DBG_ERROR, "Failed to extract player name from dll path: %s", path.c_str());
