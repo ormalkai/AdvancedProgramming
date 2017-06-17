@@ -237,5 +237,8 @@ public:
 	*/
 	static void ShowConsoleCursor(bool showFlag);
 
+	/**
+	 * @Details		extracts the player name from the path
+	 */
 	static ReturnCode getPlayerNameByDllPath(const string& path, string& playerName);
 };

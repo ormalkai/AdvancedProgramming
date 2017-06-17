@@ -126,6 +126,7 @@
 
 class BattleshipAlgoSmart : public IBattleshipGameAlgo
 {
+private:
 
 	enum SmartAlgoStatus {
 		HUNT,
@@ -139,13 +140,12 @@ class BattleshipAlgoSmart : public IBattleshipGameAlgo
 			return a->getHistValue() < b->getHistValue();
 		}
 	};
-private:
-	int		m_id;			// unique identifier of the player (PlayerA/PlayerB)
-	int		m_rows;			// number of rows in the board
-	int		m_cols;			// number of columns in the board
-	int		m_depth;		// depth level of the board
-	bool	m_shipAwarenessStatus;
-	Board	m_board;		// Board for mangae data algo knows
+	int		m_id;																		// unique identifier of the player (PlayerA/PlayerB)
+	int		m_rows;																		// number of rows in the board
+	int		m_cols;																		// number of columns in the board
+	int		m_depth;																	// depth level of the board
+	bool	m_shipAwarenessStatus;														// status of ship awerness feature
+	Board	m_board;																	// Board for mangae data algo knows
 	PriorityQueue<shared_ptr<Cell>, vector<shared_ptr<Cell>>, cmp> m_attackedQueue;		// Request attack queue - for HUNT mode
 	list<shared_ptr<Cell>> m_targetQueue;												// Request attack queue - for TARGET mode
 	SmartAlgoStatus m_currentStatus;													// Algo current status - HUNT / TARGET
@@ -156,7 +156,6 @@ private:
 																						// when we have 2 free cells to the left and 3 free cells to the right
 	vector<map<pair<int, int>, int>> m_stripToPotentialShipsPerShip;					// ship len to strip to potential ships
 	vector<int> m_otherPlayerShips;														// Vector of length of opponent's ships 
-	
 	set<shared_ptr<Cell>> m_operationCell;												// Operation mode - all the cells in operation mode	
 	string m_newBoardAwernessFile;														// Operation mode - the file name of the board the algo will save
 	bool m_saveNewBoardAwerness;														// Operation mode - Save to file indicator
@@ -261,6 +260,44 @@ private:
 	*/
 	void removeOtherPlayerSunkShip(int len);
 
+	/**
+	* @Details		This method search the current board in the history for get information about the board.
+	*				additonally, we save the current board to file for furure use
+	*/
+	void getAwarenessBoards();
+
+	/**
+	* @Details		This method parses the board file and returns 2 vectors of coordinates (each board contains 2 boards=2 player)
+	* @Param		boardPath - path for board file
+	* @Param		playerACoord - vector of coordinates by value for the first player
+	* @Param		playerBCoord - vector of coordinates by value for the second player
+	* @Param		legalCells - 3D matrix for elimnates board with illegal ship position (for ex: ship in the board is neighbor to my ship)
+	* @Return		RC_SUCCESS - if the board is valid, and all the cells are legals. In this case playerACoord,playerACoord will contains the coords.
+	*				RC_ERROR - in case of error, or if the board is definitely not our board.
+	*/
+	ReturnCode parseBoardDataFile(string & boardPath, vector<Coordinate>& playerACoord, vector<Coordinate>& playerBCoord, vector<vector<vector<bool>>>& legalCells) const;
+
+	/**
+	* @Details		Clear operation cell status and remove from the vector
+	*/
+	void removeOperationCellIfNeed(shared_ptr<Cell>& c);
+
+	/**
+	* @Details		This method calculates the similarity between one board relative to the other,
+	*				according The num of identical cells
+	*/
+	static int calcSimilarityRatio(vector<Coordinate>& boardCoord, const vector<Coordinate>& myShipsCoord);
+
+	/**
+	* @Details		initialize all data structures and members in the algo, For reuse algo instance
+	*/
+	void clear();
+
+	/**
+	* @Details		exit from operation and recover the algo to the nature behavor (recover data from cell we changed)
+	*/
+	void recoverBoardAwareness();
+
 public:
 	/**
 	* @Details		Constructor receives id of the player
@@ -293,34 +330,6 @@ public:
 	void setBoard(const BoardData& board) override;
 
 	/**
-	* @Details		This method search the current board in the history for get information about the board.
-	*				additonally, we save the current board to file for furure use
-	*/
-	void getAwarenessBoards();
-
-	/**
-	* @Details		This method calculates the similarity between one board relative to the other,
-	*				according The num of identical cells
-	*/
-	static int calcSimilarityRatio(vector<Coordinate>& boardCoord, const vector<Coordinate>& myShipsCoord);
-
-	/**
-	* @Details		This method parses the board file and returns 2 vectors of coordinates (each board contains 2 boards=2 player)
-	* @Param		boardPath - path for board file
-	* @Param		playerACoord - vector of coordinates by value for the first player
-	* @Param		playerBCoord - vector of coordinates by value for the second player
-	* @Param		legalCells - 3D matrix for elimnates board with illegal ship position (for ex: ship in the board is neighbor to my ship)
-	* @Return		RC_SUCCESS - if the board is valid, and all the cells are legals. In this case playerACoord,playerACoord will contains the coords.
-	*				RC_ERROR - in case of error, or if the board is definitely not our board.	
-	*/
-	ReturnCode parseBoardDataFile(string & boardPath, vector<Coordinate>& playerACoord, vector<Coordinate>& playerBCoord, vector<vector<vector<bool>>>& legalCells) const;
-
-	/**
-	* @Details		Clear operation cell status and remove from the vector
-	*/
-	void removeOperationCellIfNeed(shared_ptr<Cell>& c);
-	
-	/**
 	* @Details		Return next attack request
 	* @retrun		Coordinate - requested attack.
 	*				in case the queue is empty returns nullptr
@@ -342,15 +351,6 @@ public:
 	*/
 	void setPlayer(int player) override;
 
-	/**
-	 * @Details		initialize all data structures and members in the algo, For reuse algo instance
-	 */
-	void clear();
-
-	/**
-	* @Details		exit from operation and recover the algo to the nature behavor (recover data from cell we changed)
-	*/
-	void recoverBoardAwareness();
 };
 
 

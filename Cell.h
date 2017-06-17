@@ -171,9 +171,14 @@ public:
 	*/
 	void hitCell() { m_isHitted = true; }
 
-
+	/**
+	 * @Details		true is the cell is known from previous games
+	 */
 	bool isOperationCell () const { return m_isOperationCell; }
 
+	/**
+	 * @Details		set the operational status of the cell
+	 */
 	void setOperationCellStatus(bool isOperation) { m_isOperationCell = isOperation; }
 
 };

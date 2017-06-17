@@ -1,6 +1,8 @@
+#pragma once
+
 #include <string>
 #include <mutex>
-#include <ctime>
+
 
 /*
  * @Details		This macro is print easy printing to log and or to stdout

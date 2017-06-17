@@ -150,13 +150,11 @@ void BattleshipAlgoSmart::getAwarenessBoards()
 
 	vector<string> boardFiles;
 	// get all sboards file names in tempdir path
-	Utils::getListOfFilesInDirectoryBySuffix(strTmp, "ohgsmart.victory", boardFiles); 
-
+	Utils::getListOfFilesInDirectoryBySuffix(strTmp, "ohgsmart.victory", boardFiles);
+	
 	int maxRatio = -1;
 	vector<Coordinate> maxRatioCoord;
 	
-	
-
 	//	return the highest ratio vector contains other player's cells
 	for (string boardPath : boardFiles)
 	{
@@ -216,7 +214,6 @@ void BattleshipAlgoSmart::getAwarenessBoards()
 		m_operationCell.insert(c);
 	}
 
-	// TODO: Create the board file and save my coord!
 	char randName[256] = {'\0'};
 	tmpnam_s(randName, 256);
 	m_newBoardAwernessFile = string(randName) + ".ohgsmart";
@@ -246,13 +243,9 @@ void BattleshipAlgoSmart::getAwarenessBoards()
 
 int BattleshipAlgoSmart::calcSimilarityRatio(vector<Coordinate>& boardCoord, const vector<Coordinate>& myShipsCoord)
 {
-	// TODO: Make better by check if coord is bot neighbor of my cell
-	// Will cause penalty in performance!
-	
 	int hits = 0;
 	for (Coordinate coor : boardCoord)
 	{
-		// TODO: complete the if with the orminator !
 		for (auto myCoor : myShipsCoord)
 		{
 			if (coor.depth == myCoor.depth && coor.row == myCoor.row && coor.col == myCoor.col)
@@ -260,11 +253,6 @@ int BattleshipAlgoSmart::calcSimilarityRatio(vector<Coordinate>& boardCoord, con
 				hits++;
 				break;
 			}
-			// cant check this condition i'm shooting in my leg when checking the ships!
-			//else if (1 == m_board.get(myCoor)->squaredDistance(coor)) // this coord is neighbor to me can't be my board
-			//{
-			//	return 0;
-			//}
 		}
 	}
 	if (0 == hits)
@@ -314,9 +302,9 @@ ReturnCode BattleshipAlgoSmart::parseBoardDataFile(string& boardPath ,vector<Coo
 			break;
 
 		regex regexCoord("^([0-9]+),([0-9]+),([0-9]+)");
-		smatch m;
-		regex_match(line, m, regexCoord);
-		if (m.size() != 4)
+		smatch m2;
+		regex_match(line, m2, regexCoord);
+		if (m2.size() != 4)
 		{
 			if (line != PLAYERS_DELIMETER)
 			{
@@ -327,9 +315,9 @@ ReturnCode BattleshipAlgoSmart::parseBoardDataFile(string& boardPath ,vector<Coo
 		}
 		try
 		{
-			int r = stoi(m[1]);
-			int c = stoi(m[2]);
-			int d = stoi(m[3]);
+			int r = stoi(m2[1]);
+			int c = stoi(m2[2]);
+			int d = stoi(m2[3]);
 			
 			if (!legalCells[d][r][c])
 				return RC_ERROR;
@@ -443,7 +431,6 @@ void BattleshipAlgoSmart::notifyOnAttackResult(int player, Coordinate move, Atta
 		{
 			ofstream newBoardAwerness(m_newBoardAwernessFile, fstream::app);
 			newBoardAwerness << move.row << "," << move.col << "," << move.depth << endl;
-			// TODO: close the file ?
 		}
 	}
 
@@ -586,7 +573,7 @@ vector<shared_ptr<Cell>> BattleshipAlgoSmart::getSunkShipByCell(shared_ptr<Cell>
 	int col = c->col();
 	vector<shared_ptr<Cell>> result{};
 
-	ShipDirection d = ShipDirection::HORIZONTAL;
+	auto d = ShipDirection::HORIZONTAL;
 	if (!m_board.get(depth, row + 1, col)->isEmpty() || !m_board.get(depth, row - 1, col)->isEmpty())
 	{
 		d = ShipDirection::VERTICAL;
@@ -1044,8 +1031,9 @@ void BattleshipAlgoSmart::removeOtherPlayerSunkShip(int len)
 		if (*it == len)
 		{
 			m_otherPlayerShips.erase(it);
-			// TODO Board Awerness
-			
+			// We are assuming that the board is balanced
+			// therefore here we are discovering that we won!
+			// so lets rename our board file so other instances will use it.
 			if (m_otherPlayerShips.size() == 0)
 			{
 				string newStr = m_newBoardAwernessFile + ".victory";

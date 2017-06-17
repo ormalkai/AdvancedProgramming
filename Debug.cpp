@@ -1,5 +1,5 @@
-#include "Debug.h"
 #include <cstdarg>
+#include "Debug.h"
 
 Debug::Debug(): m_logFile("game.log"), m_printToLog(false), m_printToStd(false), m_debugLevel(DBG_ERROR), m_pFile(nullptr)
 {

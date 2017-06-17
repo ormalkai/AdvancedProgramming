@@ -1,11 +1,8 @@
-// Board.cpp
-
 #include <windows.h> 
 #include <iostream>
 #include <conio.h>
 #include <regex>
 #include <fstream>
-#include <set>
 #include "Board.h"
 #include "Utils.h"
 #include "ShipFactory.h"
@@ -17,8 +14,10 @@
 
 Board::Board(const Board & other)
 {
-	// TODO not me
-	this->buildBoard(other);
+	if (&other != this)
+	{
+		this->buildBoard(other);
+	}
 }
 Board& Board::operator=(const Board & other)
 {

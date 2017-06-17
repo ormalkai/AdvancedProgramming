@@ -2,7 +2,6 @@
 
 #include <vector>
 #include <memory>
-#include <set>
 #include "IBattleshipGameAlgo.h"
 #include "Cell.h"
 
@@ -149,18 +148,28 @@ private:
 		*/
 		bool checkErrors() const;
 
+		/**
+		 * @Details		init the init board - multi-dimensional array
+		 */
 		void initInitBoard();
 		
+		/**
+		 * @Details		returns the number of ships by player index
+		 */
 		int getNumOfShipByPlayer(PlayerIndex pi) const { return m_numOfShipsPerPlayer[pi]; }
 	};
-
-	
 	
 public:
 
+	/**
+	 * @Details		returns vector which each index contains the number
+	 *				of ships of the plyaer index
+	 */
+	vector<int>& shipsPerPlayer();
 
-	vector<int>& Board::shipsPerPlayer();
-
+	/**
+	 * @Details		Implementing the interface returns the char in the Coordinate
+	 */
 	virtual char charAt(Coordinate c) const
 	{
 		return m_boardData[c.depth][c.row][c.col]->getSign();
@@ -282,14 +291,30 @@ public:
 	*/
 	void printHist() const;
 
-
+	/**
+	 * @Details		Splits game board to board of each players
+	 */
 	void splitToPlayersBoards(Board& boardA, Board& boardB) const;
+
+	/**
+	 * @Details		loads the board boardPath
+	 */
 	ReturnCode loadBoardFromFile(string& boardPath);
 
+	/**
+	 * @Details		used by smart player, returns vector of lengthes of ships
+	 *				of the player which in balanced board will be other players ships
+	 */
 	void getOtherPlayerShips(vector<int>& ships);
 
+	/**
+	 * @Detail		returns vector of Coordinate of ships on board
+	 */
 	void getShipsCoord(vector<Coordinate>& shipsCoord) const;
 
+	/**
+	 * @Detail		clears all internal DBs
+	 */
 	void clear();
 
 };
