@@ -507,7 +507,7 @@ void Tournament::reportResult()
 		// however we don't want to let the reporter go to sleep and miss a signal
 		// between the condition to the sleep.
 		unique_lock<std::mutex> lk(m_reporterMutex); //unique lock
-		m_cvRound.wait(lk, [this](void) { return m_printedRounds < m_finishedRounds; });
+		m_cvRound.wait(lk, [this]() { return m_printedRounds < m_finishedRounds; });
 		lk.unlock();
 		while (m_printedRounds < m_finishedRounds)
 		{

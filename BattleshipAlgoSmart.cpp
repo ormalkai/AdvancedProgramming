@@ -573,7 +573,7 @@ vector<shared_ptr<Cell>> BattleshipAlgoSmart::getSunkShipByCell(shared_ptr<Cell>
 	int col = c->col();
 	vector<shared_ptr<Cell>> result{};
 
-	auto d = ShipDirection::HORIZONTAL;
+	ShipDirection d;
 	if (!m_board.get(depth, row + 1, col)->isEmpty() || !m_board.get(depth, row - 1, col)->isEmpty())
 	{
 		d = ShipDirection::VERTICAL;

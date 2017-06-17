@@ -77,7 +77,6 @@ private:
 		/**
 		* @Details		check the board by given constaints: ship size, shape, neighbors
 		*				and fill error data structure.
-		* @param		initBoard - input board to verify
 		*/
 		void validateBoard();
 
@@ -91,10 +90,9 @@ private:
 
 		/**
 		* @Details		Wrapper for recursive function for recieving current ship length in specific cell
-		* @param		initBoard - the board after parsing
 		* @param		expectedShip - ship to test
-		* @param		row - current row to check
-		* @param		col - current col to check
+		* @param		i - current row to check
+		* @param		j - current col to check
 		* @param		direction - in which direction to go in the next recursive call
 		*/
 		int getShipLength(char expectedShip, int d/*depth*/, int i/*row*/, int j/*col*/, ShipDirection direction);
@@ -102,8 +100,8 @@ private:
 		/**
 		* @Details		recursive function for recieving current ship length in specific cell
 		* @param		expectedShip - ship to test
-		* @param		row - current row to check
-		* @param		col - current col to check
+		* @param		i - current row to check
+		* @param		j - current col to check
 		* @param		direction - in which direction to go in the next recursive call
 		*/
 		int getShipLengthHorizontal(char expectedShip, int d/*depth*/, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction) const;
@@ -111,8 +109,8 @@ private:
 		/**
 		* @Details		Wrapper for recursive function for recieving current ship length in specific cell
 		* @param		expectedShip - ship to test
-		* @param		row - current row to check
-		* @param		col - current col to check
+		* @param		i - current row to check
+		* @param		j - current col to check
 		* @param		direction - in which direction to go in the next recursive call
 		*/
 		int getShipLengthVertical(char expectedShip, int d/*depth*/, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction) const;
@@ -120,8 +118,8 @@ private:
 		/**
 		* @Details		Wrapper for recursive function for recieving current ship length in specific cell
 		* @param		expectedShip - ship to test
-		* @param		row - current row to check
-		* @param		col - current col to check
+		* @param		i - current row to check
+		* @param		j - current col to check
 		* @param		direction - in which direction to go in the next recursive call
 		*/
 		int getShipLengthDepth(char expectedShip, int d/*depth*/, int i/*row*/, int j/*col*/, ShipLengthSecondDirection direction) const;
@@ -170,7 +168,7 @@ public:
 	/**
 	 * @Details		Implementing the interface returns the char in the Coordinate
 	 */
-	virtual char charAt(Coordinate c) const
+	virtual char charAt(Coordinate c) const override
 	{
 		return m_boardData[c.depth][c.row][c.col]->getSign();
 	}

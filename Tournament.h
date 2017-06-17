@@ -17,6 +17,7 @@ private:
 		m_nextRoundToReport(0),
 		m_nextGameIndex(0),
 		m_maxNameLen(0),
+		m_totalRounds(0),
 		m_finishedRounds(0),
 		m_printedRounds(0)
 	{

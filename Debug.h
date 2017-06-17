@@ -71,7 +71,6 @@ public:
 	 * @Details		print function
 	 * @param		debugLevel - level of current printout
 	 * @param		fmt - format of the print
-	 * @param		... - arguments for the format
 	 */
 	void print(DebugLevel debugLevel, const char* fmt, ...);
 

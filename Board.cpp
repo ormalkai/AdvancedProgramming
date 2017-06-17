@@ -368,12 +368,12 @@ ReturnCode Board::loadBoardFromFile(string& boardPath)
 
 
 Board::BoardBuilder::BoardBuilder(const string sboardPath) :
-	m_cols(-1),
-	m_rows(-1),
-	m_depth(-1),
+	m_sboardFilePath(sboardPath),
 	m_foundAdjacentShips(false),
 	m_wrongSizeOrShapePerPlayer(false),
-	m_sboardFilePath(sboardPath)
+	m_rows(-1),
+	m_cols(-1),
+	m_depth(-1)
 {
 }
 

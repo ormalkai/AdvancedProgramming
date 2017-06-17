@@ -10,7 +10,7 @@ using namespace std;
 
 
 Game::Game(Board& board, unique_ptr<IBattleshipGameAlgo> algoA, unique_ptr<IBattleshipGameAlgo> algoB) : m_isGameOver(false),
-                                                                                                         m_isQuiet(false), m_currentPlayerIndex(MAX_PLAYER), m_otherPlayerIndex(MAX_PLAYER), m_winner(TIE_WINNER_ID), m_depth(-1), m_rows(-1), m_cols(-1)
+                                                                                                         m_isQuiet(false), m_rows(-1), m_cols(-1), m_depth(-1), m_currentPlayerIndex(MAX_PLAYER), m_otherPlayerIndex(MAX_PLAYER), m_winner(TIE_WINNER_ID)
 {
 	// invoke copy constructor!
 	m_board = board;

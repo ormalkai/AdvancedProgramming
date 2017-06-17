@@ -15,9 +15,6 @@ public:
 
 	/**
 	 * @Details		create ship by char identifier
-	 * @param		i - row in initBoard
-	 * @param		j - column in initBoard
-	 * @param		initBoard - as recievd in input
 	 */
 	shared_ptr<Ship> create(char ship) const;
 
